@@ -50,7 +50,7 @@ const Notifications = () => {
     const actorIds = [...new Set(data.map(n => n.actor_id))];
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("user_id, username, avatar_url")
+      .select("user_id, username, avatar_url, is_verified")
       .in("user_id", actorIds);
     const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
 
