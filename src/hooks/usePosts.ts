@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
@@ -23,25 +23,22 @@ export const usePosts = (filterUserId?: string) => {
   const [posts, setPosts] = useState<PostWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     let query = supabase.from("posts").select("*").order("created_at", { ascending: false });
     if (filterUserId) query = query.eq("user_id", filterUserId);
     const { data: postsData } = await query;
     if (!postsData || postsData.length === 0) { setPosts([]); setLoading(false); return; }
 
-    // Get all unique user ids
     const userIds = [...new Set(postsData.map(p => p.user_id))];
     const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", userIds);
     const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
 
-    // Get likes counts
     const postIds = postsData.map(p => p.id);
     const { data: likesData } = await supabase.from("likes").select("post_id").in("post_id", postIds);
     const likesCount: Record<string, number> = {};
     (likesData || []).forEach(l => { likesCount[l.post_id] = (likesCount[l.post_id] || 0) + 1; });
 
-    // Get user's likes
     let userLikes: Set<string> = new Set();
     let userSaves: Set<string> = new Set();
     if (user) {
@@ -66,9 +63,16 @@ export const usePosts = (filterUserId?: string) => {
       timeAgo: formatDistanceToNow(new Date(p.created_at), { addSuffix: true }),
     })));
     setLoading(false);
-  };
+  }, [user, filterUserId]);
 
-  useEffect(() => { fetchPosts(); }, [user, filterUserId]);
+  useEffect(() => { fetchPosts(); }, [fetchPosts]);
+
+  // Refetch when tab/window regains focus
+  useEffect(() => {
+    const onFocus = () => { fetchPosts(); };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [fetchPosts]);
 
   return { posts, loading, refetch: fetchPosts };
 };
