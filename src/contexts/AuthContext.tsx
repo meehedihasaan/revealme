@@ -11,6 +11,7 @@ interface Profile {
   bio: string | null;
   location: string | null;
   onboarding_completed: boolean;
+  is_private: boolean;
   is_verified: boolean;
   created_at: string;
 }
