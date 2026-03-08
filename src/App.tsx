@@ -10,6 +10,7 @@ import Explore from "./pages/Explore";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
+import Messages from "./pages/Messages";
 import Following from "./pages/Following";
 import Settings from "./pages/Settings";
 import AccountSettings from "./pages/AccountSettings";
