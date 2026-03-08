@@ -6,6 +6,7 @@ import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
+import { ProfileShimmer } from "@/components/ShimmerLoader";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { useTaggedPosts } from "@/hooks/usePostTags";
@@ -49,6 +50,15 @@ const Profile = () => {
   }, [user]);
 
   const joinDate = profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "";
+
+  if (!profile || loading) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <ProfileShimmer />
+        <BottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
