@@ -84,28 +84,17 @@ const UserProfile = () => {
 
   const startConversation = async () => {
     if (!user || !userId) return;
-    const { data: myConvs } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("user_id", user.id);
-    if (myConvs) {
-      for (const mc of myConvs) {
-        const { data: other } = await supabase
-          .from("conversation_participants")
-          .select("user_id")
-          .eq("conversation_id", mc.conversation_id)
-          .eq("user_id", userId)
-          .maybeSingle();
-        if (other) { navigate(`/chat/${mc.conversation_id}`); return; }
-      }
+
+    const { data: conversationId, error } = await supabase.rpc("create_direct_conversation", {
+      other_user_id: userId,
+    });
+
+    if (error || !conversationId) {
+      console.error("Failed to start conversation", error);
+      return;
     }
-    const { data: conv } = await supabase.from("conversations").insert({}).select("id").single();
-    if (!conv) return;
-    await supabase.from("conversation_participants").insert([
-      { conversation_id: conv.id, user_id: user.id },
-      { conversation_id: conv.id, user_id: userId },
-    ]);
-    navigate(`/chat/${conv.id}`);
+
+    navigate(`/chat/${conversationId}`);
   };
 
   const displayName = profile?.display_name || profile?.username || "User";
