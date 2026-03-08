@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
@@ -27,6 +27,21 @@ const Feed = () => {
   const { posts, loading, refetch } = usePosts();
   const [storyUsers, setStoryUsers] = useState<StoryUser[]>([]);
   const [userHasStory, setUserHasStory] = useState(false);
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
+  const [followingLoading, setFollowingLoading] = useState(true);
+
+  // Fetch who the current user follows
+  const fetchFollowing = useCallback(async () => {
+    if (!user) { setFollowingLoading(false); return; }
+    const { data } = await supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", user.id);
+    setFollowingIds(new Set((data || []).map(f => f.following_id)));
+    setFollowingLoading(false);
+  }, [user]);
+
+  useEffect(() => { fetchFollowing(); }, [fetchFollowing]);
 
   useEffect(() => {
     const fetchStories = async () => {
@@ -49,11 +64,25 @@ const Feed = () => {
     fetchStories();
   }, [user]);
 
+  // Derived post lists
+  const followingPosts = posts.filter(p => followingIds.has(p.user_id));
+  const forYouPosts = posts.filter(p => p.user_id !== user?.id);
   const savedPosts = posts.filter(p => p.isSaved);
 
   const handleRefresh = async () => {
-    await refetch();
+    await Promise.all([refetch(), fetchFollowing()]);
   };
+
+  const handleFollowChange = (userId: string, isNowFollowing: boolean) => {
+    setFollowingIds(prev => {
+      const next = new Set(prev);
+      if (isNowFollowing) next.add(userId);
+      else next.delete(userId);
+      return next;
+    });
+  };
+
+  const isDataLoading = loading || followingLoading;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -124,15 +153,49 @@ const Feed = () => {
         {/* Posts */}
         <div>
           {activeTab === "For you" && (
-            loading ? (
+            isDataLoading ? (
               <FeedShimmer />
-            ) : posts.length === 0 ? (
+            ) : forYouPosts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                 <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
                 <p className="text-sm">No posts yet. Be the first!</p>
               </div>
             ) : (
-              posts.map((post) => (
+              forYouPosts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  postId={post.id}
+                  postUserId={post.user_id}
+                  username={post.username}
+                  avatar={post.avatar_url || story1}
+                  image={post.image_url}
+                  caption={post.caption}
+                  likesCount={post.likesCount}
+                  timeAgo={post.timeAgo}
+                  location={post.location}
+                  isLiked={post.isLiked}
+                  isSaved={post.isSaved}
+                  onDelete={refetch}
+                  showFollowButton={!followingIds.has(post.user_id)}
+                  isFollowing={followingIds.has(post.user_id)}
+                  onFollowChange={handleFollowChange}
+                />
+              ))
+            )
+          )}
+          {activeTab === "Following" && (
+            isDataLoading ? (
+              <FeedShimmer />
+            ) : followingPosts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                <PuffyIcon name="heart" size={48} className="opacity-30 mb-3" />
+                <p className="text-sm">Posts from people you follow will appear here</p>
+                <button onClick={() => navigate("/following")} className="mt-3 text-sm font-semibold text-primary">
+                  Discover people to follow
+                </button>
+              </div>
+            ) : (
+              followingPosts.map((post) => (
                 <PostCard
                   key={post.id}
                   postId={post.id}
@@ -151,14 +214,10 @@ const Feed = () => {
               ))
             )
           )}
-          {activeTab === "Following" && (
-            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-              <PuffyIcon name="heart" size={48} className="opacity-30 mb-3" />
-              <p className="text-sm">Posts from people you follow will appear here</p>
-            </div>
-          )}
           {activeTab === "Favourites" && (
-            savedPosts.length === 0 ? (
+            isDataLoading ? (
+              <FeedShimmer />
+            ) : savedPosts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                 <PuffyIcon name="bookmark" size={48} className="opacity-30 mb-3" />
                 <p className="text-sm">Your saved posts will appear here</p>
