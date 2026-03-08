@@ -4,7 +4,7 @@ import { Camera, Search, MessageCircle, Bell, User } from "lucide-react";
 const tabs = [
   { icon: Camera, path: "/feed", label: "Feed" },
   { icon: Search, path: "/explore", label: "Explore" },
-  { icon: MessageCircle, path: "/chat", label: "Chat" },
+  { icon: MessageCircle, path: "/messages", label: "Messages" },
   { icon: Bell, path: "/notifications", label: "Alerts" },
   { icon: User, path: "/profile", label: "Profile" },
 ];
