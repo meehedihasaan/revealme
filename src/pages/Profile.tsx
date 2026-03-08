@@ -8,6 +8,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
+import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
@@ -21,6 +22,17 @@ const Profile = () => {
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
+  const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(user?.id);
+  const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (taggedPostIds.length === 0) { setTaggedPosts([]); return; }
+    const fetchTagged = async () => {
+      const { data } = await supabase.from("posts").select("id, image_url").in("id", taggedPostIds);
+      setTaggedPosts(data || []);
+    };
+    fetchTagged();
+  }, [taggedPostIds]);
 
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || "User";
   const avatarUrl = profile?.avatar_url;
@@ -158,10 +170,22 @@ const Profile = () => {
             ))}
           </div>
         )
-      ) : (
+      ) : taggedLoading ? (
+        <div className="grid grid-cols-3 gap-0.5 mt-1">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
+          ))}
+        </div>
+      ) : taggedPosts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />
           <p className="text-sm">No tagged posts yet</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-0.5">
+          {taggedPosts.map((post) => (
+            <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+          ))}
         </div>
       )}
 

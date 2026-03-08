@@ -8,6 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
+import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -56,6 +57,17 @@ const UserProfile = () => {
   const [isBlocked, setIsBlocked] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
+  const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(userId);
+  const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (taggedPostIds.length === 0) { setTaggedPosts([]); return; }
+    const fetchTagged = async () => {
+      const { data } = await supabase.from("posts").select("id, image_url").in("id", taggedPostIds);
+      setTaggedPosts(data || []);
+    };
+    fetchTagged();
+  }, [taggedPostIds]);
 
   // Check block status
   useEffect(() => {
@@ -423,10 +435,22 @@ const UserProfile = () => {
                 ))}
               </div>
             )
-          ) : (
+          ) : taggedLoading ? (
+            <div className="grid grid-cols-3 gap-0.5 mt-1">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
+              ))}
+            </div>
+          ) : taggedPosts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
               <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />
               <p className="text-sm">No tagged posts yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-0.5">
+              {taggedPosts.map((post) => (
+                <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+              ))}
             </div>
           )}
         </>
