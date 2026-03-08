@@ -129,6 +129,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
         ...data,
         username: prof?.username || "you",
         avatar_url: prof?.avatar_url || null,
+        is_verified: prof?.is_verified || false,
         likes_count: 0,
         is_liked: false,
         replies: [],
