@@ -8,6 +8,7 @@ interface LikeUser {
   user_id: string;
   username: string;
   avatar_url: string | null;
+  is_verified: boolean;
 }
 
 interface LikesSheetProps {
