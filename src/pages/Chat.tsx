@@ -134,7 +134,7 @@ const Chat = () => {
     }, 2000);
   };
 
-  // Realtime messages
+  // Realtime messages (INSERT + UPDATE for read status)
   useEffect(() => {
     if (!conversationId || !user) return;
 
@@ -154,6 +154,15 @@ const Chat = () => {
         if (newMsg.sender_id !== user.id) {
           supabase.from("messages").update({ read: true }).eq("id", newMsg.id).then(() => {});
         }
+      })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "messages",
+        filter: `conversation_id=eq.${conversationId}`,
+      }, (payload) => {
+        const updated = payload.new as Message;
+        setMessages(prev => prev.map(m => m.id === updated.id ? { ...m, read: updated.read } : m));
       })
       .subscribe();
 
@@ -393,9 +402,16 @@ const Chat = () => {
                               {msg.text}
                             </div>
                           )}
-                          <span className="text-[10px] text-muted-foreground px-1">
-                            {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </span>
+                          <div className="flex items-center gap-1 px-1">
+                            <span className="text-[10px] text-muted-foreground">
+                              {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                            {isMine && (
+                              <span className={`text-[10px] font-medium ${msg.read ? "text-primary" : "text-muted-foreground"}`}>
+                                {isOptimistic ? "Sending..." : msg.read ? "Seen" : "Delivered"}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </motion.div>
                     );
