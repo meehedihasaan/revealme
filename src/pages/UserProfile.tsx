@@ -19,6 +19,7 @@ interface UserData {
   avatar_url: string | null;
   bio: string | null;
   location: string | null;
+  is_verified: boolean;
   is_private: boolean;
   created_at: string;
 }
