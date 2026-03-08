@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import CommentSheet from "@/components/CommentSheet";
