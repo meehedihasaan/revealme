@@ -13,6 +13,7 @@ interface ConversationItem {
   other_user_id: string;
   username: string;
   avatar_url: string | null;
+  is_verified: boolean;
   lastMessage: string;
   lastMessageTime: string;
   unread: number;
