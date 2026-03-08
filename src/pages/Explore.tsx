@@ -5,6 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { ExploreShimmer } from "@/components/ShimmerLoader";
 
 import explore1 from "@/assets/explore1.jpg";
