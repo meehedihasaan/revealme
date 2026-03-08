@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -16,6 +18,8 @@ import Messages from "./pages/Messages";
 import Following from "./pages/Following";
 import Settings from "./pages/Settings";
 import AccountSettings from "./pages/AccountSettings";
+import PreferenceSettings from "./pages/PreferenceSettings";
+import PrivacySettings from "./pages/PrivacySettings";
 import SetAvatar from "./pages/SetAvatar";
 import SetUsername from "./pages/SetUsername";
 import CreatePost from "./pages/CreatePost";
@@ -58,6 +62,8 @@ const AppRoutes = () => (
       <Route path="/following" element={<ProtectedRoute><Following /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/settings/account" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
+      <Route path="/settings/preference" element={<ProtectedRoute><PreferenceSettings /></ProtectedRoute>} />
+      <Route path="/settings/privacy" element={<ProtectedRoute><PrivacySettings /></ProtectedRoute>} />
       <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
       <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
       <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
@@ -69,15 +75,19 @@ const AppRoutes = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <AppRoutes />
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
