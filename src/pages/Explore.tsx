@@ -5,6 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { ExploreShimmer } from "@/components/ShimmerLoader";
 
 import explore1 from "@/assets/explore1.jpg";
@@ -25,11 +26,13 @@ interface UserResult {
 interface PostResult {
   id: string;
   image_url: string;
+  user_id: string;
 }
 
 const Explore = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { blockedIds } = useBlockedUsers();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"content" | "users">("content");
   const [users, setUsers] = useState<UserResult[]>([]);
@@ -44,14 +47,14 @@ const Explore = () => {
       setLoading(true);
       const { data } = await supabase
         .from("posts")
-        .select("id, image_url")
+        .select("id, image_url, user_id")
         .order("created_at", { ascending: false })
         .limit(30);
-      setPosts(data || []);
+      setPosts((data || []).filter(p => !blockedIds.has(p.user_id)));
       setLoading(false);
     };
     fetchPosts();
-  }, []);
+  }, [blockedIds]);
 
   // Search users
   useEffect(() => {
@@ -82,7 +85,7 @@ const Explore = () => {
         followSet = new Set((follows || []).map(f => f.following_id));
       }
 
-      setUsers(profiles.map(p => ({
+      setUsers(profiles.filter(p => !blockedIds.has(p.user_id)).map(p => ({
         ...p,
         isFollowing: followSet.has(p.user_id),
       })));

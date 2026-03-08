@@ -5,6 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 
 interface ConversationItem {
   conversation_id: string;
@@ -19,6 +20,7 @@ interface ConversationItem {
 const Messages = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { blockedIds } = useBlockedUsers();
   const [search, setSearch] = useState("");
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +65,7 @@ const Messages = () => {
     for (const partner of partners) {
       const convId = partner.conversation_id;
       const otherUserId = partner.other_user_id;
+      if (blockedIds.has(otherUserId)) continue;
 
       const latestMsg = allMessages.find((m) => m.conversation_id === convId);
       const unreadCount = allMessages.filter(

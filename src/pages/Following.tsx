@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { supabase } from "@/integrations/supabase/client";
 
 interface DiscoverUser {
@@ -15,6 +16,7 @@ interface DiscoverUser {
 const Following = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { blockedIds } = useBlockedUsers();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<DiscoverUser[]>([]);
@@ -40,7 +42,7 @@ const Following = () => {
       ]);
 
       if (!profilesError) {
-        setUsers((profiles || []) as DiscoverUser[]);
+        setUsers(((profiles || []) as DiscoverUser[]).filter(p => !blockedIds.has(p.user_id)));
       }
 
       if (!followsError) {

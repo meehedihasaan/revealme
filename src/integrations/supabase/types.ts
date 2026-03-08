@@ -371,6 +371,12 @@ export type Database = {
         Args: { other_user_id: string }
         Returns: string
       }
+      get_all_blocked_ids: {
+        Args: { p_user_id: string }
+        Returns: {
+          blocked_user_id: string
+        }[]
+      }
       get_conversation_other_participants: {
         Args: { p_user_id: string }
         Returns: {
