@@ -16,6 +16,7 @@ interface StoryUser {
   user_id: string;
   username: string;
   avatar_url: string | null;
+  hasSeen: boolean;
 }
 
 const tabs = ["For you", "Following", "Favourites"];
