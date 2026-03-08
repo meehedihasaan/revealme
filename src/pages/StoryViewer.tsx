@@ -46,6 +46,11 @@ const StoryViewer = () => {
   const [showViewers, setShowViewers] = useState(false);
   const [viewers, setViewers] = useState<ViewerInfo[]>([]);
   const [viewersLoading, setViewersLoading] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [replyFocused, setReplyFocused] = useState(false);
+  const [sendingReply, setSendingReply] = useState(false);
+  const [hearted, setHearted] = useState(false);
+  const [showHeartAnim, setShowHeartAnim] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const viewedRef = useRef<Set<string>>(new Set());
