@@ -268,7 +268,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 28, stiffness: 300 }}
-          className="fixed inset-0 z-50 flex flex-col bg-background"
+          className="fixed inset-0 z-[60] flex flex-col bg-background"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -354,7 +354,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
           </AnimatePresence>
 
           {/* Input */}
-          <div className="border-t border-border px-4 py-3 flex items-center gap-2 pb-safe">
+          <div className="border-t border-border px-4 py-3 flex items-center gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}>
             <input
               ref={inputRef}
               type="text"
