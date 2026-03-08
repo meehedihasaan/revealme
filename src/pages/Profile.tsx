@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { ProfileShimmer } from "@/components/ShimmerLoader";
 
 import bannerImg from "@/assets/profile-banner.jpg";
 
@@ -105,7 +105,7 @@ const Profile = () => {
       {/* Grid */}
       {activeTab === "grid" ? (
         loading ? (
-          <div className="flex justify-center py-16 text-muted-foreground"><p className="text-sm">Loading...</p></div>
+          <ProfileShimmer />
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />

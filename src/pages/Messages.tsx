@@ -5,6 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { MessagesShimmer } from "@/components/ShimmerLoader";
 
 interface ConversationItem {
   conversation_id: string;
@@ -138,7 +139,7 @@ const Messages = () => {
 
       <div>
         {loading ? (
-          <div className="flex justify-center py-16 text-muted-foreground"><p className="text-sm">Loading...</p></div>
+          <MessagesShimmer />
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <PuffyIcon name="message-circle" size={40} className="opacity-30 mb-3" />

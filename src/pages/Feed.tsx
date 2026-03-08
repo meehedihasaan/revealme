@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
+import { FeedShimmer } from "@/components/ShimmerLoader";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
@@ -121,7 +122,7 @@ const Feed = () => {
       <div>
         {activeTab === "For you" && (
           loading ? (
-            <div className="flex justify-center py-20 text-muted-foreground"><p className="text-sm">Loading...</p></div>
+            <FeedShimmer />
           ) : posts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
               <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />

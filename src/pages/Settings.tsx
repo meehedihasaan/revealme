@@ -1,41 +1,43 @@
 import { useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import { useAuth } from "@/contexts/AuthContext";
-
-const sections = [
-  {
-    icon: "user",
-    title: "Account",
-    subtitle: "Username",
-    description: "Username, Phone, Email, Password, Security, Verification request, Log out.",
-    path: "/settings/account",
-  },
-  {
-    icon: "sliders",
-    title: "Preference",
-    subtitle: "Adjust your account according",
-    description: "Appearance, language",
-    path: "",
-  },
-  {
-    icon: "shield",
-    title: "Privacy & Safety",
-    subtitle: "Manage privacy and secure data",
-    description: "Private account, password, blocked accounts",
-    path: "",
-  },
-  {
-    icon: "info",
-    title: "About",
-    subtitle: "",
-    description: "",
-    path: "",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { t } = useLanguage();
+
+  const sections = [
+    {
+      icon: "user",
+      title: t("account"),
+      subtitle: t("username"),
+      description: t("usernamePhoneEmail"),
+      path: "/settings/account",
+    },
+    {
+      icon: "sliders",
+      title: t("preference"),
+      subtitle: t("adjustAccount"),
+      description: t("appearanceLanguage"),
+      path: "/settings/preference",
+    },
+    {
+      icon: "shield",
+      title: t("privacy"),
+      subtitle: t("managePrivacy"),
+      description: t("privatePassBlocked"),
+      path: "/settings/privacy",
+    },
+    {
+      icon: "info",
+      title: t("about"),
+      subtitle: "",
+      description: "",
+      path: "",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -50,7 +52,7 @@ const Settings = () => {
       </div>
 
       <div className="px-4 pb-4 pt-8">
-        <h1 className="text-3xl font-bold text-foreground">Settings and privacy</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t("settings")}</h1>
       </div>
 
       <div className="divide-y divide-border">
