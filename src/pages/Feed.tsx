@@ -61,7 +61,7 @@ const Feed = () => {
   const { profile } = useAuth();
 
   // Add "Your story" at the beginning
-  const stories = [
+  const stories: { name: string; img: string; gradient: string; isUser?: boolean }[] = [
     {
       name: "Your story",
       img: profile?.avatar_url || story1,
