@@ -53,7 +53,7 @@ const Explore = () => {
       setLoading(false);
     };
     fetchPosts();
-  }, []);
+  }, [blockedIds]);
 
   // Search users
   useEffect(() => {
