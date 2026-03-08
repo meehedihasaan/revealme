@@ -241,8 +241,17 @@ const PostCard = ({
     <div className="border-b border-border">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-2.5">
-        <button onClick={() => navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`)} className="gradient-story-red rounded-full p-[2px]">
-          <div className="rounded-full border-[1.5px] border-background">
+        <button
+          onClick={() => {
+            if (hasStory) {
+              navigate(`/story?user=${postUserId}`);
+            } else {
+              navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`);
+            }
+          }}
+          className={`rounded-full p-[2px] ${hasStory ? "gradient-story-red" : ""}`}
+        >
+          <div className={`rounded-full ${hasStory ? "border-[1.5px] border-background" : ""}`}>
             {avatar ? (
               <img src={avatar} alt={username} className="h-8 w-8 rounded-full object-cover" />
             ) : (
