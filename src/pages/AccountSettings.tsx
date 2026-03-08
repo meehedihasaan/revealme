@@ -240,6 +240,16 @@ const AccountSettings = () => {
           )}
         </div>
 
+        {/* Verification Request */}
+        <button
+          onClick={() => navigate("/settings/verification")}
+          className="flex w-full items-center gap-4 px-4 py-4 text-left active:bg-secondary/50 transition-colors"
+        >
+          <PuffyIcon name="check" size={20} />
+          <span className="flex-1 text-foreground">Verification Request</span>
+          <PuffyIcon name="chevron-right" size={18} className="opacity-50" />
+        </button>
+
         {/* Sync Contacts */}
         <button className="flex w-full items-center gap-4 px-4 py-4 text-left active:bg-secondary/50 transition-colors">
           <PuffyIcon name="copy" size={20} />

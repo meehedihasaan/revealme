@@ -30,6 +30,7 @@ import StoryViewer from "./pages/StoryViewer";
 import EditProfile from "./pages/EditProfile";
 import FollowersList from "./pages/FollowersList";
 import UserProfile from "./pages/UserProfile";
+import RequestVerification from "./pages/RequestVerification";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const AppRoutes = () => (
       <Route path="/settings/account" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
       <Route path="/settings/preference" element={<ProtectedRoute><PreferenceSettings /></ProtectedRoute>} />
       <Route path="/settings/privacy" element={<ProtectedRoute><PrivacySettings /></ProtectedRoute>} />
+      <Route path="/settings/verification" element={<ProtectedRoute><RequestVerification /></ProtectedRoute>} />
       <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
       <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
       <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
