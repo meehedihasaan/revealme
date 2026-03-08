@@ -5,6 +5,8 @@ import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import ImageCarouselPreview from "@/components/ImageCarouselPreview";
+import TagSearchSheet from "@/components/TagSearchSheet";
 
 interface TaggedUser {
   user_id: string;
@@ -18,56 +20,46 @@ const CreatePost = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
-  const imgRef = useRef<HTMLDivElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [caption, setCaption] = useState("");
   const [location, setLocation] = useState("");
   const [posting, setPosting] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   // Tag people
   const [tagMode, setTagMode] = useState(false);
   const [taggedUsers, setTaggedUsers] = useState<TaggedUser[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [pendingPosition, setPendingPosition] = useState<{ x: number; y: number } | null>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
+  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files || []);
+    if (selected.length === 0) return;
+    const total = [...files, ...selected].slice(0, 10);
+    setFiles(total);
+    setPreviews(total.map(f => URL.createObjectURL(f)));
   };
 
-  const handleImageTap = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!tagMode || !imgRef.current) return;
-    const rect = imgRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+  const removeImage = (idx: number) => {
+    const newFiles = files.filter((_, i) => i !== idx);
+    const newPreviews = previews.filter((_, i) => i !== idx);
+    setFiles(newFiles);
+    setPreviews(newPreviews);
+    if (currentIndex >= newPreviews.length) setCurrentIndex(Math.max(0, newPreviews.length - 1));
+    if (newFiles.length === 0) {
+      setTaggedUsers([]);
+      setTagMode(false);
+    }
+  };
+
+  const handleImageTap = (x: number, y: number) => {
+    if (!tagMode) return;
     setPendingPosition({ x, y });
     setSearchOpen(true);
-    setSearchQuery("");
-    setSearchResults([]);
   };
 
-  useEffect(() => {
-    if (!searchQuery || searchQuery.length < 2) { setSearchResults([]); return; }
-    const timeout = setTimeout(async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("user_id, username, avatar_url")
-        .neq("user_id", user?.id || "")
-        .ilike("username", `%${searchQuery}%`)
-        .limit(10);
-      // Filter out already tagged
-      const taggedIds = new Set(taggedUsers.map(t => t.user_id));
-      setSearchResults((data || []).filter(p => !taggedIds.has(p.user_id)));
-    }, 300);
-    return () => clearTimeout(timeout);
-  }, [searchQuery, user, taggedUsers]);
-
-  const selectUser = (p: any) => {
+  const selectUser = (p: { user_id: string; username: string; avatar_url: string | null }) => {
     if (!pendingPosition) return;
     setTaggedUsers(prev => [...prev, {
       user_id: p.user_id,
@@ -85,23 +77,38 @@ const CreatePost = () => {
   };
 
   const handlePost = async () => {
-    if (!file || !user) return;
+    if (files.length === 0 || !user) return;
     setPosting(true);
     try {
-      const ext = file.name.split(".").pop();
-      const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from("posts").upload(path, file);
-      if (uploadError) throw uploadError;
+      // Upload all images
+      const imageUrls: string[] = [];
+      for (const file of files) {
+        const ext = file.name.split(".").pop();
+        const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from("posts").upload(path, file);
+        if (uploadError) throw uploadError;
+        const { data: { publicUrl } } = supabase.storage.from("posts").getPublicUrl(path);
+        imageUrls.push(publicUrl);
+      }
 
-      const { data: { publicUrl } } = supabase.storage.from("posts").getPublicUrl(path);
-
+      // Create post with first image as main image_url
       const { data: postData, error } = await supabase.from("posts").insert({
         user_id: user.id,
-        image_url: publicUrl,
+        image_url: imageUrls[0],
         caption,
         location,
       }).select("id").single();
       if (error) throw error;
+
+      // Insert additional images into post_images table
+      if (postData) {
+        const imageRows = imageUrls.map((url, i) => ({
+          post_id: postData.id,
+          image_url: url,
+          display_order: i,
+        }));
+        await supabase.from("post_images").insert(imageRows);
+      }
 
       // Insert tags
       if (taggedUsers.length > 0 && postData) {
@@ -134,50 +141,48 @@ const CreatePost = () => {
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={handlePost}
-          disabled={!preview || posting}
+          disabled={previews.length === 0 || posting}
           className="text-sm font-bold text-primary disabled:opacity-40"
         >
           {posting ? "Posting..." : "Share"}
         </motion.button>
       </div>
 
-      {!preview ? (
+      {previews.length === 0 ? (
         <button
           onClick={() => fileRef.current?.click()}
           className="flex flex-col items-center justify-center gap-4 w-full py-32 text-muted-foreground"
         >
           <PuffyIcon name="camera" size={48} className="opacity-40" />
-          <p className="text-sm">Tap to select a photo</p>
+          <p className="text-sm">Tap to select photos</p>
         </button>
       ) : (
-        <div ref={imgRef} className="relative w-full" onClick={handleImageTap}>
-          <img src={preview} alt="Preview" className="w-full object-cover" style={{ maxHeight: 400 }} />
-          {/* Tag indicators on image */}
-          {taggedUsers.map((t) => (
-            <div
-              key={t.user_id}
-              className="absolute pointer-events-none"
-              style={{ left: `${t.x}%`, top: `${t.y}%`, transform: "translate(-50%, -100%)" }}
-            >
-              <div className="bg-black/75 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap flex items-center gap-1">
-                <PuffyIcon name="user" size={10} className="invert" />
-                {t.username}
-              </div>
-              <div className="w-0 h-0 mx-auto border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black/75" />
-            </div>
-          ))}
-          {tagMode && (
-            <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
-              <span className="bg-black/60 text-white text-xs px-3 py-1.5 rounded-full">Tap to tag someone</span>
-            </div>
-          )}
-        </div>
+        <ImageCarouselPreview
+          images={previews}
+          currentIndex={currentIndex}
+          onIndexChange={setCurrentIndex}
+          tagMode={tagMode}
+          taggedUsers={taggedUsers}
+          onImageTap={handleImageTap}
+          onRemoveImage={removeImage}
+        />
       )}
 
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
 
-      {preview && (
+      {previews.length > 0 && (
         <div className="px-4 py-4 space-y-4">
+          {/* Add more photos button */}
+          {files.length < 10 && (
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="flex items-center gap-2 text-sm text-primary font-medium"
+            >
+              <PuffyIcon name="plus" size={16} />
+              Add more photos ({files.length}/10)
+            </button>
+          )}
+
           <textarea
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
@@ -227,73 +232,20 @@ const CreatePost = () => {
           )}
 
           <button
-            onClick={() => { setPreview(null); setFile(null); setTaggedUsers([]); setTagMode(false); }}
+            onClick={() => { setPreviews([]); setFiles([]); setTaggedUsers([]); setTagMode(false); setCurrentIndex(0); }}
             className="text-xs text-accent"
           >
-            Remove photo
+            Remove all photos
           </button>
         </div>
       )}
 
-      {/* Search user bottom sheet */}
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm"
-            onClick={() => { setSearchOpen(false); setPendingPosition(null); }}
-          >
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 350 }}
-              onClick={e => e.stopPropagation()}
-              className="w-full max-w-md rounded-t-2xl bg-card border-t border-border max-h-[60vh] flex flex-col"
-            >
-              <div className="flex justify-center pt-3 pb-2">
-                <div className="h-1 w-10 rounded-full bg-muted-foreground/20" />
-              </div>
-              <p className="text-center text-sm font-semibold text-foreground pb-2">Tag a person</p>
-              <div className="px-4 pb-3">
-                <div className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-2.5">
-                  <PuffyIcon name="search" size={16} className="opacity-50" />
-                  <input
-                    autoFocus
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="Search users..."
-                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  />
-                </div>
-              </div>
-              <div className="overflow-y-auto flex-1 pb-8">
-                {searchResults.map(p => (
-                  <button
-                    key={p.user_id}
-                    onClick={() => selectUser(p)}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-secondary/50"
-                  >
-                    {p.avatar_url ? (
-                      <img src={p.avatar_url} className="h-10 w-10 rounded-full object-cover" />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
-                        <PuffyIcon name="user" size={18} />
-                      </div>
-                    )}
-                    <span className="text-sm font-medium text-foreground">@{p.username}</span>
-                  </button>
-                ))}
-                {searchQuery.length >= 2 && searchResults.length === 0 && (
-                  <p className="text-center text-sm text-muted-foreground py-8">No users found</p>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <TagSearchSheet
+        isOpen={searchOpen}
+        onClose={() => { setSearchOpen(false); setPendingPosition(null); }}
+        onSelect={selectUser}
+        taggedUserIds={taggedUsers.map(t => t.user_id)}
+      />
     </div>
   );
 };
