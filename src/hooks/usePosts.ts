@@ -12,6 +12,7 @@ export interface PostWithDetails {
   user_id: string;
   username: string;
   avatar_url: string | null;
+  is_verified: boolean;
   likesCount: number;
   isLiked: boolean;
   isSaved: boolean;
