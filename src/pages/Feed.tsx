@@ -176,7 +176,7 @@ const Feed = () => {
                   isLiked={post.isLiked}
                   isSaved={post.isSaved}
                   onDelete={refetch}
-                  showFollowButton={!followingIds.has(post.user_id)}
+                  showFollowButton={post.user_id !== user?.id && !followingIds.has(post.user_id)}
                   isFollowing={followingIds.has(post.user_id)}
                   onFollowChange={handleFollowChange}
                 />
