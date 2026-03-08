@@ -6,6 +6,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { supabase } from "@/integrations/supabase/client";
+import { FollowersShimmer } from "@/components/ShimmerLoader";
 
 interface DiscoverUser {
   user_id: string;
