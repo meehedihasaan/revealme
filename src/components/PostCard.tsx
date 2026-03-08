@@ -140,6 +140,21 @@ const PostCard = ({
     setTimeout(() => setShowHeart(false), 1100);
   };
 
+  const toggleFollow = async () => {
+    if (!user || !postUserId || followLoading) return;
+    setFollowLoading(true);
+    const wasFollowing = following;
+    setFollowing(!wasFollowing);
+    onFollowChange?.(postUserId, !wasFollowing);
+
+    if (wasFollowing) {
+      await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", postUserId);
+    } else {
+      await supabase.from("follows").insert({ follower_id: user.id, following_id: postUserId });
+    }
+    setFollowLoading(false);
+  };
+
   const toggleLike = async () => {
     if (!user) return;
     const wasLiked = liked;
