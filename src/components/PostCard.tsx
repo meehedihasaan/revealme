@@ -223,7 +223,7 @@ const PostCard = ({
             Following
           </motion.button>
         )}
-        <PostMenu postId={postId} postUserId={postUserId || ""} onDelete={onDelete} />
+        <PostMenu postId={postId} postUserId={postUserId || ""} caption={caption} location={location} onDelete={onDelete} />
       </div>
 
       {/* Image */}
