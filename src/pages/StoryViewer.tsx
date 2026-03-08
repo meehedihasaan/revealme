@@ -263,6 +263,54 @@ const StoryViewer = () => {
     setViewersLoading(false);
   };
 
+  const handleSendReply = async () => {
+    if (!replyText.trim() || !user || !currentGroup || sendingReply) return;
+    setSendingReply(true);
+    setPaused(true);
+    try {
+      const { data: convId } = await supabase.rpc("create_direct_conversation", {
+        other_user_id: currentGroup.user_id,
+      });
+      if (convId) {
+        await supabase.from("messages").insert({
+          conversation_id: convId,
+          sender_id: user.id,
+          text: `Replied to your story: ${replyText.trim()}`,
+          mood: "Casual",
+        });
+        toast.success("Reply sent!");
+        setReplyText("");
+        setReplyFocused(false);
+      }
+    } catch {
+      toast.error("Failed to send reply");
+    } finally {
+      setSendingReply(false);
+      setPaused(false);
+    }
+  };
+
+  const handleHeartReact = async () => {
+    if (!user || !currentGroup || hearted) return;
+    setHearted(true);
+    setShowHeartAnim(true);
+    setPaused(true);
+    setTimeout(() => { setShowHeartAnim(false); setPaused(false); }, 1200);
+    try {
+      const { data: convId } = await supabase.rpc("create_direct_conversation", {
+        other_user_id: currentGroup.user_id,
+      });
+      if (convId) {
+        await supabase.from("messages").insert({
+          conversation_id: convId,
+          sender_id: user.id,
+          text: "❤️ Reacted to your story",
+          mood: "Love",
+        });
+      }
+    } catch {}
+  };
+
   if (!loaded || !currentGroup || !currentStory) return null;
 
   const isOwn = user?.id === currentGroup.user_id;
