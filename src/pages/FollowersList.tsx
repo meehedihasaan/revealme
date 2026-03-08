@@ -44,7 +44,7 @@ const FollowersList = () => {
 
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, username, avatar_url, display_name")
+        .select("user_id, username, avatar_url, display_name, is_verified")
         .in("user_id", userIds);
 
       // Check which ones current user follows

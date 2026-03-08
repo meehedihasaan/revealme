@@ -12,6 +12,7 @@ interface DiscoverUser {
   username: string | null;
   display_name: string | null;
   avatar_url: string | null;
+  is_verified: boolean;
 }
 
 const Following = () => {
