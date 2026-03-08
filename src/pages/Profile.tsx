@@ -66,7 +66,10 @@ const Profile = () => {
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold text-foreground">{displayName}</h2>
+        <div className="flex items-center gap-1.5">
+          <h2 className="text-2xl font-bold text-foreground">{displayName}</h2>
+          {profile?.is_verified && <VerifiedBadge size={20} />}
+        </div>
         {profile?.username && (
           <p className="text-sm text-muted-foreground">@{profile.username}</p>
         )}
