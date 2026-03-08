@@ -7,6 +7,7 @@ import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
+import { MessagesShimmer } from "@/components/ShimmerLoader";
 
 interface ConversationItem {
   conversation_id: string;
