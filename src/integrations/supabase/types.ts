@@ -240,6 +240,38 @@ export type Database = {
           },
         ]
       }
+      post_images: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string
+          post_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url: string
+          post_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_images_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_tags: {
         Row: {
           created_at: string
