@@ -101,7 +101,7 @@ const Notifications = () => {
         const n = payload.new as any;
         const { data: prof } = await supabase
           .from("profiles")
-          .select("username, avatar_url")
+          .select("username, avatar_url, is_verified")
           .eq("user_id", n.actor_id)
           .single();
 
@@ -115,6 +115,7 @@ const Notifications = () => {
           created_at: n.created_at,
           actor_username: prof?.username || "user",
           actor_avatar: prof?.avatar_url || null,
+          actor_verified: prof?.is_verified || false,
         };
         setNotifications(prev => [newNotif, ...prev]);
       })
