@@ -332,7 +332,11 @@ const Chat = () => {
           </div>
           <div className="min-w-0">
             <p className="font-bold text-foreground truncate">{otherUser?.username || "User"}</p>
-            <p className="text-[11px] text-muted-foreground">{isOnline ? "Online" : "Offline"}</p>
+            <p className="text-[11px] text-muted-foreground">
+              {isTyping ? (
+                <span className="text-primary font-medium">typing...</span>
+              ) : isOnline ? "Online" : "Offline"}
+            </p>
           </div>
         </button>
       </div>
