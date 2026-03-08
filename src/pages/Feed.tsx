@@ -224,7 +224,7 @@ const Feed = () => {
                   postId={post.id}
                   postUserId={post.user_id}
                   username={post.username}
-                  avatar={post.avatar_url || story1}
+                  avatar={post.avatar_url || ""}
                   verified={post.is_verified}
                   image={post.image_url}
                   caption={post.caption}
