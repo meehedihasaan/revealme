@@ -432,6 +432,45 @@ const UserProfile = () => {
         </>
       )}
 
+      {/* Full-screen post viewer */}
+      <AnimatePresence>
+        {selectedPostIndex !== null && posts[selectedPostIndex] && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background overflow-y-auto"
+          >
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border sticky top-0 bg-background z-10">
+              <button onClick={() => setSelectedPostIndex(null)}>
+                <PuffyIcon name="arrow-left" size={22} />
+              </button>
+              <span className="text-lg font-bold text-foreground">Posts</span>
+            </div>
+            <div>
+              {posts.slice(selectedPostIndex).map((post) => (
+                <PostCard
+                  key={post.id}
+                  postId={post.id}
+                  postUserId={post.user_id}
+                  username={post.username}
+                  avatar={post.avatar_url || ""}
+                  image={post.image_url}
+                  caption={post.caption}
+                  likesCount={post.likesCount}
+                  timeAgo={post.timeAgo}
+                  verified={post.is_verified}
+                  location={post.location}
+                  isLiked={post.isLiked}
+                  isSaved={post.isSaved}
+                  onDelete={() => setSelectedPostIndex(null)}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <BottomNav />
     </div>
   );
