@@ -185,7 +185,13 @@ const PostCard = ({
       <div className="flex items-center gap-3 px-4 py-2.5">
         <button onClick={() => navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`)} className="gradient-story-red rounded-full p-[2px]">
           <div className="rounded-full border-[1.5px] border-background">
-            <img src={avatar} alt={username} className="h-8 w-8 rounded-full object-cover" />
+            {avatar ? (
+              <img src={avatar} alt={username} className="h-8 w-8 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
+                <PuffyIcon name="user" size={16} />
+              </div>
+            )}
           </div>
         </button>
         <button onClick={() => navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`)} className="flex-1 min-w-0 text-left">

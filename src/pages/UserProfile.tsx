@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
+import PostCard from "@/components/PostCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,6 +55,7 @@ const UserProfile = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
 
   // Check block status
   useEffect(() => {
@@ -414,8 +416,10 @@ const UserProfile = () => {
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-0.5">
-                {posts.map((post) => (
-                  <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+                {posts.map((post, idx) => (
+                  <button key={post.id} onClick={() => setSelectedPostIndex(idx)}>
+                    <img src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+                  </button>
                 ))}
               </div>
             )
@@ -427,6 +431,45 @@ const UserProfile = () => {
           )}
         </>
       )}
+
+      {/* Full-screen post viewer */}
+      <AnimatePresence>
+        {selectedPostIndex !== null && posts[selectedPostIndex] && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background overflow-y-auto"
+          >
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border sticky top-0 bg-background z-10">
+              <button onClick={() => setSelectedPostIndex(null)}>
+                <PuffyIcon name="arrow-left" size={22} />
+              </button>
+              <span className="text-lg font-bold text-foreground">Posts</span>
+            </div>
+            <div>
+              {posts.slice(selectedPostIndex).map((post) => (
+                <PostCard
+                  key={post.id}
+                  postId={post.id}
+                  postUserId={post.user_id}
+                  username={post.username}
+                  avatar={post.avatar_url || ""}
+                  image={post.image_url}
+                  caption={post.caption}
+                  likesCount={post.likesCount}
+                  timeAgo={post.timeAgo}
+                  verified={post.is_verified}
+                  location={post.location}
+                  isLiked={post.isLiked}
+                  isSaved={post.isSaved}
+                  onDelete={() => setSelectedPostIndex(null)}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <BottomNav />
     </div>
