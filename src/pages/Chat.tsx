@@ -402,9 +402,16 @@ const Chat = () => {
                               {msg.text}
                             </div>
                           )}
-                          <span className="text-[10px] text-muted-foreground px-1">
-                            {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </span>
+                          <div className="flex items-center gap-1 px-1">
+                            <span className="text-[10px] text-muted-foreground">
+                              {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                            {isMine && (
+                              <span className={`text-[10px] font-medium ${msg.read ? "text-primary" : "text-muted-foreground"}`}>
+                                {isOptimistic ? "Sending..." : msg.read ? "Seen" : "Delivered"}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </motion.div>
                     );
