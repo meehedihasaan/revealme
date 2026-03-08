@@ -4,24 +4,33 @@ import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePosts } from "@/hooks/usePosts";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 import bannerImg from "@/assets/profile-banner.jpg";
-import explore1 from "@/assets/explore1.jpg";
-import explore2 from "@/assets/explore2.jpg";
-import explore3 from "@/assets/explore3.jpg";
-import explore4 from "@/assets/explore4.jpg";
-import explore5 from "@/assets/explore5.jpg";
-import explore6 from "@/assets/explore6.jpg";
-
-const gridImages = [explore1, explore2, explore3, explore4, explore5, explore6];
 
 const Profile = () => {
   const navigate = useNavigate();
   const { profile, user } = useAuth();
+  const { posts, loading } = usePosts(user?.id);
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
 
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || "User";
   const avatarUrl = profile?.avatar_url;
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchCounts = async () => {
+      const { count: followers } = await supabase.from("follows").select("*", { count: "exact", head: true }).eq("following_id", user.id);
+      const { count: following } = await supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", user.id);
+      setFollowersCount(followers || 0);
+      setFollowingCount(following || 0);
+    };
+    fetchCounts();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -59,19 +68,18 @@ const Profile = () => {
         )}
 
         <div className="mt-2 flex gap-6">
-          <div><span className="font-bold text-foreground">0</span> <span className="text-sm text-muted-foreground">Believers</span></div>
-          <div><span className="font-bold text-foreground">0</span> <span className="text-sm text-muted-foreground">Believing</span></div>
-          <div><span className="font-bold text-foreground">{gridImages.length}</span> <span className="text-sm text-muted-foreground">Posts</span></div>
+          <div><span className="font-bold text-foreground">{followersCount}</span> <span className="text-sm text-muted-foreground">Believers</span></div>
+          <div><span className="font-bold text-foreground">{followingCount}</span> <span className="text-sm text-muted-foreground">Believing</span></div>
+          <div><span className="font-bold text-foreground">{posts.length}</span> <span className="text-sm text-muted-foreground">Posts</span></div>
         </div>
 
-        <p className="mt-2 text-sm text-foreground">Hey there, Enjoy the world!</p>
         <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
           <span>📧 {user?.email}</span>
         </div>
 
         <motion.button
           whileTap={{ scale: 0.97 }}
-          onClick={() => navigate("/settings/account")}
+          onClick={() => navigate("/edit-profile")}
           className="mt-4 w-full rounded-lg bg-secondary py-2.5 text-sm font-semibold text-secondary-foreground transition-colors"
         >
           Edit Profile
@@ -94,13 +102,25 @@ const Profile = () => {
         </button>
       </div>
 
-      {/* Grid / Tagged */}
+      {/* Grid */}
       {activeTab === "grid" ? (
-        <div className="grid grid-cols-3 gap-0.5">
-          {gridImages.map((img, i) => (
-            <img key={i} src={img} alt={`Post ${i}`} className="aspect-square w-full object-cover" />
-          ))}
-        </div>
+        loading ? (
+          <div className="flex justify-center py-16 text-muted-foreground"><p className="text-sm">Loading...</p></div>
+        ) : posts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+            <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
+            <p className="text-sm">No posts yet</p>
+            <button onClick={() => navigate("/create-post")} className="mt-3 text-sm font-semibold text-primary">
+              Create your first post
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-0.5">
+            {posts.map((post) => (
+              <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+            ))}
+          </div>
+        )
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />

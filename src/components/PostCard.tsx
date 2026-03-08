@@ -1,36 +1,61 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PostCardProps {
+  postId: string;
   username: string;
   avatar: string;
   image: string;
   caption: string;
-  likes: number;
+  likesCount: number;
   timeAgo: string;
   verified?: boolean;
   location?: string;
+  isLiked?: boolean;
+  isSaved?: boolean;
 }
 
-const PostCard = ({ username, avatar, image, caption, likes, timeAgo, verified, location }: PostCardProps) => {
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [likeCount, setLikeCount] = useState(likes);
+const PostCard = ({ postId, username, avatar, image, caption, likesCount, timeAgo, verified, location, isLiked: initialLiked = false, isSaved: initialSaved = false }: PostCardProps) => {
+  const { user } = useAuth();
+  const [liked, setLiked] = useState(initialLiked);
+  const [saved, setSaved] = useState(initialSaved);
+  const [likeCount, setLikeCount] = useState(likesCount);
   const [showHeart, setShowHeart] = useState(false);
 
   const handleDoubleTap = () => {
     if (!liked) {
-      setLiked(true);
-      setLikeCount((c) => c + 1);
+      toggleLike();
     }
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 800);
   };
 
-  const toggleLike = () => {
-    setLiked((prev) => !prev);
-    setLikeCount((c) => (liked ? c - 1 : c + 1));
+  const toggleLike = async () => {
+    if (!user) return;
+    const wasLiked = liked;
+    setLiked(!wasLiked);
+    setLikeCount((c) => (wasLiked ? c - 1 : c + 1));
+
+    if (wasLiked) {
+      await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", postId);
+    } else {
+      await supabase.from("likes").insert({ user_id: user.id, post_id: postId });
+    }
+  };
+
+  const toggleSave = async () => {
+    if (!user) return;
+    const wasSaved = saved;
+    setSaved(!wasSaved);
+
+    if (wasSaved) {
+      await supabase.from("saved_posts").delete().eq("user_id", user.id).eq("post_id", postId);
+    } else {
+      await supabase.from("saved_posts").insert({ user_id: user.id, post_id: postId });
+    }
   };
 
   return (
@@ -68,7 +93,6 @@ const PostCard = ({ username, avatar, image, caption, likes, timeAgo, verified, 
           style={{ maxHeight: "580px" }}
           draggable={false}
         />
-
         <AnimatePresence>
           {showHeart && (
             <motion.div
@@ -97,7 +121,7 @@ const PostCard = ({ username, avatar, image, caption, likes, timeAgo, verified, 
             <PuffyIcon name="send" size={22} />
           </button>
         </div>
-        <motion.button whileTap={{ scale: 0.8 }} onClick={() => setSaved(!saved)}>
+        <motion.button whileTap={{ scale: 0.8 }} onClick={toggleSave}>
           <PuffyIcon name="bookmark" size={24} className={saved ? "opacity-100" : "opacity-70"} />
         </motion.button>
       </div>
@@ -115,13 +139,6 @@ const PostCard = ({ username, avatar, image, caption, likes, timeAgo, verified, 
           <span className="font-semibold">{username}</span>{" "}
           <span className="text-foreground/90">{caption}</span>
         </p>
-      </div>
-
-      {/* View comments */}
-      <div className="px-4 pb-1">
-        <button className="text-sm text-muted-foreground">
-          View all comments
-        </button>
       </div>
 
       {/* Time */}
