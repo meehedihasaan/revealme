@@ -22,6 +22,17 @@ const Profile = () => {
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
+  const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(user?.id);
+  const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (taggedPostIds.length === 0) { setTaggedPosts([]); return; }
+    const fetchTagged = async () => {
+      const { data } = await supabase.from("posts").select("id, image_url").in("id", taggedPostIds);
+      setTaggedPosts(data || []);
+    };
+    fetchTagged();
+  }, [taggedPostIds]);
 
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || "User";
   const avatarUrl = profile?.avatar_url;
