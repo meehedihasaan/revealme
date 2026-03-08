@@ -25,6 +25,21 @@ interface UserData {
   created_at: string;
 }
 
+const ProfileMenuItem = ({ icon, label, onClick, destructive = false }: {
+  icon: string; label: string; onClick: () => void; destructive?: boolean;
+}) => (
+  <motion.button
+    whileTap={{ scale: 0.98 }}
+    onClick={onClick}
+    className="flex w-full items-center gap-3 px-5 py-3 text-left transition-colors active:bg-secondary/50"
+  >
+    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${destructive ? "bg-destructive/10" : "bg-secondary"}`}>
+      <PuffyIcon name={icon} size={18} />
+    </div>
+    <span className={`text-sm font-medium ${destructive ? "text-destructive" : "text-foreground"}`}>{label}</span>
+  </motion.button>
+);
+
 const UserProfile = () => {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
