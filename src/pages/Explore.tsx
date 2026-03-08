@@ -222,7 +222,7 @@ const Explore = () => {
                       <img src={u.avatar_url} alt={u.username || ""} className="h-12 w-12 rounded-full object-cover" />
                     ) : (
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
-                        <PuffyIcon name="user" size={22} />
+                        <PuffyIcon name="user" size={20} />
                       </div>
                     )}
                   </button>
