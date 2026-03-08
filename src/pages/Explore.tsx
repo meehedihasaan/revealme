@@ -49,7 +49,7 @@ const Explore = () => {
         .select("id, image_url")
         .order("created_at", { ascending: false })
         .limit(30);
-      setPosts(data || []);
+      setPosts((data || []).filter(p => !blockedIds.has(p.user_id)));
       setLoading(false);
     };
     fetchPosts();
