@@ -42,7 +42,7 @@ const Following = () => {
       ]);
 
       if (!profilesError) {
-        setUsers((profiles || []) as DiscoverUser[]);
+        setUsers(((profiles || []) as DiscoverUser[]).filter(p => !blockedIds.has(p.user_id)));
       }
 
       if (!followsError) {

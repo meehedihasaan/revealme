@@ -85,7 +85,7 @@ const Explore = () => {
         followSet = new Set((follows || []).map(f => f.following_id));
       }
 
-      setUsers(profiles.map(p => ({
+      setUsers(profiles.filter(p => !blockedIds.has(p.user_id)).map(p => ({
         ...p,
         isFollowing: followSet.has(p.user_id),
       })));
