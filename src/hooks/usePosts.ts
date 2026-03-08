@@ -32,7 +32,7 @@ export const usePosts = (filterUserId?: string) => {
     if (!postsData || postsData.length === 0) { setPosts([]); setLoading(false); return; }
 
     const userIds = [...new Set(postsData.map(p => p.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", userIds);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url, is_verified").in("user_id", userIds);
     const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
 
     const postIds = postsData.map(p => p.id);
