@@ -7,6 +7,7 @@ import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
+import { MessagesShimmer } from "@/components/ShimmerLoader";
 
 interface ConversationItem {
   conversation_id: string;
@@ -180,18 +181,7 @@ const Messages = () => {
 
       <div>
         {loading ? (
-          <div className="px-4 space-y-4 py-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="h-14 w-14 rounded-full bg-muted animate-pulse shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-28 rounded bg-muted animate-pulse" />
-                  <div className="h-3 w-40 rounded bg-muted animate-pulse" />
-                </div>
-                <div className="h-3 w-8 rounded bg-muted animate-pulse" />
-              </div>
-            ))}
-          </div>
+          <MessagesShimmer />
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <PuffyIcon name="message-circle" size={40} className="opacity-30 mb-3" />

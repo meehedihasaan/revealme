@@ -7,6 +7,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
 import { useAuth } from "@/contexts/AuthContext";
+import { ProfileShimmer } from "@/components/ShimmerLoader";
 import { usePosts } from "@/hooks/usePosts";
 import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
@@ -198,25 +199,7 @@ const UserProfile = () => {
   if (profileLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <div className="h-12 flex items-center px-4">
-          <div className="h-5 w-5 rounded bg-muted animate-pulse" />
-        </div>
-        <div className="h-48 w-full bg-muted animate-pulse" />
-        <div className="px-4 space-y-3 mt-4">
-          <div className="h-20 w-20 rounded-xl bg-muted animate-pulse -mt-10" />
-          <div className="h-5 w-40 rounded bg-muted animate-pulse" />
-          <div className="h-3 w-24 rounded bg-muted animate-pulse" />
-          <div className="h-3 w-full rounded bg-muted animate-pulse" />
-          <div className="flex gap-6">
-            <div className="h-4 w-20 rounded bg-muted animate-pulse" />
-            <div className="h-4 w-20 rounded bg-muted animate-pulse" />
-          </div>
-          <div className="h-3 w-32 rounded bg-muted animate-pulse" />
-          <div className="flex gap-3 mt-4">
-            <div className="h-10 flex-1 rounded-lg bg-muted animate-pulse" />
-            <div className="h-10 flex-1 rounded-lg bg-muted animate-pulse" />
-          </div>
-        </div>
+        <ProfileShimmer />
         <BottomNav />
       </div>
     );
