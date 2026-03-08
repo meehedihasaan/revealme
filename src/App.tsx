@@ -52,28 +52,28 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => (
   <div className="mx-auto max-w-md min-h-screen">
     <Routes>
-      <Route path="/" element={<PublicRoute><Welcome /></PublicRoute>} />
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-      <Route path="/onboarding/avatar" element={<ProtectedRoute><SetAvatar /></ProtectedRoute>} />
-      <Route path="/onboarding/username" element={<ProtectedRoute><SetUsername /></ProtectedRoute>} />
-      <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
-      <Route path="/explore" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
-      <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
-      <Route path="/chat/:conversationId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-      <Route path="/following" element={<ProtectedRoute><Following /></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-      <Route path="/settings/account" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
-      <Route path="/settings/preference" element={<ProtectedRoute><PreferenceSettings /></ProtectedRoute>} />
-      <Route path="/settings/privacy" element={<ProtectedRoute><PrivacySettings /></ProtectedRoute>} />
-      <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
-      <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
-      <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
-      <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-      <Route path="/followers" element={<ProtectedRoute><FollowersList /></ProtectedRoute>} />
-      <Route path="/user/:userId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+      <Route path="/" element={<PublicRoute><PageLoadWrapper><Welcome /></PageLoadWrapper></PublicRoute>} />
+      <Route path="/login" element={<PublicRoute><PageLoadWrapper><Login /></PageLoadWrapper></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><PageLoadWrapper><Register /></PageLoadWrapper></PublicRoute>} />
+      <Route path="/onboarding/avatar" element={<ProtectedRoute><PageLoadWrapper><SetAvatar /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/onboarding/username" element={<ProtectedRoute><PageLoadWrapper><SetUsername /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/feed" element={<ProtectedRoute><PageLoadWrapper><Feed /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/explore" element={<ProtectedRoute><PageLoadWrapper><Explore /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><PageLoadWrapper><Notifications /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><PageLoadWrapper><Profile /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/messages" element={<ProtectedRoute><PageLoadWrapper><Messages /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/chat/:conversationId" element={<ProtectedRoute><PageLoadWrapper><Chat /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/following" element={<ProtectedRoute><PageLoadWrapper><Following /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><PageLoadWrapper><Settings /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/settings/account" element={<ProtectedRoute><PageLoadWrapper><AccountSettings /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/settings/preference" element={<ProtectedRoute><PageLoadWrapper><PreferenceSettings /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/settings/privacy" element={<ProtectedRoute><PageLoadWrapper><PrivacySettings /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/create-post" element={<ProtectedRoute><PageLoadWrapper><CreatePost /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/create-story" element={<ProtectedRoute><PageLoadWrapper><CreateStory /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/story" element={<ProtectedRoute><PageLoadWrapper><StoryViewer /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/edit-profile" element={<ProtectedRoute><PageLoadWrapper><EditProfile /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/followers" element={<ProtectedRoute><PageLoadWrapper><FollowersList /></PageLoadWrapper></ProtectedRoute>} />
+      <Route path="/user/:userId" element={<ProtectedRoute><PageLoadWrapper><UserProfile /></PageLoadWrapper></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </div>
