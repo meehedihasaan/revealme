@@ -32,6 +32,11 @@ import FollowersList from "./pages/FollowersList";
 import UserProfile from "./pages/UserProfile";
 import RequestVerification from "./pages/RequestVerification";
 import NotFound from "./pages/NotFound";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminVerifications from "./pages/admin/AdminVerifications";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminPosts from "./pages/admin/AdminPosts";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +81,12 @@ const AppRoutes = () => (
       <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
       <Route path="/followers" element={<ProtectedRoute><FollowersList /></ProtectedRoute>} />
       <Route path="/user/:userId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="verifications" element={<AdminVerifications />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="posts" element={<AdminPosts />} />
+      </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
   </div>
