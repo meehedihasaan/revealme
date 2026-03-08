@@ -1,5 +1,5 @@
-import { Search, Plus, Settings } from "lucide-react";
 import { motion } from "framer-motion";
+import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 
 import explore1 from "@/assets/explore1.jpg";
@@ -18,15 +18,15 @@ const Explore = () => {
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-xl font-bold text-foreground">Explore</h1>
         <div className="flex items-center gap-3">
-          <button className="text-foreground"><Plus size={24} /></button>
-          <button className="text-foreground"><Settings size={22} /></button>
+          <button><PuffyIcon name="plus" size={24} /></button>
+          <button><PuffyIcon name="settings" size={22} /></button>
         </div>
       </div>
 
       {/* Search */}
       <div className="px-4 pb-3">
         <div className="flex items-center gap-2 rounded-xl bg-secondary px-4 py-2.5">
-          <Search size={18} className="text-muted-foreground" />
+          <PuffyIcon name="search" size={18} className="opacity-50" />
           <input
             type="text"
             placeholder="Search"
@@ -50,7 +50,7 @@ const Explore = () => {
               src={img}
               alt={`Explore ${i}`}
               className="h-full w-full object-cover"
-              style={{ aspectRatio: i === 0 ? "1" : "1" }}
+              style={{ aspectRatio: "1" }}
             />
           </div>
         ))}

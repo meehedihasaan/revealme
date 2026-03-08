@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MoreHorizontal, Grid3X3, User } from "lucide-react";
 import { motion } from "framer-motion";
+import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 
 import bannerImg from "@/assets/profile-banner.jpg";
@@ -25,11 +25,11 @@ const Profile = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-foreground">
-          <ArrowLeft size={20} />
+          <PuffyIcon name="arrow-left" size={20} />
           <span className="text-lg font-bold">reveal</span>
           <span className="text-primary">✓</span>
         </button>
-        <button className="text-foreground"><MoreHorizontal size={24} /></button>
+        <button><PuffyIcon name="more-horizontal" size={24} /></button>
       </div>
 
       {/* Banner */}
@@ -74,15 +74,15 @@ const Profile = () => {
       <div className="mt-4 flex border-b border-border">
         <button
           onClick={() => setActiveTab("grid")}
-          className={`flex-1 py-3 ${activeTab === "grid" ? "border-b-2 border-foreground text-foreground" : "text-muted-foreground"}`}
+          className={`flex-1 py-3 flex justify-center ${activeTab === "grid" ? "border-b-2 border-foreground" : "opacity-50"}`}
         >
-          <Grid3X3 size={22} className="mx-auto" />
+          <PuffyIcon name="grid" size={22} />
         </button>
         <button
           onClick={() => setActiveTab("tagged")}
-          className={`flex-1 py-3 ${activeTab === "tagged" ? "border-b-2 border-foreground text-foreground" : "text-muted-foreground"}`}
+          className={`flex-1 py-3 flex justify-center ${activeTab === "tagged" ? "border-b-2 border-foreground" : "opacity-50"}`}
         >
-          <User size={22} className="mx-auto" />
+          <PuffyIcon name="user" size={22} />
         </button>
       </div>
 

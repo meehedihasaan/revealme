@@ -1,5 +1,5 @@
-import { UserPlus, Heart, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 
 import story1 from "@/assets/story1.jpg";
@@ -34,8 +34,8 @@ const notifications: Notification[] = [
 ];
 
 const NotifIcon = ({ type }: { type: NotifType }) => {
-  if (type === "like") return <Heart size={20} className="fill-accent text-accent" />;
-  if (type === "comment") return <MessageCircle size={20} className="text-foreground" />;
+  if (type === "like") return <PuffyIcon name="heart-filled" size={20} />;
+  if (type === "comment") return <PuffyIcon name="message-circle" size={20} />;
   return null;
 };
 
@@ -44,7 +44,7 @@ const Notifications = () => {
     <div className="min-h-screen bg-background pb-20">
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
-        <button className="text-foreground"><UserPlus size={24} /></button>
+        <button><PuffyIcon name="user-plus" size={24} /></button>
       </div>
 
       <div className="divide-y divide-border">

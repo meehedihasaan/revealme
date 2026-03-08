@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit, Search } from "lucide-react";
 import { motion } from "framer-motion";
+import PuffyIcon from "@/components/PuffyIcon";
 
 import story1 from "@/assets/story1.jpg";
 import story2 from "@/assets/story2.jpg";
@@ -47,19 +47,19 @@ const Messages = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
-        <button onClick={() => navigate(-1)} className="text-foreground">
-          <ArrowLeft size={22} />
+        <button onClick={() => navigate(-1)}>
+          <PuffyIcon name="arrow-left" size={22} />
         </button>
         <h1 className="text-lg font-bold text-foreground">Messages</h1>
-        <button className="text-foreground">
-          <Edit size={20} />
+        <button>
+          <PuffyIcon name="edit" size={20} />
         </button>
       </div>
 
       {/* Search */}
       <div className="px-4 pb-2">
         <div className="flex items-center gap-2 rounded-xl bg-secondary px-4 py-2.5">
-          <Search size={18} className="text-muted-foreground" />
+          <PuffyIcon name="search" size={18} className="opacity-50" />
           <input
             type="text"
             value={search}
@@ -85,16 +85,10 @@ const Messages = () => {
                 className="flex flex-col items-center gap-1"
               >
                 <div className="relative">
-                  <img
-                    src={c.avatar}
-                    alt={c.username}
-                    className="h-14 w-14 rounded-full object-cover"
-                  />
+                  <img src={c.avatar} alt={c.username} className="h-14 w-14 rounded-full object-cover" />
                   <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-background bg-success" />
                 </div>
-                <span className="max-w-[60px] truncate text-[11px] text-foreground">
-                  {c.username}
-                </span>
+                <span className="max-w-[60px] truncate text-[11px] text-foreground">{c.username}</span>
               </button>
             ))}
         </div>
@@ -114,28 +108,20 @@ const Messages = () => {
             className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-secondary/50"
           >
             <div className="relative shrink-0">
-              <img
-                src={conv.avatar}
-                alt={conv.username}
-                className="h-14 w-14 rounded-full object-cover"
-              />
+              <img src={conv.avatar} alt={conv.username} className="h-14 w-14 rounded-full object-cover" />
               {conv.online && (
                 <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-background bg-success" />
               )}
             </div>
-
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1">
-                <span className={`font-semibold ${conv.unread > 0 ? "text-foreground" : "text-foreground"}`}>
-                  {conv.username}
-                </span>
+                <span className="font-semibold text-foreground">{conv.username}</span>
                 {conv.verified && <span className="text-xs text-primary">✓</span>}
               </div>
               <p className={`truncate text-sm ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
                 {conv.lastMessage}
               </p>
             </div>
-
             <div className="flex flex-col items-end gap-1 shrink-0">
               <span className="text-xs text-muted-foreground">{conv.time}</span>
               {conv.unread > 0 && (

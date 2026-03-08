@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import PuffyIcon from "@/components/PuffyIcon";
 
 interface PostCardProps {
   username: string;
@@ -51,8 +51,8 @@ const PostCard = ({ username, avatar, image, caption, likes, timeAgo, verified, 
             <p className="text-[11px] text-muted-foreground">{location}</p>
           )}
         </div>
-        <button className="text-foreground">
-          <MoreHorizontal size={20} />
+        <button>
+          <PuffyIcon name="more-horizontal" size={20} />
         </button>
       </div>
 
@@ -69,7 +69,6 @@ const PostCard = ({ username, avatar, image, caption, likes, timeAgo, verified, 
           draggable={false}
         />
 
-        {/* Double-tap heart animation */}
         <AnimatePresence>
           {showHeart && (
             <motion.div
@@ -79,7 +78,7 @@ const PostCard = ({ username, avatar, image, caption, likes, timeAgo, verified, 
               transition={{ duration: 0.3 }}
               className="pointer-events-none absolute inset-0 flex items-center justify-center"
             >
-              <Heart size={80} className="fill-foreground text-foreground drop-shadow-lg" />
+              <PuffyIcon name="heart-filled" size={80} className="drop-shadow-lg" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -88,27 +87,18 @@ const PostCard = ({ username, avatar, image, caption, likes, timeAgo, verified, 
       {/* Actions */}
       <div className="flex items-center justify-between px-4 py-2.5">
         <div className="flex items-center gap-4">
-          <motion.button
-            whileTap={{ scale: 0.8 }}
-            onClick={toggleLike}
-          >
-            <Heart
-              size={26}
-              className={`transition-colors ${liked ? "fill-accent text-accent" : "text-foreground"}`}
-            />
+          <motion.button whileTap={{ scale: 0.8 }} onClick={toggleLike}>
+            <PuffyIcon name={liked ? "heart-filled" : "heart"} size={26} />
           </motion.button>
-          <button className="text-foreground">
-            <MessageCircle size={24} />
+          <button>
+            <PuffyIcon name="message-circle" size={24} />
           </button>
-          <button className="text-foreground">
-            <Send size={22} />
+          <button>
+            <PuffyIcon name="send" size={22} />
           </button>
         </div>
         <motion.button whileTap={{ scale: 0.8 }} onClick={() => setSaved(!saved)}>
-          <Bookmark
-            size={24}
-            className={`transition-colors ${saved ? "fill-foreground text-foreground" : "text-foreground"}`}
-          />
+          <PuffyIcon name="bookmark" size={24} className={saved ? "opacity-100" : "opacity-70"} />
         </motion.button>
       </div>
 

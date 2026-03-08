@@ -1,28 +1,28 @@
-import { ArrowLeft, User, SlidersHorizontal, Shield, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import PuffyIcon from "@/components/PuffyIcon";
 
 const sections = [
   {
-    icon: User,
+    icon: "user",
     title: "Account",
     subtitle: "Username",
     description: "Username, Phone, Email, Password, Security, Verification request, Log out.",
     path: "/settings/account",
   },
   {
-    icon: SlidersHorizontal,
+    icon: "sliders",
     title: "Preference",
     subtitle: "Adjust your account according",
     description: "Appearance, language",
   },
   {
-    icon: Shield,
+    icon: "shield",
     title: "Privacy & Safety",
     subtitle: "Manage privacy and secure data",
     description: "Private account, password, blocked accounts",
   },
   {
-    icon: Info,
+    icon: "info",
     title: "About",
     subtitle: "",
     description: "",
@@ -35,8 +35,8 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="px-4 py-3">
-        <button onClick={() => navigate(-1)} className="text-foreground">
-          <ArrowLeft size={22} />
+        <button onClick={() => navigate(-1)}>
+          <PuffyIcon name="arrow-left" size={22} />
         </button>
       </div>
 
@@ -51,7 +51,7 @@ const Settings = () => {
             onClick={() => s.path && navigate(s.path)}
             className="flex w-full items-start gap-4 px-4 py-5 text-left"
           >
-            <s.icon size={24} className="mt-0.5 shrink-0 text-foreground" />
+            <PuffyIcon name={s.icon} size={24} className="mt-0.5" />
             <div>
               <p className="font-bold text-foreground">{s.title}</p>
               {s.subtitle && <p className="text-sm text-foreground">{s.subtitle}</p>}
