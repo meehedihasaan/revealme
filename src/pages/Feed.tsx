@@ -122,7 +122,7 @@ const Feed = () => {
       <div>
         {activeTab === "For you" && (
           loading ? (
-            <div className="flex justify-center py-20 text-muted-foreground"><p className="text-sm">Loading...</p></div>
+            <FeedShimmer />
           ) : posts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
               <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />

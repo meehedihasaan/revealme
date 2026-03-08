@@ -139,7 +139,7 @@ const Messages = () => {
 
       <div>
         {loading ? (
-          <div className="flex justify-center py-16 text-muted-foreground"><p className="text-sm">Loading...</p></div>
+          <MessagesShimmer />
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <PuffyIcon name="message-circle" size={40} className="opacity-30 mb-3" />
