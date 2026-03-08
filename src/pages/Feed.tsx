@@ -9,8 +9,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
 
-import story1 from "@/assets/story1.jpg";
-import story2 from "@/assets/story2.jpg";
 
 interface StoryUser {
   user_id: string;
