@@ -156,6 +156,20 @@ const Notifications = () => {
     }
   };
 
+  const handleNotifClick = async (n: NotifItem) => {
+    // Mark as read
+    if (!n.read) {
+      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+      await supabase.from("notifications").update({ read: true }).eq("id", n.id);
+    }
+    // Navigate
+    if (n.type === "follow") {
+      navigate(`/user/${n.actor_id}`);
+    } else if (n.post_id) {
+      navigate(`/user/${n.actor_id}`);
+    }
+  };
+
   const NotifIcon = ({ type }: { type: NotifType }) => {
     if (type === "like") return <PuffyIcon name="heart-filled" size={20} />;
     if (type === "comment") return <PuffyIcon name="message-circle" size={20} />;
