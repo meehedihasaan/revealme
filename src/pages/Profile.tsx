@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { ProfileShimmer } from "@/components/ShimmerLoader";
 
 import bannerImg from "@/assets/profile-banner.jpg";
 
