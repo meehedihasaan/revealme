@@ -30,6 +30,7 @@ import StoryViewer from "./pages/StoryViewer";
 import EditProfile from "./pages/EditProfile";
 import FollowersList from "./pages/FollowersList";
 import UserProfile from "./pages/UserProfile";
+import RequestVerification from "./pages/RequestVerification";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
