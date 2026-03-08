@@ -10,6 +10,7 @@ import Explore from "./pages/Explore";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
+import Messages from "./pages/Messages";
 import Following from "./pages/Following";
 import Settings from "./pages/Settings";
 import AccountSettings from "./pages/AccountSettings";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/explore" element={<Explore />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/messages" element={<Messages />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/following" element={<Following />} />
             <Route path="/settings" element={<Settings />} />
