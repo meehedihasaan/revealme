@@ -58,6 +58,7 @@ export const usePosts = (filterUserId?: string) => {
       user_id: p.user_id,
       username: profileMap[p.user_id]?.username || "user",
       avatar_url: profileMap[p.user_id]?.avatar_url || null,
+      is_verified: profileMap[p.user_id]?.is_verified || false,
       likesCount: likesCount[p.id] || 0,
       isLiked: userLikes.has(p.id),
       isSaved: userSaves.has(p.id),
