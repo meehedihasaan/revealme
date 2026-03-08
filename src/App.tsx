@@ -32,6 +32,11 @@ import FollowersList from "./pages/FollowersList";
 import UserProfile from "./pages/UserProfile";
 import RequestVerification from "./pages/RequestVerification";
 import NotFound from "./pages/NotFound";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminVerifications from "./pages/admin/AdminVerifications";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminPosts from "./pages/admin/AdminPosts";
 
 const queryClient = new QueryClient();
 
