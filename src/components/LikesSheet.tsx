@@ -35,7 +35,7 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
       const uids = likes.map(l => l.user_id);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, username, avatar_url")
+        .select("user_id, username, avatar_url, is_verified")
         .in("user_id", uids);
       setUsers(profiles || []);
       setLoading(false);
