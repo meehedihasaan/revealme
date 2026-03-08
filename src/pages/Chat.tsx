@@ -67,7 +67,7 @@ const Chat = () => {
         const otherUserId = partnerRes.data[0].user_id;
         const { data: prof } = await supabase
           .from("profiles")
-          .select("user_id, username, avatar_url")
+          .select("user_id, username, avatar_url, is_verified")
           .eq("user_id", otherUserId)
           .single();
         if (prof) setOtherUser(prof as OtherUser);
