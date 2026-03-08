@@ -9,7 +9,7 @@ import CommentSheet from "@/components/CommentSheet";
 import ShareSheet from "@/components/ShareSheet";
 import PostMenu from "@/components/PostMenu";
 import LikesSheet from "@/components/LikesSheet";
-import { usePostTags } from "@/hooks/usePostTags";
+import PostImageCarousel from "@/components/PostImageCarousel";
 
 interface PostCardProps {
   postId: string;
