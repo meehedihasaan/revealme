@@ -372,47 +372,60 @@ const UserProfile = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="mt-4 flex border-b border-border">
-        <button
-          onClick={() => setActiveTab("grid")}
-          className={`flex-1 py-3 flex justify-center ${activeTab === "grid" ? "border-b-2 border-foreground" : "opacity-50"}`}
-        >
-          <PuffyIcon name="grid" size={22} />
-        </button>
-        <button
-          onClick={() => setActiveTab("tagged")}
-          className={`flex-1 py-3 flex justify-center ${activeTab === "tagged" ? "border-b-2 border-foreground" : "opacity-50"}`}
-        >
-          <PuffyIcon name="user" size={22} />
-        </button>
-      </div>
-
-      {/* Grid */}
-      {activeTab === "grid" ? (
-        loading ? (
-          <div className="grid grid-cols-3 gap-0.5 mt-1">
-            {[...Array(9)].map((_, i) => (
-              <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
-            ))}
+      {/* Private profile gate */}
+      {profile.is_private && !isFollowing ? (
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary mb-4">
+            <PuffyIcon name="shield" size={32} />
           </div>
-        ) : posts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-            <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
-            <p className="text-sm">No posts yet</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-0.5">
-            {posts.map((post) => (
-              <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
-            ))}
-          </div>
-        )
-      ) : (
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-          <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />
-          <p className="text-sm">No tagged posts yet</p>
+          <p className="text-base font-bold text-foreground mb-1">This account is private</p>
+          <p className="text-sm text-center max-w-[250px]">Follow this account to see their photos and posts.</p>
         </div>
+      ) : (
+        <>
+          {/* Tabs */}
+          <div className="mt-4 flex border-b border-border">
+            <button
+              onClick={() => setActiveTab("grid")}
+              className={`flex-1 py-3 flex justify-center ${activeTab === "grid" ? "border-b-2 border-foreground" : "opacity-50"}`}
+            >
+              <PuffyIcon name="grid" size={22} />
+            </button>
+            <button
+              onClick={() => setActiveTab("tagged")}
+              className={`flex-1 py-3 flex justify-center ${activeTab === "tagged" ? "border-b-2 border-foreground" : "opacity-50"}`}
+            >
+              <PuffyIcon name="user" size={22} />
+            </button>
+          </div>
+
+          {/* Grid */}
+          {activeTab === "grid" ? (
+            loading ? (
+              <div className="grid grid-cols-3 gap-0.5 mt-1">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
+                ))}
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
+                <p className="text-sm">No posts yet</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-0.5">
+                {posts.map((post) => (
+                  <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+                ))}
+              </div>
+            )
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />
+              <p className="text-sm">No tagged posts yet</p>
+            </div>
+          )}
+        </>
       )}
 
       <BottomNav />
