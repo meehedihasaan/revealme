@@ -18,6 +18,10 @@ import Settings from "./pages/Settings";
 import AccountSettings from "./pages/AccountSettings";
 import SetAvatar from "./pages/SetAvatar";
 import SetUsername from "./pages/SetUsername";
+import CreatePost from "./pages/CreatePost";
+import CreateStory from "./pages/CreateStory";
+import StoryViewer from "./pages/StoryViewer";
+import EditProfile from "./pages/EditProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,10 +54,14 @@ const AppRoutes = () => (
       <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
-      <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+      <Route path="/chat/:conversationId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
       <Route path="/following" element={<ProtectedRoute><Following /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/settings/account" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
+      <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
+      <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
+      <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
+      <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </div>
