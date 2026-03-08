@@ -6,7 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
-import { ProfileShimmer } from "@/components/ShimmerLoader";
+import { format } from "date-fns";
 
 import bannerImg from "@/assets/profile-banner.jpg";
 
@@ -31,6 +31,8 @@ const Profile = () => {
     };
     fetchCounts();
   }, [user]);
+
+  const joinDate = profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "";
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -67,6 +69,12 @@ const Profile = () => {
           <p className="text-sm text-muted-foreground">@{profile.username}</p>
         )}
 
+        {/* Bio */}
+        {profile?.bio && (
+          <p className="mt-2 text-sm text-foreground leading-relaxed">{profile.bio}</p>
+        )}
+
+        {/* Stats */}
         <div className="mt-2 flex gap-6">
           <button onClick={() => navigate(`/followers?tab=followers&userId=${user?.id}`)}>
             <span className="font-bold text-foreground">{followersCount}</span>{" "}
@@ -82,8 +90,14 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-          <span>📧 {user?.email}</span>
+        {/* Location & Join date */}
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          {profile?.location && (
+            <span className="flex items-center gap-1">📍 {profile.location}</span>
+          )}
+          {joinDate && (
+            <span className="flex items-center gap-1">📅 Joined {joinDate}</span>
+          )}
         </div>
 
         <motion.button

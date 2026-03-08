@@ -6,6 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
 import bannerImg from "@/assets/profile-banner.jpg";
 
@@ -14,7 +15,10 @@ interface UserData {
   username: string | null;
   display_name: string | null;
   avatar_url: string | null;
+  bio: string | null;
+  location: string | null;
   is_private: boolean;
+  created_at: string;
 }
 
 const UserProfile = () => {
@@ -27,8 +31,8 @@ const UserProfile = () => {
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
 
-  // Redirect to own profile
   useEffect(() => {
     if (userId && user && userId === user.id) {
       navigate("/profile", { replace: true });
@@ -41,7 +45,7 @@ const UserProfile = () => {
       setProfileLoading(true);
       const { data: prof } = await supabase
         .from("profiles")
-        .select("user_id, username, display_name, avatar_url, is_private")
+        .select("user_id, username, display_name, avatar_url, bio, location, is_private, created_at")
         .eq("user_id", userId)
         .single();
       setProfile(prof);
@@ -104,6 +108,7 @@ const UserProfile = () => {
   };
 
   const displayName = profile?.display_name || profile?.username || "User";
+  const joinDate = profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "";
 
   if (profileLoading) {
     return (
@@ -116,10 +121,12 @@ const UserProfile = () => {
           <div className="h-20 w-20 rounded-xl bg-muted animate-pulse -mt-10" />
           <div className="h-5 w-40 rounded bg-muted animate-pulse" />
           <div className="h-3 w-24 rounded bg-muted animate-pulse" />
+          <div className="h-3 w-full rounded bg-muted animate-pulse" />
           <div className="flex gap-6">
             <div className="h-4 w-20 rounded bg-muted animate-pulse" />
             <div className="h-4 w-20 rounded bg-muted animate-pulse" />
           </div>
+          <div className="h-3 w-32 rounded bg-muted animate-pulse" />
           <div className="flex gap-3 mt-4">
             <div className="h-10 flex-1 rounded-lg bg-muted animate-pulse" />
             <div className="h-10 flex-1 rounded-lg bg-muted animate-pulse" />
@@ -170,6 +177,12 @@ const UserProfile = () => {
         <h2 className="text-2xl font-bold text-foreground">{displayName}</h2>
         {profile.username && <p className="text-sm text-muted-foreground">@{profile.username}</p>}
 
+        {/* Bio */}
+        {profile.bio && (
+          <p className="mt-2 text-sm text-foreground leading-relaxed">{profile.bio}</p>
+        )}
+
+        {/* Stats */}
         <div className="mt-2 flex gap-6">
           <button onClick={() => navigate(`/followers?tab=followers&userId=${userId}`)}>
             <span className="font-bold text-foreground">{followersCount}</span>{" "}
@@ -185,6 +198,17 @@ const UserProfile = () => {
           </div>
         </div>
 
+        {/* Location & Join date */}
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          {profile.location && (
+            <span className="flex items-center gap-1">📍 {profile.location}</span>
+          )}
+          {joinDate && (
+            <span className="flex items-center gap-1">📅 Joined {joinDate}</span>
+          )}
+        </div>
+
+        {/* Action buttons */}
         <div className="mt-4 flex gap-3">
           <motion.button
             whileTap={{ scale: 0.97 }}
@@ -205,9 +229,25 @@ const UserProfile = () => {
         </div>
       </div>
 
-      {/* Posts grid */}
-      <div className="mt-4 border-t border-border">
-        {loading ? (
+      {/* Tabs */}
+      <div className="mt-4 flex border-b border-border">
+        <button
+          onClick={() => setActiveTab("grid")}
+          className={`flex-1 py-3 flex justify-center ${activeTab === "grid" ? "border-b-2 border-foreground" : "opacity-50"}`}
+        >
+          <PuffyIcon name="grid" size={22} />
+        </button>
+        <button
+          onClick={() => setActiveTab("tagged")}
+          className={`flex-1 py-3 flex justify-center ${activeTab === "tagged" ? "border-b-2 border-foreground" : "opacity-50"}`}
+        >
+          <PuffyIcon name="user" size={22} />
+        </button>
+      </div>
+
+      {/* Grid */}
+      {activeTab === "grid" ? (
+        loading ? (
           <div className="grid grid-cols-3 gap-0.5 mt-1">
             {[...Array(9)].map((_, i) => (
               <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
@@ -224,8 +264,13 @@ const UserProfile = () => {
               <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
             ))}
           </div>
-        )}
-      </div>
+        )
+      ) : (
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+          <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />
+          <p className="text-sm">No tagged posts yet</p>
+        </div>
+      )}
 
       <BottomNav />
     </div>
