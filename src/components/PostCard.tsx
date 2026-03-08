@@ -23,6 +23,9 @@ interface PostCardProps {
   isLiked?: boolean;
   isSaved?: boolean;
   onDelete?: () => void;
+  showFollowButton?: boolean;
+  isFollowing?: boolean;
+  onFollowChange?: (userId: string, isNowFollowing: boolean) => void;
 }
 
 const HeartParticle = ({ index, total }: { index: number; total: number }) => {
@@ -115,6 +118,9 @@ const PostCard = ({
   isLiked: initialLiked = false,
   isSaved: initialSaved = false,
   onDelete,
+  showFollowButton = false,
+  isFollowing: initialFollowing = false,
+  onFollowChange,
 }: PostCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -125,11 +131,28 @@ const PostCard = ({
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [likesOpen, setLikesOpen] = useState(false);
+  const [following, setFollowing] = useState(initialFollowing);
+  const [followLoading, setFollowLoading] = useState(false);
 
   const handleDoubleTap = () => {
     if (!liked) toggleLike();
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 1100);
+  };
+
+  const toggleFollow = async () => {
+    if (!user || !postUserId || followLoading) return;
+    setFollowLoading(true);
+    const wasFollowing = following;
+    setFollowing(!wasFollowing);
+    onFollowChange?.(postUserId, !wasFollowing);
+
+    if (wasFollowing) {
+      await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", postUserId);
+    } else {
+      await supabase.from("follows").insert({ follower_id: user.id, following_id: postUserId });
+    }
+    setFollowLoading(false);
   };
 
   const toggleLike = async () => {
@@ -171,6 +194,26 @@ const PostCard = ({
           </div>
           {location && <p className="text-[11px] text-muted-foreground">{location}</p>}
         </button>
+        {showFollowButton && !following && (
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleFollow}
+            disabled={followLoading}
+            className="rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground transition-opacity disabled:opacity-50"
+          >
+            Follow
+          </motion.button>
+        )}
+        {showFollowButton && following && (
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleFollow}
+            disabled={followLoading}
+            className="rounded-lg bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground transition-opacity disabled:opacity-50"
+          >
+            Following
+          </motion.button>
+        )}
         <PostMenu postId={postId} postUserId={postUserId || ""} onDelete={onDelete} />
       </div>
 
