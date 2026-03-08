@@ -33,7 +33,7 @@ const Following = () => {
       const [{ data: profiles, error: profilesError }, { data: follows, error: followsError }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("user_id, username, display_name, avatar_url")
+          .select("user_id, username, display_name, avatar_url, is_verified")
           .neq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(100),
