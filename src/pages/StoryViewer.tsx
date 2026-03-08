@@ -1,122 +1,453 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { formatDistanceToNow } from "date-fns";
 
-interface StoryData {
+interface StoryItem {
   id: string;
   image_url: string;
   created_at: string;
+}
+
+interface StoryGroup {
+  user_id: string;
   username: string;
   avatar_url: string | null;
+  stories: StoryItem[];
 }
+
+interface ViewerInfo {
+  user_id: string;
+  username: string;
+  avatar_url: string | null;
+  viewed_at: string;
+}
+
+const STORY_DURATION = 5000; // 5 seconds per story
+const TICK = 50;
 
 const StoryViewer = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const userId = searchParams.get("user");
-  const [stories, setStories] = useState<StoryData[]>([]);
-  const [current, setCurrent] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const startUserId = searchParams.get("user");
 
+  const [groups, setGroups] = useState<StoryGroup[]>([]);
+  const [groupIndex, setGroupIndex] = useState(0);
+  const [storyIndex, setStoryIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [direction, setDirection] = useState(0);
+  const [showViewers, setShowViewers] = useState(false);
+  const [viewers, setViewers] = useState<ViewerInfo[]>([]);
+  const [viewersLoading, setViewersLoading] = useState(false);
+
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const viewedRef = useRef<Set<string>>(new Set());
+
+  // Fetch all story groups
   useEffect(() => {
-    if (!userId) return;
-    const fetchStories = async () => {
-      // Stories from last 24h
+    const fetchAllStories = async () => {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { data } = await supabase
+      const { data: storiesData } = await supabase
         .from("stories")
         .select("id, image_url, created_at, user_id")
-        .eq("user_id", userId)
         .gte("created_at", since)
         .order("created_at", { ascending: true });
 
-      if (!data || data.length === 0) {
-        navigate(-1);
-        return;
+      if (!storiesData || storiesData.length === 0) { navigate(-1); return; }
+
+      const userIds = [...new Set(storiesData.map(s => s.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, username, avatar_url")
+        .in("user_id", userIds);
+      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+
+      // Get viewed story IDs
+      let viewedIds = new Set<string>();
+      if (user) {
+        const { data: viewsData } = await supabase
+          .from("story_views")
+          .select("story_id")
+          .eq("viewer_id", user.id);
+        viewedIds = new Set((viewsData || []).map(v => v.story_id));
+      }
+      viewedRef.current = viewedIds;
+
+      const groupMap: Record<string, StoryGroup> = {};
+      for (const s of storiesData) {
+        if (!groupMap[s.user_id]) {
+          groupMap[s.user_id] = {
+            user_id: s.user_id,
+            username: profileMap[s.user_id]?.username || "user",
+            avatar_url: profileMap[s.user_id]?.avatar_url || null,
+            stories: [],
+          };
+        }
+        groupMap[s.user_id].stories.push({ id: s.id, image_url: s.image_url, created_at: s.created_at });
       }
 
-      // Get profile
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("username, avatar_url")
-        .eq("user_id", userId)
-        .single();
+      // Order: startUser first, then others (unseen first)
+      const allGroups = Object.values(groupMap);
+      let ordered: StoryGroup[];
+      if (startUserId) {
+        const startGroup = allGroups.find(g => g.user_id === startUserId);
+        const rest = allGroups.filter(g => g.user_id !== startUserId);
+        ordered = startGroup ? [startGroup, ...rest] : rest;
+      } else {
+        ordered = allGroups;
+      }
 
-      setStories(data.map(s => ({
-        ...s,
-        username: profileData?.username || "user",
-        avatar_url: profileData?.avatar_url || null,
-      })));
+      setGroups(ordered);
+
+      // Find first unseen story in the start group
+      if (ordered.length > 0) {
+        const firstGroup = ordered[0];
+        const unseenIdx = firstGroup.stories.findIndex(s => !viewedIds.has(s.id));
+        setStoryIndex(unseenIdx >= 0 ? unseenIdx : 0);
+      }
+
+      setLoaded(true);
     };
-    fetchStories();
-  }, [userId]);
+    fetchAllStories();
+  }, [startUserId, user]);
 
+  const currentGroup = groups[groupIndex];
+  const currentStory = currentGroup?.stories[storyIndex];
+
+  // Mark story as seen
+  const markSeen = useCallback(async (storyId: string) => {
+    if (!user || viewedRef.current.has(storyId) || !currentGroup || currentGroup.user_id === user.id) return;
+    viewedRef.current.add(storyId);
+    await supabase.from("story_views").insert({ story_id: storyId, viewer_id: user.id }).then(() => {});
+  }, [user, currentGroup]);
+
+  // Timer
   useEffect(() => {
-    if (stories.length === 0) return;
-    setProgress(0);
-    const interval = setInterval(() => {
+    if (!loaded || !currentStory || !imageLoaded || paused || showViewers) return;
+
+    // Mark as seen when story starts
+    markSeen(currentStory.id);
+
+    timerRef.current = setInterval(() => {
       setProgress(p => {
-        if (p >= 100) {
-          if (current < stories.length - 1) {
-            setCurrent(c => c + 1);
+        const next = p + (TICK / STORY_DURATION) * 100;
+        if (next >= 100) {
+          // Auto-advance
+          if (storyIndex < currentGroup!.stories.length - 1) {
+            setStoryIndex(i => i + 1);
+            setImageLoaded(false);
+            return 0;
+          } else if (groupIndex < groups.length - 1) {
+            setDirection(1);
+            setGroupIndex(i => i + 1);
+            setStoryIndex(0);
+            setImageLoaded(false);
             return 0;
           } else {
             navigate(-1);
             return 100;
           }
         }
-        return p + 2;
+        return next;
       });
-    }, 100);
-    return () => clearInterval(interval);
-  }, [current, stories.length]);
+    }, TICK);
 
-  const handleTap = (e: React.MouseEvent) => {
-    const x = e.clientX;
-    const mid = window.innerWidth / 2;
-    if (x < mid) {
-      if (current > 0) { setCurrent(c => c - 1); setProgress(0); }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [loaded, currentStory?.id, imageLoaded, paused, showViewers, storyIndex, groupIndex, groups.length]);
+
+  // Reset progress on story change
+  useEffect(() => {
+    setProgress(0);
+  }, [storyIndex, groupIndex]);
+
+  const goNext = () => {
+    if (storyIndex < (currentGroup?.stories.length || 0) - 1) {
+      setStoryIndex(i => i + 1);
+      setImageLoaded(false);
+    } else if (groupIndex < groups.length - 1) {
+      setDirection(1);
+      setGroupIndex(i => i + 1);
+      setStoryIndex(0);
+      setImageLoaded(false);
     } else {
-      if (current < stories.length - 1) { setCurrent(c => c + 1); setProgress(0); }
-      else navigate(-1);
+      navigate(-1);
     }
   };
 
-  if (stories.length === 0) return null;
-  const story = stories[current];
+  const goPrev = () => {
+    if (storyIndex > 0) {
+      setStoryIndex(i => i - 1);
+      setImageLoaded(false);
+    } else if (groupIndex > 0) {
+      setDirection(-1);
+      setGroupIndex(i => i - 1);
+      const prevGroup = groups[groupIndex - 1];
+      setStoryIndex(0);
+      setImageLoaded(false);
+    }
+  };
+
+  const handleTap = (e: React.MouseEvent) => {
+    if (showViewers) return;
+    const x = e.clientX;
+    const mid = window.innerWidth / 2;
+    if (x < mid) goPrev();
+    else goNext();
+  };
+
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    if (Math.abs(info.velocity.y) > 300 && info.offset.y > 50) {
+      navigate(-1);
+      return;
+    }
+    if (Math.abs(info.offset.x) > 60) {
+      if (info.offset.x < 0) goNext();
+      else goPrev();
+    }
+  };
+
+  // Long press to pause
+  const handlePointerDown = () => setPaused(true);
+  const handlePointerUp = () => setPaused(false);
+
+  // Fetch viewers for own stories
+  const fetchViewers = async () => {
+    if (!currentStory || !user || currentGroup?.user_id !== user.id) return;
+    setViewersLoading(true);
+    setShowViewers(true);
+
+    // Get all story IDs for this group
+    const storyIds = currentGroup.stories.map(s => s.id);
+    const { data } = await supabase
+      .from("story_views")
+      .select("viewer_id, created_at, story_id")
+      .in("story_id", storyIds)
+      .order("created_at", { ascending: false });
+
+    if (data && data.length > 0) {
+      const viewerIds = [...new Set(data.map(v => v.viewer_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, username, avatar_url")
+        .in("user_id", viewerIds);
+      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+
+      // Deduplicate by viewer_id, keep most recent
+      const seenMap = new Map<string, ViewerInfo>();
+      for (const v of data) {
+        if (!seenMap.has(v.viewer_id)) {
+          seenMap.set(v.viewer_id, {
+            user_id: v.viewer_id,
+            username: profileMap[v.viewer_id]?.username || "user",
+            avatar_url: profileMap[v.viewer_id]?.avatar_url || null,
+            viewed_at: v.created_at,
+          });
+        }
+      }
+      setViewers([...seenMap.values()]);
+    } else {
+      setViewers([]);
+    }
+    setViewersLoading(false);
+  };
+
+  if (!loaded || !currentGroup || !currentStory) return null;
+
+  const isOwn = user?.id === currentGroup.user_id;
+  const timeAgo = formatDistanceToNow(new Date(currentStory.created_at), { addSuffix: false });
 
   return (
-    <div className="fixed inset-0 z-50 bg-background" onClick={handleTap}>
+    <motion.div
+      className="fixed inset-0 z-50 bg-black select-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <AnimatePresence mode="wait" custom={direction}>
+        <motion.div
+          key={`${groupIndex}-${storyIndex}`}
+          custom={direction}
+          initial={{ opacity: 0, x: direction > 0 ? 80 : direction < 0 ? -80 : 0 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: direction > 0 ? -80 : 80 }}
+          transition={{ duration: 0.25, ease: "easeInOut" }}
+          className="absolute inset-0"
+          onClick={handleTap}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={handleDragEnd}
+        >
+          {/* Story image */}
+          <img
+            src={currentStory.image_url}
+            alt="Story"
+            className="h-full w-full object-contain"
+            onLoad={() => setImageLoaded(true)}
+            draggable={false}
+          />
+
+          {/* Gradient overlays */}
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+        </motion.div>
+      </AnimatePresence>
+
       {/* Progress bars */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-2">
-        {stories.map((_, i) => (
-          <div key={i} className="h-0.5 flex-1 rounded-full bg-foreground/20 overflow-hidden">
-            <div
-              className="h-full bg-foreground transition-all"
-              style={{ width: i < current ? "100%" : i === current ? `${progress}%` : "0%" }}
+      <div className="absolute top-0 left-0 right-0 z-20 flex gap-[3px] px-2 pt-2">
+        {currentGroup.stories.map((_, i) => (
+          <div key={i} className="h-[2.5px] flex-1 rounded-full bg-white/30 overflow-hidden">
+            <motion.div
+              className="h-full bg-white rounded-full"
+              style={{
+                width: i < storyIndex ? "100%" : i === storyIndex ? `${progress}%` : "0%",
+              }}
             />
           </div>
         ))}
       </div>
 
       {/* Header */}
-      <div className="absolute top-4 left-0 right-0 z-10 flex items-center gap-3 px-4 pt-2">
-        <img src={story.avatar_url || ""} alt="" className="h-8 w-8 rounded-full object-cover bg-secondary" />
-        <span className="text-sm font-semibold text-foreground">{story.username}</span>
-        <span className="text-xs text-muted-foreground">
-          {new Date(story.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </span>
+      <div className="absolute top-5 left-0 right-0 z-20 flex items-center gap-3 px-4 pt-1">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(isOwn ? "/profile" : `/user/${currentGroup.user_id}`);
+          }}
+          className="flex items-center gap-2.5"
+        >
+          {currentGroup.avatar_url ? (
+            <img src={currentGroup.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-white/30" />
+          ) : (
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 ring-2 ring-white/30">
+              <PuffyIcon name="user" size={16} className="invert" />
+            </div>
+          )}
+          <div>
+            <span className="text-sm font-semibold text-white drop-shadow">{currentGroup.username}</span>
+            <span className="ml-2 text-xs text-white/60 drop-shadow">{timeAgo}</span>
+          </div>
+        </button>
         <div className="flex-1" />
-        <button onClick={(e) => { e.stopPropagation(); navigate(-1); }}>
-          <PuffyIcon name="arrow-left" size={20} />
+        {paused && (
+          <span className="text-[10px] text-white/50 uppercase tracking-wider mr-2">Paused</span>
+        )}
+        <button
+          onClick={(e) => { e.stopPropagation(); navigate(-1); }}
+          className="p-1"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
       </div>
 
-      {/* Image */}
-      <img src={story.image_url} alt="Story" className="h-full w-full object-contain" />
-    </div>
+      {/* Bottom: Viewers (for own stories) or reply area */}
+      {isOwn ? (
+        <div className="absolute bottom-0 left-0 right-0 z-20 pb-8">
+          <button
+            onClick={(e) => { e.stopPropagation(); fetchViewers(); }}
+            className="flex items-center justify-center gap-2 w-full py-3"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <polyline points="18 15 12 9 6 15" />
+            </svg>
+            <span className="text-sm text-white font-medium drop-shadow">
+              {viewedRef.current.size > 0 ? `Viewed` : "No views yet"}
+            </span>
+          </button>
+        </div>
+      ) : (
+        <div className="absolute bottom-0 left-0 right-0 z-20 pb-6 px-4">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm px-4 py-2.5">
+              <span className="text-sm text-white/50">Send message</span>
+            </div>
+            <button onClick={(e) => { e.stopPropagation(); }} className="p-1">
+              <PuffyIcon name="heart" size={24} className="invert" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); }} className="p-1">
+              <PuffyIcon name="send" size={22} className="invert" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Viewers sheet */}
+      <AnimatePresence>
+        {showViewers && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-30"
+              onClick={() => setShowViewers(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 350 }}
+              className="fixed bottom-0 left-0 right-0 z-40 mx-auto max-w-md rounded-t-3xl bg-card max-h-[55vh] flex flex-col"
+            >
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="h-1 w-10 rounded-full bg-muted-foreground/20" />
+              </div>
+              <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+                <h3 className="font-bold text-foreground">Viewers</h3>
+                <span className="text-sm text-muted-foreground">{viewers.length}</span>
+              </div>
+              <div className="overflow-y-auto flex-1 pb-8">
+                {viewersLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : viewers.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                    <PuffyIcon name="user" size={32} className="opacity-30 mb-2" />
+                    <p className="text-sm">No viewers yet</p>
+                  </div>
+                ) : (
+                  viewers.map(v => (
+                    <button
+                      key={v.user_id}
+                      onClick={() => { setShowViewers(false); navigate(`/user/${v.user_id}`); }}
+                      className="flex w-full items-center gap-3 px-5 py-3 text-left active:bg-secondary/50"
+                    >
+                      {v.avatar_url ? (
+                        <img src={v.avatar_url} className="h-10 w-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                          <PuffyIcon name="user" size={18} />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-foreground">{v.username}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(v.viewed_at), { addSuffix: true })}
+                        </p>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
