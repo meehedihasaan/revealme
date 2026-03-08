@@ -144,4 +144,9 @@
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 16px);
   }
+
+  /* Invert white PNG icons in light theme */
+  .light-theme .icon-adaptive {
+    filter: invert(1);
+  }
 }

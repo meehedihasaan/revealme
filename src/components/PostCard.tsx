@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import CommentSheet from "@/components/CommentSheet";
+import ShareSheet from "@/components/ShareSheet";
 
 interface PostCardProps {
   postId: string;
@@ -49,18 +51,13 @@ const DoubleTapHeart = () => (
     exit={{ opacity: 0 }}
     transition={{ duration: 0.2, delay: 0.8 }}
   >
-    {/* Main heart */}
     <motion.div
       initial={{ scale: 0, rotate: -15 }}
-      animate={{
-        scale: [0, 1.3, 1, 1.1, 1],
-        rotate: [-15, 5, -3, 0],
-      }}
+      animate={{ scale: [0, 1.3, 1, 1.1, 1], rotate: [-15, 5, -3, 0] }}
       exit={{ scale: 0, opacity: 0 }}
       transition={{ duration: 0.6, ease: [0.17, 0.67, 0.21, 1.2] }}
       className="relative"
     >
-      {/* Glow ring */}
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: [0.5, 2.5], opacity: [0.6, 0] }}
@@ -69,15 +66,7 @@ const DoubleTapHeart = () => (
       >
         <div className="h-24 w-24 rounded-full bg-accent/30" />
       </motion.div>
-
-      {/* Heart icon */}
-      <svg
-        width="80"
-        height="80"
-        viewBox="0 0 24 24"
-        fill="none"
-        className="drop-shadow-[0_0_20px_hsl(var(--accent)/0.6)]"
-      >
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" className="drop-shadow-[0_0_20px_hsl(var(--accent)/0.6)]">
         <motion.path
           d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
           fill="hsl(340, 82%, 60%)"
@@ -89,13 +78,9 @@ const DoubleTapHeart = () => (
         />
       </svg>
     </motion.div>
-
-    {/* Particle burst */}
     {Array.from({ length: 12 }).map((_, i) => (
       <HeartParticle key={i} index={i} total={12} />
     ))}
-
-    {/* Sparkle ring */}
     {Array.from({ length: 6 }).map((_, i) => {
       const angle = (360 / 6) * i + 30;
       const rad = (angle * Math.PI) / 180;
@@ -104,12 +89,7 @@ const DoubleTapHeart = () => (
         <motion.div
           key={`sparkle-${i}`}
           initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
-          animate={{
-            x: Math.cos(rad) * dist,
-            y: Math.sin(rad) * dist,
-            scale: [0, 1, 0],
-            opacity: [1, 1, 0],
-          }}
+          animate={{ x: Math.cos(rad) * dist, y: Math.sin(rad) * dist, scale: [0, 1, 0], opacity: [1, 1, 0] }}
           transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
           className="absolute h-2 w-2 rounded-full bg-accent"
         />
@@ -136,11 +116,11 @@ const PostCard = ({
   const [saved, setSaved] = useState(initialSaved);
   const [likeCount, setLikeCount] = useState(likesCount);
   const [showHeart, setShowHeart] = useState(false);
+  const [commentOpen, setCommentOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const handleDoubleTap = () => {
-    if (!liked) {
-      toggleLike();
-    }
+    if (!liked) toggleLike();
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 1100);
   };
@@ -150,7 +130,6 @@ const PostCard = ({
     const wasLiked = liked;
     setLiked(!wasLiked);
     setLikeCount((c) => (wasLiked ? c - 1 : c + 1));
-
     if (wasLiked) {
       await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", postId);
     } else {
@@ -162,7 +141,6 @@ const PostCard = ({
     if (!user) return;
     const wasSaved = saved;
     setSaved(!wasSaved);
-
     if (wasSaved) {
       await supabase.from("saved_posts").delete().eq("user_id", user.id).eq("post_id", postId);
     } else {
@@ -184,9 +162,7 @@ const PostCard = ({
             <span className="text-sm font-semibold text-foreground">{username}</span>
             {verified && <span className="text-xs text-primary">✓</span>}
           </div>
-          {location && (
-            <p className="text-[11px] text-muted-foreground">{location}</p>
-          )}
+          {location && <p className="text-[11px] text-muted-foreground">{location}</p>}
         </div>
         <button>
           <PuffyIcon name="more-horizontal" size={20} />
@@ -194,37 +170,23 @@ const PostCard = ({
       </div>
 
       {/* Image */}
-      <div
-        className="relative w-full cursor-pointer select-none overflow-hidden"
-        onDoubleClick={handleDoubleTap}
-      >
-        <img
-          src={image}
-          alt="Post"
-          className="w-full object-cover"
-          style={{ maxHeight: "580px" }}
-          draggable={false}
-        />
-        <AnimatePresence>
-          {showHeart && <DoubleTapHeart />}
-        </AnimatePresence>
+      <div className="relative w-full cursor-pointer select-none overflow-hidden" onDoubleClick={handleDoubleTap}>
+        <img src={image} alt="Post" className="w-full object-cover" style={{ maxHeight: "580px" }} draggable={false} />
+        <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
       </div>
 
       {/* Actions */}
       <div className="flex items-center justify-between px-4 py-2.5">
         <div className="flex items-center gap-4">
           <motion.button whileTap={{ scale: 0.8 }} onClick={toggleLike}>
-            <motion.div
-              animate={liked ? { scale: [1, 1.3, 1] } : {}}
-              transition={{ duration: 0.3 }}
-            >
+            <motion.div animate={liked ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}>
               <PuffyIcon name={liked ? "heart-filled" : "heart"} size={26} />
             </motion.div>
           </motion.button>
-          <button>
+          <button onClick={() => setCommentOpen(true)}>
             <PuffyIcon name="message-circle" size={24} />
           </button>
-          <button>
+          <button onClick={() => setShareOpen(true)}>
             <PuffyIcon name="send" size={22} />
           </button>
         </div>
@@ -235,9 +197,7 @@ const PostCard = ({
 
       {/* Likes */}
       <div className="px-4">
-        <p className="text-sm font-semibold text-foreground">
-          {likeCount.toLocaleString()} likes
-        </p>
+        <p className="text-sm font-semibold text-foreground">{likeCount.toLocaleString()} likes</p>
       </div>
 
       {/* Caption */}
@@ -248,10 +208,28 @@ const PostCard = ({
         </p>
       </div>
 
+      {/* View comments */}
+      <button onClick={() => setCommentOpen(true)} className="px-4 pb-1">
+        <span className="text-xs text-muted-foreground">View comments</span>
+      </button>
+
       {/* Time */}
       <div className="px-4 pb-3">
         <p className="text-[10px] uppercase text-muted-foreground">{timeAgo}</p>
       </div>
+
+      {/* Comment Sheet */}
+      <CommentSheet postId={postId} isOpen={commentOpen} onClose={() => setCommentOpen(false)} />
+
+      {/* Share Sheet */}
+      <ShareSheet
+        postId={postId}
+        image={image}
+        caption={caption}
+        username={username}
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+      />
     </div>
   );
 };

@@ -74,7 +74,7 @@ const PuffyIcon = ({ name, size = 24, className = "", style }: PuffyIconProps) =
       alt={name}
       width={size}
       height={size}
-      className={`inline-block shrink-0 ${className}`}
+      className={`inline-block shrink-0 icon-adaptive ${className}`}
       style={style}
       draggable={false}
     />
