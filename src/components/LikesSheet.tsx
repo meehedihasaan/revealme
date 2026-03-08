@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 
 interface LikeUser {
   user_id: string;
   username: string;
   avatar_url: string | null;
+  is_verified: boolean;
 }
 
 interface LikesSheetProps {
@@ -33,7 +35,7 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
       const uids = likes.map(l => l.user_id);
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, username, avatar_url")
+        .select("user_id, username, avatar_url, is_verified")
         .in("user_id", uids);
       setUsers(profiles || []);
       setLoading(false);
@@ -87,7 +89,7 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
                         <PuffyIcon name="user" size={18} />
                       </div>
                     )}
-                    <span className="text-sm font-semibold text-foreground">{u.username || "user"}</span>
+                    <span className="text-sm font-semibold text-foreground flex items-center gap-1">{u.username || "user"}{u.is_verified && <VerifiedBadge size={13} />}</span>
                   </div>
                 ))
               )}

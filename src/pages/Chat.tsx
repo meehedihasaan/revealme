@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -18,6 +19,7 @@ interface OtherUser {
   user_id: string;
   username: string;
   avatar_url: string | null;
+  is_verified: boolean;
 }
 
 const Chat = () => {
@@ -65,7 +67,7 @@ const Chat = () => {
         const otherUserId = partnerRes.data[0].user_id;
         const { data: prof } = await supabase
           .from("profiles")
-          .select("user_id, username, avatar_url")
+          .select("user_id, username, avatar_url, is_verified")
           .eq("user_id", otherUserId)
           .single();
         if (prof) setOtherUser(prof as OtherUser);
@@ -340,7 +342,7 @@ const Chat = () => {
             <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${isOnline ? "bg-green-500" : "bg-muted-foreground/40"}`} />
           </div>
           <div className="min-w-0">
-            <p className="font-bold text-foreground truncate">{otherUser?.username || "User"}</p>
+            <p className="font-bold text-foreground truncate flex items-center gap-1">{otherUser?.username || "User"}{otherUser?.is_verified && <VerifiedBadge size={14} />}</p>
             <p className="text-[11px] text-muted-foreground">
               {isTyping ? (
                 <span className="text-primary font-medium">typing...</span>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -12,6 +13,7 @@ interface Comment {
   parent_id: string | null;
   username: string;
   avatar_url: string | null;
+  is_verified: boolean;
   likes_count: number;
   is_liked: boolean;
   replies: Comment[];
@@ -54,7 +56,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
     const commentIds = commentsData.map((c: any) => c.id);
 
     const [{ data: profiles }, { data: allLikes }, { data: myLikes }] = await Promise.all([
-      supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", userIds),
+      supabase.from("profiles").select("user_id, username, avatar_url, is_verified").in("user_id", userIds),
       supabase.from("comment_likes").select("comment_id").in("comment_id", commentIds),
       user
         ? supabase.from("comment_likes").select("comment_id").in("comment_id", commentIds).eq("user_id", user.id)
@@ -72,6 +74,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
       ...c,
       username: profileMap[c.user_id]?.username || "user",
       avatar_url: profileMap[c.user_id]?.avatar_url || null,
+      is_verified: profileMap[c.user_id]?.is_verified || false,
       likes_count: likesCountMap[c.id] || 0,
       is_liked: myLikesSet.has(c.id),
       replies: [] as Comment[],
@@ -118,7 +121,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
     if (data) {
       const { data: prof } = await supabase
         .from("profiles")
-        .select("username, avatar_url")
+        .select("username, avatar_url, is_verified")
         .eq("user_id", user.id)
         .single();
 
@@ -126,6 +129,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
         ...data,
         username: prof?.username || "you",
         avatar_url: prof?.avatar_url || null,
+        is_verified: prof?.is_verified || false,
         likes_count: 0,
         is_liked: false,
         replies: [],
@@ -214,7 +218,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-foreground leading-snug">{comment.username}</p>
+        <p className="text-[13px] font-semibold text-foreground leading-snug flex items-center gap-1">{comment.username}{comment.is_verified && <VerifiedBadge size={12} />}</p>
         <p className="text-[13px] text-foreground leading-snug mt-0.5">{comment.text}</p>
         <div className="flex items-center gap-4 mt-1">
           <span className="text-[11px] text-muted-foreground">{timeAgo(comment.created_at)}</span>

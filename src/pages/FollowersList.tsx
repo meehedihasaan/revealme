@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -10,6 +11,7 @@ interface UserItem {
   username: string;
   avatar_url: string | null;
   display_name: string | null;
+  is_verified: boolean;
   isFollowing: boolean;
 }
 
@@ -42,7 +44,7 @@ const FollowersList = () => {
 
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, username, avatar_url, display_name")
+        .select("user_id, username, avatar_url, display_name, is_verified")
         .in("user_id", userIds);
 
       // Check which ones current user follows
@@ -159,7 +161,7 @@ const FollowersList = () => {
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-foreground text-sm">{u.username || "user"}</p>
+                <p className="font-semibold text-foreground text-sm flex items-center gap-1">{u.username || "user"}{u.is_verified && <VerifiedBadge size={13} />}</p>
                 {u.display_name && <p className="text-xs text-muted-foreground truncate">{u.display_name}</p>}
               </div>
               {u.user_id !== user?.id && (

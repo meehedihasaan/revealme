@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +13,7 @@ interface ConversationItem {
   other_user_id: string;
   username: string;
   avatar_url: string | null;
+  is_verified: boolean;
   lastMessage: string;
   lastMessageTime: string;
   unread: number;
@@ -46,7 +48,7 @@ const Messages = () => {
     const [profilesRes, messagesRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("user_id, username, avatar_url")
+        .select("user_id, username, avatar_url, is_verified")
         .in("user_id", otherUserIds as string[]),
       supabase
         .from("messages")
@@ -78,6 +80,7 @@ const Messages = () => {
         other_user_id: otherUserId,
         username: prof?.username || "user",
         avatar_url: prof?.avatar_url || null,
+        is_verified: prof?.is_verified || false,
         lastMessage: latestMsg?.image_url ? "📷 Photo" : (latestMsg?.text || ""),
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
@@ -218,8 +221,9 @@ const Messages = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span className={`font-semibold text-foreground truncate ${conv.unread > 0 ? "font-bold" : ""}`}>
+                  <span className={`font-semibold text-foreground truncate ${conv.unread > 0 ? "font-bold" : ""} flex items-center gap-1`}>
                     {conv.username}
+                    {conv.is_verified && <VerifiedBadge size={13} />}
                   </span>
                   <span className="text-xs text-muted-foreground shrink-0 ml-2">
                     {formatTime(conv.lastMessageTime)}

@@ -8,6 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsShimmer } from "@/components/ShimmerLoader";
 import { formatDistanceToNow } from "date-fns";
 
+import VerifiedBadge from "@/components/VerifiedBadge";
+
 type NotifType = "like" | "comment" | "follow";
 
 interface NotifItem {
@@ -20,6 +22,7 @@ interface NotifItem {
   created_at: string;
   actor_username: string;
   actor_avatar: string | null;
+  actor_verified: boolean;
 }
 
 const Notifications = () => {
@@ -47,7 +50,7 @@ const Notifications = () => {
     const actorIds = [...new Set(data.map(n => n.actor_id))];
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("user_id, username, avatar_url")
+      .select("user_id, username, avatar_url, is_verified")
       .in("user_id", actorIds);
     const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
 
@@ -75,6 +78,7 @@ const Notifications = () => {
       created_at: n.created_at,
       actor_username: profileMap[n.actor_id]?.username || "user",
       actor_avatar: profileMap[n.actor_id]?.avatar_url || null,
+      actor_verified: profileMap[n.actor_id]?.is_verified || false,
     })));
     setLoading(false);
   };
@@ -97,7 +101,7 @@ const Notifications = () => {
         const n = payload.new as any;
         const { data: prof } = await supabase
           .from("profiles")
-          .select("username, avatar_url")
+          .select("username, avatar_url, is_verified")
           .eq("user_id", n.actor_id)
           .single();
 
@@ -111,6 +115,7 @@ const Notifications = () => {
           created_at: n.created_at,
           actor_username: prof?.username || "user",
           actor_avatar: prof?.avatar_url || null,
+          actor_verified: prof?.is_verified || false,
         };
         setNotifications(prev => [newNotif, ...prev]);
       })
@@ -203,7 +208,7 @@ const Notifications = () => {
               </button>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-foreground">
-                  <span className="font-bold">{n.actor_username}</span> {getNotifText(n)}
+                  <span className="font-bold">{n.actor_username}</span>{n.actor_verified && <VerifiedBadge size={13} className="ml-0.5" />} {getNotifText(n)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}

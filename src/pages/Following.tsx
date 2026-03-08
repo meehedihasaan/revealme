@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +12,7 @@ interface DiscoverUser {
   username: string | null;
   display_name: string | null;
   avatar_url: string | null;
+  is_verified: boolean;
 }
 
 const Following = () => {
@@ -31,7 +33,7 @@ const Following = () => {
       const [{ data: profiles, error: profilesError }, { data: follows, error: followsError }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("user_id, username, display_name, avatar_url")
+          .select("user_id, username, display_name, avatar_url, is_verified")
           .neq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(100),
@@ -151,7 +153,7 @@ const Following = () => {
                 </button>
 
                 <button onClick={() => navigate(`/user/${person.user_id}`)} className="min-w-0 flex-1 text-left">
-                  <p className="truncate font-bold text-foreground">{username}</p>
+                  <p className="truncate font-bold text-foreground flex items-center gap-1">{username}{person.is_verified && <VerifiedBadge size={13} />}</p>
                   {displayName && <p className="truncate text-sm text-muted-foreground">{displayName}</p>}
                 </button>
 
