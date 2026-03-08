@@ -19,15 +19,20 @@ export const FeedShimmer = () => (
         <div className="flex items-center gap-3">
           <ShimmerBlock className="h-9 w-9 rounded-full" />
           <ShimmerBlock className="h-3 w-28" />
+          <div className="flex-1" />
+          <ShimmerBlock className="h-3 w-6" />
         </div>
         <ShimmerBlock className="h-72 w-full rounded-none" />
         <div className="flex gap-4">
           <ShimmerBlock className="h-6 w-6 rounded-md" />
           <ShimmerBlock className="h-6 w-6 rounded-md" />
           <ShimmerBlock className="h-6 w-6 rounded-md" />
+          <div className="flex-1" />
+          <ShimmerBlock className="h-6 w-6 rounded-md" />
         </div>
         <ShimmerBlock className="h-3 w-20" />
         <ShimmerBlock className="h-3 w-48" />
+        <ShimmerBlock className="h-2 w-16" />
       </div>
     ))}
   </div>
@@ -45,10 +50,15 @@ export const ProfileShimmer = () => (
         <ShimmerBlock className="h-4 w-20" />
         <ShimmerBlock className="h-4 w-16" />
       </div>
+      <ShimmerBlock className="h-3 w-36" />
       <ShimmerBlock className="h-10 w-full rounded-lg" />
     </div>
-    <div className="grid grid-cols-3 gap-0.5 mt-4">
-      {[...Array(6)].map((_, i) => (
+    <div className="flex border-b border-border">
+      <div className="flex-1 py-3 flex justify-center"><ShimmerBlock className="h-5 w-5" /></div>
+      <div className="flex-1 py-3 flex justify-center"><ShimmerBlock className="h-5 w-5" /></div>
+    </div>
+    <div className="grid grid-cols-3 gap-0.5">
+      {[...Array(9)].map((_, i) => (
         <ShimmerBlock key={i} className="aspect-square w-full rounded-none" />
       ))}
     </div>
@@ -72,7 +82,7 @@ export const MessagesShimmer = () => (
 
 export const ExploreShimmer = () => (
   <div className="grid grid-cols-3 gap-0.5">
-    {[...Array(9)].map((_, i) => (
+    {[...Array(12)].map((_, i) => (
       <ShimmerBlock key={i} className={`aspect-square w-full rounded-none ${i === 0 ? "col-span-2 row-span-2" : ""}`} />
     ))}
   </div>
@@ -80,9 +90,9 @@ export const ExploreShimmer = () => (
 
 export const ChatShimmer = () => (
   <div className="flex-1 space-y-3 px-4 py-4">
-    {[...Array(6)].map((_, i) => (
+    {[...Array(8)].map((_, i) => (
       <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
-        <ShimmerBlock className={`h-10 rounded-2xl ${i % 3 === 0 ? "w-48" : "w-32"}`} />
+        <ShimmerBlock className={`h-10 rounded-2xl ${i % 3 === 0 ? "w-48" : i % 3 === 1 ? "w-32" : "w-40"}`} />
       </div>
     ))}
   </div>
@@ -97,6 +107,22 @@ export const SettingsShimmer = () => (
           <ShimmerBlock className="h-4 w-28" />
           <ShimmerBlock className="h-3 w-48" />
         </div>
+        <ShimmerBlock className="h-4 w-4 mt-1" />
+      </div>
+    ))}
+  </div>
+);
+
+export const NotificationsShimmer = () => (
+  <div className="divide-y divide-border">
+    {[...Array(8)].map((_, i) => (
+      <div key={i} className="flex items-center gap-3 px-4 py-3">
+        <ShimmerBlock className="h-12 w-12 rounded-full shrink-0" />
+        <div className="flex-1 space-y-2">
+          <ShimmerBlock className="h-3.5 w-44" />
+          <ShimmerBlock className="h-3 w-12" />
+        </div>
+        <ShimmerBlock className="h-5 w-5 rounded-md" />
       </div>
     ))}
   </div>
