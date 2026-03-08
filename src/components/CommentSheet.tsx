@@ -121,7 +121,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
     if (data) {
       const { data: prof } = await supabase
         .from("profiles")
-        .select("username, avatar_url")
+        .select("username, avatar_url, is_verified")
         .eq("user_id", user.id)
         .single();
 
