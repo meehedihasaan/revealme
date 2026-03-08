@@ -30,6 +30,9 @@ const Chat = () => {
   const [otherUser, setOtherUser] = useState<OtherUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const presenceChannelRef = useRef<any>(null);
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -90,20 +93,46 @@ const Chat = () => {
       config: { presence: { key: user.id } },
     });
 
+    presenceChannelRef.current = presenceChannel;
+
     presenceChannel
       .on("presence", { event: "sync" }, () => {
         const state = presenceChannel.presenceState();
         const onlineIds = Object.keys(state);
         setIsOnline(onlineIds.includes(otherUser.user_id));
+
+        // Check if other user is typing
+        const otherState = state[otherUser.user_id];
+        if (otherState && Array.isArray(otherState) && otherState.length > 0) {
+          setIsTyping(!!(otherState[0] as any).is_typing);
+        } else {
+          setIsTyping(false);
+        }
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
-          await presenceChannel.track({ user_id: user.id, online_at: new Date().toISOString() });
+          await presenceChannel.track({ user_id: user.id, online_at: new Date().toISOString(), is_typing: false });
         }
       });
 
-    return () => { supabase.removeChannel(presenceChannel); };
+    return () => {
+      presenceChannelRef.current = null;
+      supabase.removeChannel(presenceChannel);
+    };
   }, [conversationId, user, otherUser]);
+
+  // Broadcast typing status
+  const broadcastTyping = () => {
+    if (!presenceChannelRef.current || !user) return;
+    presenceChannelRef.current.track({ user_id: user.id, online_at: new Date().toISOString(), is_typing: true });
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      if (presenceChannelRef.current) {
+        presenceChannelRef.current.track({ user_id: user.id, online_at: new Date().toISOString(), is_typing: false });
+      }
+    }, 2000);
+  };
 
   // Realtime messages
   useEffect(() => {
@@ -303,7 +332,11 @@ const Chat = () => {
           </div>
           <div className="min-w-0">
             <p className="font-bold text-foreground truncate">{otherUser?.username || "User"}</p>
-            <p className="text-[11px] text-muted-foreground">{isOnline ? "Online" : "Offline"}</p>
+            <p className="text-[11px] text-muted-foreground">
+              {isTyping ? (
+                <span className="text-primary font-medium">typing...</span>
+              ) : isOnline ? "Online" : "Offline"}
+            </p>
           </div>
         </button>
       </div>
@@ -372,6 +405,23 @@ const Chat = () => {
             </div>
           ))
         )}
+        {/* Typing indicator */}
+        <AnimatePresence>
+          {isTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              className="flex justify-start mb-2"
+            >
+              <div className="flex items-center gap-1 rounded-2xl bg-secondary px-4 py-3">
+                <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <div ref={bottomRef} />
       </div>
 
@@ -418,7 +468,7 @@ const Chat = () => {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => { setInput(e.target.value); broadcastTyping(); }}
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             className="flex-1 rounded-full bg-secondary px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
