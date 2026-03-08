@@ -173,6 +173,19 @@ const PostCard = ({
   const [liked, setLiked] = useState(initialLiked);
   const [saved, setSaved] = useState(initialSaved);
   const [likeCount, setLikeCount] = useState(likesCount);
+  const [hasStory, setHasStory] = useState(false);
+
+  // Check if post user has active stories
+  useEffect(() => {
+    if (!postUserId) return;
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    supabase
+      .from("stories")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", postUserId)
+      .gte("created_at", since)
+      .then(({ count }) => setHasStory((count || 0) > 0));
+  }, [postUserId]);
   const [showHeart, setShowHeart] = useState(false);
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
