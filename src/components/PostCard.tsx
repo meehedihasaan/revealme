@@ -194,6 +194,26 @@ const PostCard = ({
           </div>
           {location && <p className="text-[11px] text-muted-foreground">{location}</p>}
         </button>
+        {showFollowButton && !following && (
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleFollow}
+            disabled={followLoading}
+            className="rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground transition-opacity disabled:opacity-50"
+          >
+            Follow
+          </motion.button>
+        )}
+        {showFollowButton && following && (
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleFollow}
+            disabled={followLoading}
+            className="rounded-lg bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground transition-opacity disabled:opacity-50"
+          >
+            Following
+          </motion.button>
+        )}
         <PostMenu postId={postId} postUserId={postUserId || ""} onDelete={onDelete} />
       </div>
 
