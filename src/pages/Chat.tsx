@@ -297,13 +297,7 @@ const Chat = () => {
           <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
           <div className="h-4 w-24 rounded bg-muted animate-pulse" />
         </div>
-        <div className="flex-1 px-4 py-4 space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
-              <div className="h-10 w-48 rounded-2xl bg-muted animate-pulse" />
-            </div>
-          ))}
-        </div>
+        <ChatShimmer />
       </div>
     );
   }
