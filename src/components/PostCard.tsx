@@ -118,6 +118,9 @@ const PostCard = ({
   isLiked: initialLiked = false,
   isSaved: initialSaved = false,
   onDelete,
+  showFollowButton = false,
+  isFollowing: initialFollowing = false,
+  onFollowChange,
 }: PostCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -128,6 +131,8 @@ const PostCard = ({
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [likesOpen, setLikesOpen] = useState(false);
+  const [following, setFollowing] = useState(initialFollowing);
+  const [followLoading, setFollowLoading] = useState(false);
 
   const handleDoubleTap = () => {
     if (!liked) toggleLike();
