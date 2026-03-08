@@ -7,20 +7,15 @@ export const useBlockedUsers = () => {
   const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
-  const fetch = useCallback(async () => {
+  const fetchBlocked = useCallback(async () => {
     if (!user) { setBlockedIds(new Set()); setLoading(false); return; }
-    const [{ data: blocked }, { data: blockedBy }] = await Promise.all([
-      supabase.from("blocked_users").select("blocked_id").eq("blocker_id", user.id),
-      supabase.from("blocked_users").select("blocker_id").eq("blocked_id", user.id),
-    ]);
-    const ids = new Set<string>();
-    (blocked || []).forEach(b => ids.add(b.blocked_id));
-    (blockedBy || []).forEach(b => ids.add(b.blocker_id));
+    const { data } = await supabase.rpc("get_all_blocked_ids", { p_user_id: user.id });
+    const ids = new Set<string>((data || []).map((r: any) => r.blocked_user_id));
     setBlockedIds(ids);
     setLoading(false);
   }, [user]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => { fetchBlocked(); }, [fetchBlocked]);
 
-  return { blockedIds, loading, refetch: fetch };
+  return { blockedIds, loading, refetch: fetchBlocked };
 };
