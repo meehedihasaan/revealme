@@ -20,6 +20,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
 
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || "User";
   const avatarUrl = profile?.avatar_url;
