@@ -23,6 +23,9 @@ interface PostCardProps {
   isLiked?: boolean;
   isSaved?: boolean;
   onDelete?: () => void;
+  showFollowButton?: boolean;
+  isFollowing?: boolean;
+  onFollowChange?: (userId: string, isNowFollowing: boolean) => void;
 }
 
 const HeartParticle = ({ index, total }: { index: number; total: number }) => {
