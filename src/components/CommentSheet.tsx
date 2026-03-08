@@ -74,6 +74,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
       ...c,
       username: profileMap[c.user_id]?.username || "user",
       avatar_url: profileMap[c.user_id]?.avatar_url || null,
+      is_verified: profileMap[c.user_id]?.is_verified || false,
       likes_count: likesCountMap[c.id] || 0,
       is_liked: myLikesSet.has(c.id),
       replies: [] as Comment[],
