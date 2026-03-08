@@ -214,10 +214,8 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] text-foreground leading-snug">
-          <span className="font-semibold">{comment.username}</span>{" "}
-          {comment.text}
-        </p>
+        <p className="text-[13px] font-semibold text-foreground leading-snug">{comment.username}</p>
+        <p className="text-[13px] text-foreground leading-snug mt-0.5">{comment.text}</p>
         <div className="flex items-center gap-4 mt-1">
           <span className="text-[11px] text-muted-foreground">{timeAgo(comment.created_at)}</span>
           {comment.likes_count > 0 && (
