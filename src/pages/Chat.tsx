@@ -11,6 +11,7 @@ interface Message {
   sender_id: string;
   created_at: string;
   read: boolean;
+  image_url?: string | null;
 }
 
 interface OtherUser {
@@ -29,7 +30,11 @@ const Chat = () => {
   const [otherUser, setOtherUser] = useState<OtherUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     bottomRef.current?.scrollIntoView({ behavior });
@@ -42,19 +47,17 @@ const Chat = () => {
     const init = async () => {
       setLoading(true);
 
-      // Use RPC to get conversation partner (bypasses RLS issue)
       const [partnerRes, messagesRes] = await Promise.all([
         supabase.rpc("get_conversation_partner", { p_conversation_id: conversationId }),
         supabase
           .from("messages")
-          .select("id, text, sender_id, created_at, read")
+          .select("id, text, sender_id, created_at, read, image_url")
           .eq("conversation_id", conversationId)
           .order("created_at", { ascending: true }),
       ]);
 
       setMessages((messagesRes.data as Message[]) || []);
 
-      // Get other user's profile
       if (partnerRes.data && partnerRes.data.length > 0) {
         const otherUserId = partnerRes.data[0].user_id;
         const { data: prof } = await supabase
@@ -67,7 +70,6 @@ const Chat = () => {
 
       setLoading(false);
 
-      // Mark unread as read
       supabase
         .from("messages")
         .update({ read: true })
@@ -80,7 +82,7 @@ const Chat = () => {
     init();
   }, [conversationId, user]);
 
-  // Online/offline presence via Supabase Realtime Presence
+  // Online/offline presence
   useEffect(() => {
     if (!conversationId || !user || !otherUser) return;
 
@@ -134,27 +136,81 @@ const Chat = () => {
     scrollToBottom(loading ? "instant" : "smooth");
   }, [messages, loading]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+    if (file.size > 10 * 1024 * 1024) return; // 10MB limit
+
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const clearImagePreview = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${user.id}/${Date.now()}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from("chat-images")
+      .upload(path, file, { contentType: file.type });
+
+    if (error) {
+      console.error("Upload error:", error);
+      return null;
+    }
+
+    const { data: urlData } = supabase.storage.from("chat-images").getPublicUrl(path);
+    return urlData.publicUrl;
+  };
+
   const sendMessage = async () => {
-    if (!input.trim() || !user || !conversationId || sending) return;
+    if ((!input.trim() && !selectedFile) || !user || !conversationId || sending) return;
     const text = input.trim();
+
+    setSending(true);
+    setInput("");
+
+    let imageUrl: string | null = null;
+
+    if (selectedFile) {
+      setUploading(true);
+      imageUrl = await uploadImage(selectedFile);
+      setUploading(false);
+      clearImagePreview();
+    }
 
     const optimisticMsg: Message = {
       id: `temp-${Date.now()}`,
-      text,
+      text: text || "",
       sender_id: user.id,
       created_at: new Date().toISOString(),
       read: false,
+      image_url: imageUrl,
     };
 
-    setInput("");
-    setSending(true);
     setMessages(prev => [...prev, optimisticMsg]);
 
-    const { data, error } = await supabase.from("messages").insert({
+    const insertPayload: any = {
       conversation_id: conversationId,
       sender_id: user.id,
-      text,
-    }).select("id, text, sender_id, created_at, read").single();
+      text: text || (imageUrl ? "📷 Photo" : ""),
+    };
+    if (imageUrl) insertPayload.image_url = imageUrl;
+
+    const { data, error } = await supabase
+      .from("messages")
+      .insert(insertPayload)
+      .select("id, text, sender_id, created_at, read, image_url")
+      .single();
 
     if (data) {
       setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? (data as Message) : m));
@@ -190,6 +246,8 @@ const Chat = () => {
     return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
   };
 
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
@@ -211,6 +269,22 @@ const Chat = () => {
 
   return (
     <div className="flex h-screen flex-col bg-background">
+      {/* Fullscreen image viewer */}
+      <AnimatePresence>
+        {fullscreenImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+            onClick={() => setFullscreenImage(null)}
+          >
+            <button className="absolute top-4 right-4 text-white/80 text-2xl font-bold z-10" onClick={() => setFullscreenImage(null)}>✕</button>
+            <img src={fullscreenImage} alt="" className="max-h-[90vh] max-w-[95vw] object-contain rounded-lg" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-border px-4 py-3 shrink-0">
         <button onClick={() => navigate("/messages")}>
@@ -225,7 +299,6 @@ const Chat = () => {
                 <PuffyIcon name="user" size={20} />
               </div>
             )}
-            {/* Online indicator */}
             <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${isOnline ? "bg-green-500" : "bg-muted-foreground/40"}`} />
           </div>
           <div className="min-w-0">
@@ -255,6 +328,9 @@ const Chat = () => {
                   {group.msgs.map((msg) => {
                     const isMine = msg.sender_id === user?.id;
                     const isOptimistic = msg.id.startsWith("temp-");
+                    const hasImage = !!msg.image_url;
+                    const hasText = msg.text && msg.text !== "📷 Photo";
+
                     return (
                       <motion.div
                         key={msg.id}
@@ -264,11 +340,26 @@ const Chat = () => {
                         className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                       >
                         <div className={`flex flex-col gap-0.5 ${isMine ? "items-end" : "items-start"}`}>
-                          <div className={`max-w-[75vw] rounded-2xl px-4 py-2.5 text-sm break-words ${
-                            isMine ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
-                          }`}>
-                            {msg.text}
-                          </div>
+                          {hasImage && (
+                            <button
+                              onClick={() => setFullscreenImage(msg.image_url!)}
+                              className="overflow-hidden rounded-2xl max-w-[75vw]"
+                            >
+                              <img
+                                src={msg.image_url!}
+                                alt=""
+                                className="max-w-[260px] max-h-[320px] object-cover rounded-2xl"
+                                loading="lazy"
+                              />
+                            </button>
+                          )}
+                          {hasText && (
+                            <div className={`max-w-[75vw] rounded-2xl px-4 py-2.5 text-sm break-words ${
+                              isMine ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
+                            }`}>
+                              {msg.text}
+                            </div>
+                          )}
                           <span className="text-[10px] text-muted-foreground px-1">
                             {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </span>
@@ -284,9 +375,46 @@ const Chat = () => {
         <div ref={bottomRef} />
       </div>
 
+      {/* Image preview */}
+      <AnimatePresence>
+        {imagePreview && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="border-t border-border bg-secondary/50 px-4 py-2 shrink-0"
+          >
+            <div className="relative inline-block">
+              <img src={imagePreview} alt="Preview" className="h-20 w-20 rounded-xl object-cover" />
+              <button
+                onClick={clearImagePreview}
+                className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Input */}
       <div className="border-t border-border bg-background px-4 py-3 shrink-0">
         <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded-full bg-secondary p-2.5 transition-colors"
+            disabled={uploading}
+          >
+            <PuffyIcon name="camera" size={18} />
+          </motion.button>
           <input
             type="text"
             value={input}
@@ -298,10 +426,14 @@ const Chat = () => {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={sendMessage}
-            disabled={!input.trim() || sending}
+            disabled={(!input.trim() && !selectedFile) || sending || uploading}
             className="rounded-full bg-primary p-2.5 transition-opacity disabled:opacity-30"
           >
-            <PuffyIcon name="send" size={18} />
+            {uploading ? (
+              <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
+            ) : (
+              <PuffyIcon name="send" size={18} />
+            )}
           </motion.button>
         </div>
       </div>
