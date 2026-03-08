@@ -65,6 +65,7 @@ const Messages = () => {
     for (const partner of partners) {
       const convId = partner.conversation_id;
       const otherUserId = partner.other_user_id;
+      if (blockedIds.has(otherUserId)) continue;
 
       const latestMsg = allMessages.find((m) => m.conversation_id === convId);
       const unreadCount = allMessages.filter(
