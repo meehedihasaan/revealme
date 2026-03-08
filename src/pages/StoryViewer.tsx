@@ -5,6 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 interface StoryItem {
   id: string;
@@ -46,6 +47,11 @@ const StoryViewer = () => {
   const [showViewers, setShowViewers] = useState(false);
   const [viewers, setViewers] = useState<ViewerInfo[]>([]);
   const [viewersLoading, setViewersLoading] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [replyFocused, setReplyFocused] = useState(false);
+  const [sendingReply, setSendingReply] = useState(false);
+  const [hearted, setHearted] = useState(false);
+  const [showHeartAnim, setShowHeartAnim] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const viewedRef = useRef<Set<string>>(new Set());
@@ -258,6 +264,54 @@ const StoryViewer = () => {
     setViewersLoading(false);
   };
 
+  const handleSendReply = async () => {
+    if (!replyText.trim() || !user || !currentGroup || sendingReply) return;
+    setSendingReply(true);
+    setPaused(true);
+    try {
+      const { data: convId } = await supabase.rpc("create_direct_conversation", {
+        other_user_id: currentGroup.user_id,
+      });
+      if (convId) {
+        await supabase.from("messages").insert({
+          conversation_id: convId,
+          sender_id: user.id,
+          text: `Replied to your story: ${replyText.trim()}`,
+          mood: "Casual",
+        });
+        toast.success("Reply sent!");
+        setReplyText("");
+        setReplyFocused(false);
+      }
+    } catch {
+      toast.error("Failed to send reply");
+    } finally {
+      setSendingReply(false);
+      setPaused(false);
+    }
+  };
+
+  const handleHeartReact = async () => {
+    if (!user || !currentGroup || hearted) return;
+    setHearted(true);
+    setShowHeartAnim(true);
+    setPaused(true);
+    setTimeout(() => { setShowHeartAnim(false); setPaused(false); }, 1200);
+    try {
+      const { data: convId } = await supabase.rpc("create_direct_conversation", {
+        other_user_id: currentGroup.user_id,
+      });
+      if (convId) {
+        await supabase.from("messages").insert({
+          conversation_id: convId,
+          sender_id: user.id,
+          text: "❤️ Reacted to your story",
+          mood: "Love",
+        });
+      }
+    } catch {}
+  };
+
   if (!loaded || !currentGroup || !currentStory) return null;
 
   const isOwn = user?.id === currentGroup.user_id;
@@ -353,6 +407,21 @@ const StoryViewer = () => {
         </button>
       </div>
 
+      {/* Heart animation overlay */}
+      <AnimatePresence>
+        {showHeartAnim && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: [0, 1.4, 1] }}
+            exit={{ opacity: 0, scale: 0 }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
+          >
+            <span className="text-7xl drop-shadow-lg">❤️</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Bottom: Viewers (for own stories) or reply area */}
       {isOwn ? (
         <div className="absolute bottom-0 left-0 right-0 z-20 pb-8">
@@ -369,17 +438,46 @@ const StoryViewer = () => {
           </button>
         </div>
       ) : (
-        <div className="absolute bottom-0 left-0 right-0 z-20 pb-6 px-4">
+        <div className="absolute bottom-0 left-0 right-0 z-20 pb-6 px-4" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-3">
-            <div className="flex-1 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm px-4 py-2.5">
-              <span className="text-sm text-white/50">Send message</span>
-            </div>
-            <button onClick={(e) => { e.stopPropagation(); }} className="p-1">
-              <PuffyIcon name="heart" size={24} className="invert" />
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); }} className="p-1">
-              <PuffyIcon name="send" size={22} className="invert" />
-            </button>
+            <form
+              onSubmit={(e) => { e.preventDefault(); handleSendReply(); }}
+              className="flex-1"
+            >
+              <input
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                onFocus={() => { setReplyFocused(true); setPaused(true); }}
+                onBlur={() => { if (!replyText) { setReplyFocused(false); setPaused(false); } }}
+                placeholder="Send message..."
+                className="w-full rounded-full border border-white/30 bg-white/10 backdrop-blur-sm px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-white/50"
+              />
+            </form>
+            {replyFocused && replyText.trim() ? (
+              <button
+                onClick={handleSendReply}
+                disabled={sendingReply}
+                className="p-1"
+              >
+                <PuffyIcon name="send" size={22} className="invert" />
+              </button>
+            ) : (
+              <>
+                <motion.button
+                  whileTap={{ scale: 0.8 }}
+                  onClick={(e) => { e.stopPropagation(); handleHeartReact(); }}
+                  className="p-1"
+                >
+                  <PuffyIcon name={hearted ? "heart-filled" : "heart"} size={24} className="invert" />
+                </motion.button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); navigate(`/messages`); }}
+                  className="p-1"
+                >
+                  <PuffyIcon name="send" size={22} className="invert" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

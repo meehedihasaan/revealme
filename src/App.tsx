@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import PageLoader from "@/components/PageLoader";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -34,14 +35,14 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div className="flex min-h-screen items-center justify-center bg-background"><span className="text-foreground">Loading...</span></div>;
+  if (loading) return <PageLoader />;
   if (!user) return <Navigate to="/" replace />;
   return <>{children}</>;
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, profile, loading } = useAuth();
-  if (loading) return <div className="flex min-h-screen items-center justify-center bg-background"><span className="text-foreground">Loading...</span></div>;
+  if (loading) return <PageLoader />;
   if (user && profile?.onboarding_completed) return <Navigate to="/feed" replace />;
   if (user && !profile?.onboarding_completed) return <Navigate to="/onboarding/avatar" replace />;
   return <>{children}</>;
