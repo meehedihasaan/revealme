@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { MapPin, CalendarDays } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
@@ -201,10 +202,10 @@ const UserProfile = () => {
         {/* Location & Join date */}
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
           {profile.location && (
-            <span className="flex items-center gap-1">📍 {profile.location}</span>
+            <span className="flex items-center gap-1"><MapPin size={14} className="text-muted-foreground" /> {profile.location}</span>
           )}
           {joinDate && (
-            <span className="flex items-center gap-1">📅 Joined {joinDate}</span>
+            <span className="flex items-center gap-1"><CalendarDays size={14} className="text-muted-foreground" /> Joined {joinDate}</span>
           )}
         </div>
 
