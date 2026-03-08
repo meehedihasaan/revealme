@@ -5,6 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { FollowersShimmer } from "@/components/ShimmerLoader";
 
 interface UserItem {
   user_id: string;
