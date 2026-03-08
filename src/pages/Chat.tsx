@@ -342,7 +342,7 @@ const Chat = () => {
             <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${isOnline ? "bg-green-500" : "bg-muted-foreground/40"}`} />
           </div>
           <div className="min-w-0">
-            <p className="font-bold text-foreground truncate">{otherUser?.username || "User"}</p>
+            <p className="font-bold text-foreground truncate flex items-center gap-1">{otherUser?.username || "User"}{otherUser?.is_verified && <VerifiedBadge size={14} />}</p>
             <p className="text-[11px] text-muted-foreground">
               {isTyping ? (
                 <span className="text-primary font-medium">typing...</span>

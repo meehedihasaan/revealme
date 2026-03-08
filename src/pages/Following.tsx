@@ -153,7 +153,7 @@ const Following = () => {
                 </button>
 
                 <button onClick={() => navigate(`/user/${person.user_id}`)} className="min-w-0 flex-1 text-left">
-                  <p className="truncate font-bold text-foreground">{username}</p>
+                  <p className="truncate font-bold text-foreground flex items-center gap-1">{username}{person.is_verified && <VerifiedBadge size={13} />}</p>
                   {displayName && <p className="truncate text-sm text-muted-foreground">{displayName}</p>}
                 </button>
 

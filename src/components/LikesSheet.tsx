@@ -89,7 +89,7 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
                         <PuffyIcon name="user" size={18} />
                       </div>
                     )}
-                    <span className="text-sm font-semibold text-foreground">{u.username || "user"}</span>
+                    <span className="text-sm font-semibold text-foreground flex items-center gap-1">{u.username || "user"}{u.is_verified && <VerifiedBadge size={13} />}</span>
                   </div>
                 ))
               )}

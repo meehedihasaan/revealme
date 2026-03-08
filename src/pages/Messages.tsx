@@ -221,8 +221,9 @@ const Messages = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span className={`font-semibold text-foreground truncate ${conv.unread > 0 ? "font-bold" : ""}`}>
+                  <span className={`font-semibold text-foreground truncate ${conv.unread > 0 ? "font-bold" : ""} flex items-center gap-1`}>
                     {conv.username}
+                    {conv.is_verified && <VerifiedBadge size={13} />}
                   </span>
                   <span className="text-xs text-muted-foreground shrink-0 ml-2">
                     {formatTime(conv.lastMessageTime)}

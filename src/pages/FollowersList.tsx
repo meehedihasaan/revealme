@@ -161,7 +161,7 @@ const FollowersList = () => {
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-foreground text-sm">{u.username || "user"}</p>
+                <p className="font-semibold text-foreground text-sm flex items-center gap-1">{u.username || "user"}{u.is_verified && <VerifiedBadge size={13} />}</p>
                 {u.display_name && <p className="text-xs text-muted-foreground truncate">{u.display_name}</p>}
               </div>
               {u.user_id !== user?.id && (

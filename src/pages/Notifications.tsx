@@ -208,7 +208,7 @@ const Notifications = () => {
               </button>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-foreground">
-                  <span className="font-bold">{n.actor_username}</span> {getNotifText(n)}
+                  <span className="font-bold">{n.actor_username}</span>{n.actor_verified && <VerifiedBadge size={13} className="ml-0.5" />} {getNotifText(n)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
