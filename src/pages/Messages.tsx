@@ -26,80 +26,53 @@ const Messages = () => {
   const fetchConversations = useCallback(async () => {
     if (!user) return;
 
-    // Step 1: Get my conversation IDs
-    const { data: myParticipations } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("user_id", user.id);
+    // Use RPC to get other participants (bypasses RLS)
+    const { data: partners } = await supabase.rpc("get_conversation_other_participants", {
+      p_user_id: user.id,
+    });
 
-    if (!myParticipations || myParticipations.length === 0) {
+    if (!partners || partners.length === 0) {
       setConversations([]);
       setLoading(false);
       return;
     }
 
-    const convIds = myParticipations.map((p) => p.conversation_id);
+    const convIds = partners.map((p: any) => p.conversation_id);
+    const otherUserIds = [...new Set(partners.map((p: any) => p.other_user_id))];
 
-    // Step 2: Get other participants + all messages in one batch
-    const [participantsRes, messagesRes] = await Promise.all([
+    // Batch fetch profiles + messages
+    const [profilesRes, messagesRes] = await Promise.all([
       supabase
-        .from("conversation_participants")
-        .select("conversation_id, user_id")
-        .in("conversation_id", convIds)
-        .neq("user_id", user.id),
+        .from("profiles")
+        .select("user_id, username, avatar_url")
+        .in("user_id", otherUserIds as string[]),
       supabase
         .from("messages")
         .select("conversation_id, text, created_at, read, sender_id")
-        .in("conversation_id", convIds)
+        .in("conversation_id", convIds as string[])
         .order("created_at", { ascending: false }),
     ]);
 
-    const allParticipants = participantsRes.data || [];
+    const profileMap = Object.fromEntries(
+      (profilesRes.data || []).map((p) => [p.user_id, p])
+    );
     const allMessages = messagesRes.data || [];
 
-    if (allParticipants.length === 0) {
-      setConversations([]);
-      setLoading(false);
-      return;
-    }
-
-    // Step 3: Get profiles for other users
-    const otherUserIds = [...new Set(allParticipants.map((p) => p.user_id))];
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("user_id, username, avatar_url")
-      .in("user_id", otherUserIds);
-
-    const profileMap = Object.fromEntries(
-      (profiles || []).map((p) => [p.user_id, p])
-    );
-
-    // Step 4: Build conversation items efficiently
     const items: ConversationItem[] = [];
 
-    for (const convId of convIds) {
-      const otherParticipant = allParticipants.find(
-        (p) => p.conversation_id === convId
-      );
-      if (!otherParticipant) continue;
+    for (const partner of partners) {
+      const convId = partner.conversation_id;
+      const otherUserId = partner.other_user_id;
 
-      // Find latest message for this conversation
-      const latestMsg = allMessages.find(
-        (m) => m.conversation_id === convId
-      );
-
-      // Count unread messages for this conversation
+      const latestMsg = allMessages.find((m) => m.conversation_id === convId);
       const unreadCount = allMessages.filter(
-        (m) =>
-          m.conversation_id === convId &&
-          !m.read &&
-          m.sender_id !== user.id
+        (m) => m.conversation_id === convId && !m.read && m.sender_id !== user.id
       ).length;
 
-      const prof = profileMap[otherParticipant.user_id];
+      const prof = profileMap[otherUserId];
       items.push({
         conversation_id: convId,
-        other_user_id: otherParticipant.user_id,
+        other_user_id: otherUserId,
         username: prof?.username || "user",
         avatar_url: prof?.avatar_url || null,
         lastMessage: latestMsg?.text || "",
@@ -110,8 +83,7 @@ const Messages = () => {
 
     items.sort(
       (a, b) =>
-        new Date(b.lastMessageTime).getTime() -
-        new Date(a.lastMessageTime).getTime()
+        new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
     );
 
     setConversations(items);
@@ -122,52 +94,36 @@ const Messages = () => {
     fetchConversations();
   }, [fetchConversations]);
 
-  // Real-time: listen for new messages to update inbox
+  // Real-time inbox updates
   useEffect(() => {
     if (!user) return;
     const channel = supabase
       .channel("messages-inbox-realtime")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-        },
-        (payload) => {
-          const msg = payload.new as any;
-          setConversations((prev) => {
-            const existing = prev.find(
-              (c) => c.conversation_id === msg.conversation_id
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+        const msg = payload.new as any;
+        setConversations((prev) => {
+          const existing = prev.find((c) => c.conversation_id === msg.conversation_id);
+          if (existing) {
+            const updated = prev.map((c) => {
+              if (c.conversation_id !== msg.conversation_id) return c;
+              return {
+                ...c,
+                lastMessage: msg.text,
+                lastMessageTime: msg.created_at,
+                unread: msg.sender_id !== user.id ? c.unread + 1 : c.unread,
+              };
+            });
+            return updated.sort(
+              (a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
             );
-            if (existing) {
-              const updated = prev.map((c) => {
-                if (c.conversation_id !== msg.conversation_id) return c;
-                return {
-                  ...c,
-                  lastMessage: msg.text,
-                  lastMessageTime: msg.created_at,
-                  unread:
-                    msg.sender_id !== user.id ? c.unread + 1 : c.unread,
-                };
-              });
-              return updated.sort(
-                (a, b) =>
-                  new Date(b.lastMessageTime).getTime() -
-                  new Date(a.lastMessageTime).getTime()
-              );
-            }
-            // New conversation — refetch
-            fetchConversations();
-            return prev;
-          });
-        }
-      )
+          }
+          fetchConversations();
+          return prev;
+        });
+      })
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [user, fetchConversations]);
 
   const filtered = conversations.filter((c) =>
@@ -196,13 +152,9 @@ const Messages = () => {
         </button>
         <h1 className="text-lg font-bold text-foreground">
           Messages{" "}
-          {totalUnread > 0 && (
-            <span className="text-primary">({totalUnread})</span>
-          )}
+          {totalUnread > 0 && <span className="text-primary">({totalUnread})</span>}
         </h1>
-        <button>
-          <PuffyIcon name="edit" size={20} />
-        </button>
+        <button><PuffyIcon name="edit" size={20} /></button>
       </div>
 
       <div className="px-4 pb-2">
@@ -236,16 +188,9 @@ const Messages = () => {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-            <PuffyIcon
-              name="message-circle"
-              size={40}
-              className="opacity-30 mb-3"
-            />
+            <PuffyIcon name="message-circle" size={40} className="opacity-30 mb-3" />
             <p className="text-sm">No conversations yet</p>
-            <button
-              onClick={() => navigate("/following")}
-              className="mt-3 text-sm font-semibold text-primary"
-            >
+            <button onClick={() => navigate("/following")} className="mt-3 text-sm font-semibold text-primary">
               Discover people to message
             </button>
           </div>
@@ -259,13 +204,9 @@ const Messages = () => {
               onClick={() => navigate(`/chat/${conv.conversation_id}`)}
               className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-secondary/50"
             >
-              <div className="shrink-0 relative">
+              <div className="shrink-0">
                 {conv.avatar_url ? (
-                  <img
-                    src={conv.avatar_url}
-                    alt={conv.username}
-                    className="h-14 w-14 rounded-full object-cover"
-                  />
+                  <img src={conv.avatar_url} alt={conv.username} className="h-14 w-14 rounded-full object-cover" />
                 ) : (
                   <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
                     <PuffyIcon name="user" size={24} />
@@ -274,11 +215,7 @@ const Messages = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span
-                    className={`font-semibold text-foreground truncate ${
-                      conv.unread > 0 ? "font-bold" : ""
-                    }`}
-                  >
+                  <span className={`font-semibold text-foreground truncate ${conv.unread > 0 ? "font-bold" : ""}`}>
                     {conv.username}
                   </span>
                   <span className="text-xs text-muted-foreground shrink-0 ml-2">
@@ -286,13 +223,7 @@ const Messages = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p
-                    className={`truncate text-sm ${
-                      conv.unread > 0
-                        ? "font-medium text-foreground"
-                        : "text-muted-foreground"
-                    }`}
-                  >
+                  <p className={`truncate text-sm ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
                     {conv.lastMessage || "Start a conversation"}
                   </p>
                   {conv.unread > 0 && (
