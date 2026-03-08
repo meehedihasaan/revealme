@@ -1,14 +1,21 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import PuffyIcon from "@/components/PuffyIcon";
 
 const AccountSettings = () => {
   const navigate = useNavigate();
+  const { profile, signOut } = useAuth();
 
   const items = [
-    { icon: "user", label: "Username", value: "mehedihasan" },
+    { icon: "user", label: "Username", value: profile?.username || "Not set" },
     { icon: "phone", label: "Phone number", value: "" },
     { icon: "copy", label: "Sync contacts", value: "" },
   ];
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,7 +38,7 @@ const AccountSettings = () => {
             <PuffyIcon name="chevron-right" size={18} className="opacity-50" />
           </button>
         ))}
-        <button className="flex w-full items-center gap-4 px-4 py-4 text-left">
+        <button onClick={handleLogout} className="flex w-full items-center gap-4 px-4 py-4 text-left">
           <PuffyIcon name="log-out" size={20} />
           <span className="text-accent font-medium">Log out</span>
         </button>

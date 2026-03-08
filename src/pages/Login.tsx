@@ -4,34 +4,30 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
+import PuffyIcon from "@/components/PuffyIcon";
 
-const Register = () => {
+const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: window.location.origin },
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Account created!");
-      navigate("/onboarding/avatar");
+      navigate("/feed");
     }
   };
 
-  const handleGoogleSignup = async () => {
+  const handleGoogleLogin = async () => {
     setLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/onboarding/avatar",
+      redirect_uri: window.location.origin + "/feed",
     });
     if (result.error) {
       toast.error(result.error.message);
@@ -47,9 +43,9 @@ const Register = () => {
         className="flex flex-1 flex-col"
       >
         <h1 className="text-reveal mb-2 text-3xl text-foreground">Reveal.</h1>
-        <p className="mb-10 text-muted-foreground">Create your account</p>
+        <p className="mb-10 text-muted-foreground">Welcome back</p>
 
-        <form onSubmit={handleRegister} className="flex flex-col gap-4">
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">Email</label>
             <input
@@ -67,7 +63,7 @@ const Register = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min 6 characters"
+              placeholder="••••••••"
               required
               minLength={6}
               className="w-full rounded-xl bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -79,7 +75,7 @@ const Register = () => {
             disabled={loading}
             className="mt-2 w-full rounded-xl bg-primary py-4 text-lg font-semibold text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
           >
-            {loading ? "Creating account..." : "Create Account"}
+            {loading ? "Logging in..." : "Log in"}
           </button>
         </form>
 
@@ -90,7 +86,7 @@ const Register = () => {
         </div>
 
         <button
-          onClick={handleGoogleSignup}
+          onClick={handleGoogleLogin}
           disabled={loading}
           className="flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-secondary py-3.5 text-sm font-semibold text-foreground transition-all hover:bg-secondary/80 active:scale-[0.98] disabled:opacity-50"
         >
@@ -103,17 +99,11 @@ const Register = () => {
           Continue with Google
         </button>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          By signing up, you agree to our{" "}
-          <span className="text-primary">Terms of Use</span> &{" "}
-          <span className="text-primary">Privacy Policy</span>.
-        </p>
-
         <div className="mt-auto pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link to="/login" className="font-bold text-foreground">
-              Log in
+            Don't have an account?{" "}
+            <Link to="/register" className="font-bold text-foreground">
+              Sign up
             </Link>
           </p>
         </div>
@@ -122,4 +112,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;
