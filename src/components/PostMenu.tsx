@@ -93,7 +93,7 @@ const PostMenu = ({ postId, postUserId, caption = "", location = "", onDelete, o
               exit={{ y: 300 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md rounded-t-2xl bg-card border-t border-border pb-8"
+              className="w-full max-w-md rounded-t-2xl bg-card border-t border-border safe-bottom"
             >
               <div className="flex justify-center py-3">
                 <div className="h-1 w-10 rounded-full bg-muted-foreground/30" />
