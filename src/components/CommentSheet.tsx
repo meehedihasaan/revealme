@@ -13,6 +13,7 @@ interface Comment {
   parent_id: string | null;
   username: string;
   avatar_url: string | null;
+  is_verified: boolean;
   likes_count: number;
   is_liked: boolean;
   replies: Comment[];
