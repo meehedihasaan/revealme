@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocked_users: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       conversation_participants: {
         Row: {
           conversation_id: string
@@ -176,6 +197,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          is_private: boolean
           onboarding_completed: boolean
           updated_at: string
           user_id: string
@@ -186,6 +208,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_private?: boolean
           onboarding_completed?: boolean
           updated_at?: string
           user_id: string
@@ -196,6 +219,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_private?: boolean
           onboarding_completed?: boolean
           updated_at?: string
           user_id?: string
