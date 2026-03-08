@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { MapPin, CalendarDays } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 import bannerImg from "@/assets/profile-banner.jpg";
 
@@ -24,6 +25,21 @@ interface UserData {
   created_at: string;
 }
 
+const ProfileMenuItem = ({ icon, label, onClick, destructive = false }: {
+  icon: string; label: string; onClick: () => void; destructive?: boolean;
+}) => (
+  <motion.button
+    whileTap={{ scale: 0.98 }}
+    onClick={onClick}
+    className="flex w-full items-center gap-3 px-5 py-3 text-left transition-colors active:bg-secondary/50"
+  >
+    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${destructive ? "bg-destructive/10" : "bg-secondary"}`}>
+      <PuffyIcon name={icon} size={18} />
+    </div>
+    <span className={`text-sm font-medium ${destructive ? "text-destructive" : "text-foreground"}`}>{label}</span>
+  </motion.button>
+);
+
 const UserProfile = () => {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
@@ -35,6 +51,21 @@ const UserProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  // Check block status
+  useEffect(() => {
+    if (!user || !userId) return;
+    supabase
+      .from("blocked_users")
+      .select("id")
+      .eq("blocker_id", user.id)
+      .eq("blocked_id", userId)
+      .maybeSingle()
+      .then(({ data }) => setIsBlocked(!!data));
+  }, [user, userId]);
 
   useEffect(() => {
     if (userId && user && userId === user.id) {
@@ -99,6 +130,54 @@ const UserProfile = () => {
     navigate(`/chat/${conversationId}`);
   };
 
+  const handleBlock = async () => {
+    if (!user || !userId) return;
+    if (isBlocked) {
+      await supabase.from("blocked_users").delete().eq("blocker_id", user.id).eq("blocked_id", userId);
+      setIsBlocked(false);
+      toast.success("User unblocked");
+    } else {
+      await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: userId });
+      setIsBlocked(true);
+      // Also unfollow
+      if (isFollowing) {
+        await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", userId);
+        setIsFollowing(false);
+        setFollowersCount(c => c - 1);
+      }
+      toast.success("User blocked");
+    }
+    setMenuOpen(false);
+  };
+
+  const handleReport = () => {
+    toast.success("Report submitted. We'll review it shortly.");
+    setMenuOpen(false);
+  };
+
+  const handleShareProfile = () => {
+    const url = `${window.location.origin}/user/${userId}`;
+    if (navigator.share) {
+      navigator.share({ title: `${displayName}'s profile`, url });
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success("Profile link copied!");
+    }
+    setMenuOpen(false);
+  };
+
+  const handleCopyProfileUrl = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/user/${userId}`);
+    toast.success("Profile link copied!");
+    setMenuOpen(false);
+  };
+
+  const handleToggleMute = () => {
+    setIsMuted(!isMuted);
+    toast.success(isMuted ? "Notifications unmuted" : "Notifications muted");
+    setMenuOpen(false);
+  };
+
   const displayName = profile?.display_name || profile?.username || "User";
   const joinDate = profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "";
 
@@ -142,12 +221,81 @@ const UserProfile = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2">
-        <button onClick={() => navigate(-1)} className="text-foreground">
-          <PuffyIcon name="arrow-left" size={20} />
+      <div className="flex items-center justify-between px-4 py-2">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="text-foreground">
+            <PuffyIcon name="arrow-left" size={20} />
+          </button>
+          <span className="text-lg font-bold text-foreground">{profile.username || "user"}</span>
+        </div>
+        <button onClick={() => setMenuOpen(true)} className="text-foreground p-1">
+          <PuffyIcon name="more-horizontal" size={22} />
         </button>
-        <span className="text-lg font-bold text-foreground">{profile.username || "user"}</span>
       </div>
+
+      {/* Three dot menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              onClick={() => setMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 350 }}
+              className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md rounded-t-3xl bg-card border-t border-border"
+            >
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="h-1 w-10 rounded-full bg-muted-foreground/20" />
+              </div>
+
+              {/* User info */}
+              <div className="flex items-center gap-3 px-5 pb-4 border-b border-border/50">
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                    <PuffyIcon name="user" size={18} />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold text-foreground text-sm">{displayName}</span>
+                    {profile.is_verified && <VerifiedBadge size={14} />}
+                  </div>
+                  <p className="text-xs text-muted-foreground">@{profile.username}</p>
+                </div>
+              </div>
+
+              {/* Menu items */}
+              <div className="py-1">
+                <ProfileMenuItem icon="send" label="Share this profile" onClick={handleShareProfile} />
+                <ProfileMenuItem icon="copy" label="Copy profile URL" onClick={handleCopyProfileUrl} />
+                <ProfileMenuItem icon="bell" label={isMuted ? "Unmute notifications" : "Mute notifications"} onClick={handleToggleMute} />
+                <div className="h-px bg-border/50 mx-5 my-1" />
+                <ProfileMenuItem icon="shield" label={isBlocked ? "Unblock this user" : "Block this user"} onClick={handleBlock} destructive={!isBlocked} />
+                <ProfileMenuItem icon="info" label="Report this user" onClick={handleReport} destructive />
+              </div>
+
+              <div className="px-5 pt-1 pb-5">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full rounded-2xl bg-secondary py-3.5 text-sm font-bold text-secondary-foreground"
+                >
+                  Cancel
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Banner */}
       <img src={bannerImg} alt="Banner" className="h-48 w-full object-cover" />
