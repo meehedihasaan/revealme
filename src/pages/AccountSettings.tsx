@@ -1,20 +1,20 @@
-import { ArrowLeft, User, Phone, Copy, LogOut, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import PuffyIcon from "@/components/PuffyIcon";
 
 const AccountSettings = () => {
   const navigate = useNavigate();
 
   const items = [
-    { icon: User, label: "Username", value: "mehedihasan" },
-    { icon: Phone, label: "Phone number", value: "" },
-    { icon: Copy, label: "Sync contacts", value: "" },
+    { icon: "user", label: "Username", value: "mehedihasan" },
+    { icon: "phone", label: "Phone number", value: "" },
+    { icon: "copy", label: "Sync contacts", value: "" },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <div className="px-4 py-3">
-        <button onClick={() => navigate(-1)} className="text-foreground">
-          <ArrowLeft size={22} />
+        <button onClick={() => navigate(-1)}>
+          <PuffyIcon name="arrow-left" size={22} />
         </button>
       </div>
 
@@ -25,14 +25,14 @@ const AccountSettings = () => {
       <div className="divide-y divide-border">
         {items.map((item) => (
           <button key={item.label} className="flex w-full items-center gap-4 px-4 py-4 text-left">
-            <item.icon size={20} className="shrink-0 text-foreground" />
+            <PuffyIcon name={item.icon} size={20} />
             <span className="flex-1 text-foreground">{item.label}</span>
             <span className="text-sm text-muted-foreground">{item.value}</span>
-            <ChevronRight size={18} className="text-muted-foreground" />
+            <PuffyIcon name="chevron-right" size={18} className="opacity-50" />
           </button>
         ))}
         <button className="flex w-full items-center gap-4 px-4 py-4 text-left">
-          <LogOut size={20} className="shrink-0 text-accent" />
+          <PuffyIcon name="log-out" size={20} />
           <span className="text-accent font-medium">Log out</span>
         </button>
       </div>

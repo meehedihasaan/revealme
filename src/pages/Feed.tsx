@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { MessageCircle, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
 
@@ -68,13 +68,13 @@ const Feed = () => {
             className="relative text-foreground"
             onClick={() => navigate("/messages")}
           >
-            <MessageCircle size={24} />
+            <PuffyIcon name="message-circle" size={24} />
             <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
               12
             </span>
           </button>
           <button className="rounded-full border border-border p-1 text-foreground">
-            <Plus size={20} />
+            <PuffyIcon name="plus" size={20} />
           </button>
         </div>
       </div>

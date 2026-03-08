@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
+import PuffyIcon from "@/components/PuffyIcon";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -10,8 +10,8 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-background px-6 py-4">
-      <button onClick={() => navigate(-1)} className="mb-12 text-foreground">
-        <ArrowLeft size={24} />
+      <button onClick={() => navigate(-1)} className="mb-12">
+        <PuffyIcon name="arrow-left" size={24} />
       </button>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -22,7 +22,7 @@ const Register = () => {
         <div className="mb-10 flex items-center gap-3 border-b border-border pb-3">
           <button className="flex items-center gap-1 text-primary">
             <span className="text-lg font-medium">{countryCode}</span>
-            <ChevronDown size={16} />
+            <PuffyIcon name="chevron-down" size={16} />
           </button>
           <input
             type="tel"

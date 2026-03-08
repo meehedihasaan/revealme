@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ArrowLeft, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import story2 from "@/assets/story2.jpg";
 
@@ -39,8 +39,8 @@ const Chat = () => {
     <div className="flex min-h-screen flex-col bg-background pb-20">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <button onClick={() => navigate(-1)} className="text-foreground">
-          <ArrowLeft size={22} />
+        <button onClick={() => navigate(-1)}>
+          <PuffyIcon name="arrow-left" size={22} />
         </button>
         <img src={story2} alt="Harry" className="h-10 w-10 rounded-full object-cover" />
         <div className="flex-1">
@@ -76,7 +76,7 @@ const Chat = () => {
       {/* Mood selector + Input */}
       <div className="border-t border-border bg-background px-4 py-3">
         <div className="mb-3 flex items-center gap-2 overflow-x-auto">
-          <Heart size={18} className="shrink-0 text-accent" />
+          <PuffyIcon name="heart-filled" size={18} />
           {moods.map((mood) => (
             <button
               key={mood}

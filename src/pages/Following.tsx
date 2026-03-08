@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ArrowLeft, Search, Check, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import PuffyIcon from "@/components/PuffyIcon";
 
 import story1 from "@/assets/story1.jpg";
 import story2 from "@/assets/story2.jpg";
@@ -44,8 +44,8 @@ const Following = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="flex items-center justify-between px-4 py-3">
-        <button onClick={() => navigate(-1)} className="text-foreground">
-          <ArrowLeft size={22} />
+        <button onClick={() => navigate(-1)}>
+          <PuffyIcon name="arrow-left" size={22} />
         </button>
         <span className="font-semibold text-foreground">Later</span>
       </div>
@@ -61,7 +61,7 @@ const Following = () => {
         </p>
 
         <div className="mt-4 flex items-center gap-2 rounded-xl bg-secondary px-4 py-2.5">
-          <Search size={18} className="text-muted-foreground" />
+          <PuffyIcon name="search" size={18} className="opacity-50" />
           <input
             type="text"
             value={search}
@@ -97,9 +97,9 @@ const Following = () => {
               }`}
             >
               {user.status === "requested" ? (
-                <><Check size={14} /> Requested</>
+                <><PuffyIcon name="check" size={14} /> Requested</>
               ) : (
-                <><Plus size={14} /> Believe</>
+                <><PuffyIcon name="plus" size={14} /> Believe</>
               )}
             </button>
           </motion.div>
