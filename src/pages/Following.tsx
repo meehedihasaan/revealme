@@ -11,7 +11,7 @@ import explore1 from "@/assets/explore1.jpg";
 import explore2 from "@/assets/explore2.jpg";
 import explore4 from "@/assets/explore4.jpg";
 
-type Status = "believe" | "requested" | "believing";
+type Status = "follow" | "requested" | "following";
 
 interface UserItem {
   username: string;
@@ -22,13 +22,13 @@ interface UserItem {
 }
 
 const initialUsers: UserItem[] = [
-  { username: "hemlata", displayName: "Hemu Patel", avatar: story1, verified: true, status: "believe" },
+  { username: "hemlata", displayName: "Hemu Patel", avatar: story1, verified: true, status: "follow" },
   { username: "zeel.jogiwala", displayName: "zeel🦋", avatar: story2, status: "requested" },
   { username: "dhrumilvanani14", displayName: "Dhrumil", avatar: story3, status: "requested" },
   { username: "rae", displayName: "rajvee", avatar: story4, status: "requested" },
-  { username: "farryjust", displayName: "farry", avatar: explore1, verified: true, status: "believe" },
-  { username: "_parth_22", displayName: "Parth Diyora", avatar: explore2, status: "believe" },
-  { username: "kevin_sheta_97", displayName: "Er. Kevin Sheta", avatar: explore4, status: "believe" },
+  { username: "farryjust", displayName: "farry", avatar: explore1, verified: true, status: "follow" },
+  { username: "_parth_22", displayName: "Parth Diyora", avatar: explore2, status: "follow" },
+  { username: "kevin_sheta_97", displayName: "Er. Kevin Sheta", avatar: explore4, status: "follow" },
 ];
 
 const Following = () => {
@@ -46,9 +46,9 @@ const Following = () => {
     setUsers((prev) =>
       prev.map((u) => {
         if (u.username !== username) return u;
-        if (u.status === "believe") return { ...u, status: "believing" as Status };
-        if (u.status === "believing") return { ...u, status: "believe" as Status };
-        if (u.status === "requested") return { ...u, status: "believe" as Status };
+        if (u.status === "follow") return { ...u, status: "following" as Status };
+        if (u.status === "following") return { ...u, status: "follow" as Status };
+        if (u.status === "requested") return { ...u, status: "follow" as Status };
         return u;
       })
     );
@@ -67,12 +67,10 @@ const Following = () => {
 
       <div className="px-4 pb-4">
         <h1 className="text-3xl font-extrabold leading-tight text-foreground">
-          Stop Following
-          <br />
-          Start Believing
+          Discover People
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          When you believe someone, you'll see their posts on your Timeline.
+          Follow people to see their posts on your Timeline.
         </p>
 
         <div className="mt-4 flex items-center gap-2 rounded-xl bg-secondary px-4 py-2.5">
@@ -107,16 +105,16 @@ const Following = () => {
             <button
               onClick={() => toggleStatus(user.username)}
               className={`flex items-center gap-1 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
-                user.status === "believing"
+                user.status === "following"
                   ? "bg-secondary text-secondary-foreground"
                   : user.status === "requested"
                   ? "bg-secondary text-secondary-foreground"
                   : "bg-primary text-primary-foreground"
               }`}
             >
-              {user.status === "believing" ? (
+              {user.status === "following" ? (
                 <>
-                  <PuffyIcon name="check" size={14} /> Believing
+                  <PuffyIcon name="check" size={14} /> Following
                 </>
               ) : user.status === "requested" ? (
                 <>
@@ -124,7 +122,7 @@ const Following = () => {
                 </>
               ) : (
                 <>
-                  <PuffyIcon name="plus" size={14} /> Believe
+                  <PuffyIcon name="plus" size={14} /> Follow
                 </>
               )}
             </button>

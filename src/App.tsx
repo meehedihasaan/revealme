@@ -26,6 +26,7 @@ import CreatePost from "./pages/CreatePost";
 import CreateStory from "./pages/CreateStory";
 import StoryViewer from "./pages/StoryViewer";
 import EditProfile from "./pages/EditProfile";
+import FollowersList from "./pages/FollowersList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const AppRoutes = () => (
       <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
       <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
       <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+      <Route path="/followers" element={<ProtectedRoute><FollowersList /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </div>

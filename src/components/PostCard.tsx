@@ -5,9 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import CommentSheet from "@/components/CommentSheet";
 import ShareSheet from "@/components/ShareSheet";
+import PostMenu from "@/components/PostMenu";
+import LikesSheet from "@/components/LikesSheet";
 
 interface PostCardProps {
   postId: string;
+  postUserId?: string;
   username: string;
   avatar: string;
   image: string;
@@ -18,9 +21,9 @@ interface PostCardProps {
   location?: string;
   isLiked?: boolean;
   isSaved?: boolean;
+  onDelete?: () => void;
 }
 
-// Particle burst for the double-tap heart
 const HeartParticle = ({ index, total }: { index: number; total: number }) => {
   const angle = (360 / total) * index;
   const rad = (angle * Math.PI) / 180;
@@ -29,7 +32,6 @@ const HeartParticle = ({ index, total }: { index: number; total: number }) => {
   const y = Math.sin(rad) * distance;
   const size = 8 + Math.random() * 10;
   const delay = Math.random() * 0.1;
-
   return (
     <motion.div
       initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
@@ -100,6 +102,7 @@ const DoubleTapHeart = () => (
 
 const PostCard = ({
   postId,
+  postUserId,
   username,
   avatar,
   image,
@@ -110,6 +113,7 @@ const PostCard = ({
   location,
   isLiked: initialLiked = false,
   isSaved: initialSaved = false,
+  onDelete,
 }: PostCardProps) => {
   const { user } = useAuth();
   const [liked, setLiked] = useState(initialLiked);
@@ -118,6 +122,7 @@ const PostCard = ({
   const [showHeart, setShowHeart] = useState(false);
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [likesOpen, setLikesOpen] = useState(false);
 
   const handleDoubleTap = () => {
     if (!liked) toggleLike();
@@ -164,9 +169,7 @@ const PostCard = ({
           </div>
           {location && <p className="text-[11px] text-muted-foreground">{location}</p>}
         </div>
-        <button>
-          <PuffyIcon name="more-horizontal" size={20} />
-        </button>
+        <PostMenu postId={postId} postUserId={postUserId || ""} onDelete={onDelete} />
       </div>
 
       {/* Image */}
@@ -195,9 +198,11 @@ const PostCard = ({
         </motion.button>
       </div>
 
-      {/* Likes */}
+      {/* Likes - clickable */}
       <div className="px-4">
-        <p className="text-sm font-semibold text-foreground">{likeCount.toLocaleString()} likes</p>
+        <button onClick={() => setLikesOpen(true)} className="text-sm font-semibold text-foreground">
+          {likeCount.toLocaleString()} likes
+        </button>
       </div>
 
       {/* Caption */}
@@ -218,18 +223,9 @@ const PostCard = ({
         <p className="text-[10px] uppercase text-muted-foreground">{timeAgo}</p>
       </div>
 
-      {/* Comment Sheet */}
       <CommentSheet postId={postId} isOpen={commentOpen} onClose={() => setCommentOpen(false)} />
-
-      {/* Share Sheet */}
-      <ShareSheet
-        postId={postId}
-        image={image}
-        caption={caption}
-        username={username}
-        isOpen={shareOpen}
-        onClose={() => setShareOpen(false)}
-      />
+      <ShareSheet postId={postId} image={image} caption={caption} username={username} isOpen={shareOpen} onClose={() => setShareOpen(false)} />
+      <LikesSheet postId={postId} isOpen={likesOpen} onClose={() => setLikesOpen(false)} likesCount={likeCount} />
     </div>
   );
 };
