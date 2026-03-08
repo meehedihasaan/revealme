@@ -206,12 +206,81 @@ const UserProfile = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2">
-        <button onClick={() => navigate(-1)} className="text-foreground">
-          <PuffyIcon name="arrow-left" size={20} />
+      <div className="flex items-center justify-between px-4 py-2">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="text-foreground">
+            <PuffyIcon name="arrow-left" size={20} />
+          </button>
+          <span className="text-lg font-bold text-foreground">{profile.username || "user"}</span>
+        </div>
+        <button onClick={() => setMenuOpen(true)} className="text-foreground p-1">
+          <PuffyIcon name="more-horizontal" size={22} />
         </button>
-        <span className="text-lg font-bold text-foreground">{profile.username || "user"}</span>
       </div>
+
+      {/* Three dot menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              onClick={() => setMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 350 }}
+              className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md rounded-t-3xl bg-card border-t border-border"
+            >
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="h-1 w-10 rounded-full bg-muted-foreground/20" />
+              </div>
+
+              {/* User info */}
+              <div className="flex items-center gap-3 px-5 pb-4 border-b border-border/50">
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                    <PuffyIcon name="user" size={18} />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold text-foreground text-sm">{displayName}</span>
+                    {profile.is_verified && <VerifiedBadge size={14} />}
+                  </div>
+                  <p className="text-xs text-muted-foreground">@{profile.username}</p>
+                </div>
+              </div>
+
+              {/* Menu items */}
+              <div className="py-1">
+                <ProfileMenuItem icon="send" label="Share this profile" onClick={handleShareProfile} />
+                <ProfileMenuItem icon="copy" label="Copy profile URL" onClick={handleCopyProfileUrl} />
+                <ProfileMenuItem icon="bell" label={isMuted ? "Unmute notifications" : "Mute notifications"} onClick={handleToggleMute} />
+                <div className="h-px bg-border/50 mx-5 my-1" />
+                <ProfileMenuItem icon="shield" label={isBlocked ? "Unblock this user" : "Block this user"} onClick={handleBlock} destructive={!isBlocked} />
+                <ProfileMenuItem icon="info" label="Report this user" onClick={handleReport} destructive />
+              </div>
+
+              <div className="px-5 pt-1 pb-5">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full rounded-2xl bg-secondary py-3.5 text-sm font-bold text-secondary-foreground"
+                >
+                  Cancel
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Banner */}
       <img src={bannerImg} alt="Banner" className="h-48 w-full object-cover" />
