@@ -26,6 +26,7 @@ interface UserResult {
 interface PostResult {
   id: string;
   image_url: string;
+  user_id: string;
 }
 
 const Explore = () => {
