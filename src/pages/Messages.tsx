@@ -202,10 +202,10 @@ const Messages = () => {
             >
               <div className="shrink-0">
                 {conv.avatar_url ? (
-                  <img src={conv.avatar_url} alt={conv.username} className="h-14 w-14 rounded-full object-cover" />
+                  <img src={conv.avatar_url} alt={conv.username} className="h-12 w-12 rounded-full object-cover" />
                 ) : (
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
-                    <PuffyIcon name="user" size={24} />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                    <PuffyIcon name="user" size={20} />
                   </div>
                 )}
               </div>

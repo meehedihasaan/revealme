@@ -212,12 +212,12 @@ const Notifications = () => {
               className={`flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-secondary/50 ${!n.read ? "bg-primary/5" : ""}`}
               onClick={() => handleNotifClick(n)}
             >
-              <button onClick={() => navigate(`/user/${n.actor_id}`)} className="shrink-0">
+              <button onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.actor_id}`); }} className="shrink-0">
                 {n.actor_avatar ? (
                   <img src={n.actor_avatar} alt={n.actor_username} className="h-12 w-12 rounded-full object-cover" />
                 ) : (
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
-                    <PuffyIcon name="user" size={22} />
+                    <PuffyIcon name="user" size={20} />
                   </div>
                 )}
               </button>
@@ -234,13 +234,14 @@ const Notifications = () => {
               </div>
               {n.type === "follow" ? (
                 <button
-                  onClick={() => toggleFollowBack(n.actor_id)}
-                  className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-colors ${
+                  onClick={(e) => { e.stopPropagation(); toggleFollowBack(n.actor_id); }}
+                  className={`flex items-center gap-1 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
                     followStates[n.actor_id]
                       ? "bg-secondary text-secondary-foreground"
                       : "bg-primary text-primary-foreground"
                   }`}
                 >
+                  <PuffyIcon name={followStates[n.actor_id] ? "check" : "plus"} size={14} />
                   {followStates[n.actor_id] ? "Following" : "Follow Back"}
                 </button>
               ) : (
