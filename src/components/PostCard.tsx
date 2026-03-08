@@ -116,6 +116,7 @@ const PostCard = ({
   isSaved: initialSaved = false,
   onDelete,
 }: PostCardProps) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [liked, setLiked] = useState(initialLiked);
   const [saved, setSaved] = useState(initialSaved);
