@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import CommentSheet from "@/components/CommentSheet";
@@ -190,7 +191,7 @@ const PostCard = ({
         <button onClick={() => navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`)} className="flex-1 min-w-0 text-left">
           <div className="flex items-center gap-1">
             <span className="text-sm font-semibold text-foreground">{username}</span>
-            {verified && <span className="text-xs text-primary">✓</span>}
+            {verified && <VerifiedBadge size={15} />}
           </div>
           {location && <p className="text-[11px] text-muted-foreground">{location}</p>}
         </button>

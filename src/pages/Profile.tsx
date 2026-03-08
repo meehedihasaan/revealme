@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { MapPin, CalendarDays } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -65,7 +66,10 @@ const Profile = () => {
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold text-foreground">{displayName}</h2>
+        <div className="flex items-center gap-1.5">
+          <h2 className="text-2xl font-bold text-foreground">{displayName}</h2>
+          {profile?.is_verified && <VerifiedBadge size={20} />}
+        </div>
         {profile?.username && (
           <p className="text-sm text-muted-foreground">@{profile.username}</p>
         )}

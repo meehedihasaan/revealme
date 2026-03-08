@@ -12,6 +12,7 @@ export interface PostWithDetails {
   user_id: string;
   username: string;
   avatar_url: string | null;
+  is_verified: boolean;
   likesCount: number;
   isLiked: boolean;
   isSaved: boolean;
@@ -31,7 +32,7 @@ export const usePosts = (filterUserId?: string) => {
     if (!postsData || postsData.length === 0) { setPosts([]); setLoading(false); return; }
 
     const userIds = [...new Set(postsData.map(p => p.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", userIds);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url, is_verified").in("user_id", userIds);
     const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
 
     const postIds = postsData.map(p => p.id);
@@ -57,6 +58,7 @@ export const usePosts = (filterUserId?: string) => {
       user_id: p.user_id,
       username: profileMap[p.user_id]?.username || "user",
       avatar_url: profileMap[p.user_id]?.avatar_url || null,
+      is_verified: profileMap[p.user_id]?.is_verified || false,
       likesCount: likesCount[p.id] || 0,
       isLiked: userLikes.has(p.id),
       isSaved: userSaves.has(p.id),

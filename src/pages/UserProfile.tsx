@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { MapPin, CalendarDays } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,6 +19,7 @@ interface UserData {
   avatar_url: string | null;
   bio: string | null;
   location: string | null;
+  is_verified: boolean;
   is_private: boolean;
   created_at: string;
 }
@@ -46,7 +48,7 @@ const UserProfile = () => {
       setProfileLoading(true);
       const { data: prof } = await supabase
         .from("profiles")
-        .select("user_id, username, display_name, avatar_url, bio, location, is_private, created_at")
+        .select("user_id, username, display_name, avatar_url, bio, location, is_private, is_verified, created_at")
         .eq("user_id", userId)
         .single();
       setProfile(prof);
@@ -164,7 +166,10 @@ const UserProfile = () => {
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold text-foreground">{displayName}</h2>
+        <div className="flex items-center gap-1.5">
+          <h2 className="text-2xl font-bold text-foreground">{displayName}</h2>
+          {profile.is_verified && <VerifiedBadge size={20} />}
+        </div>
         {profile.username && <p className="text-sm text-muted-foreground">@{profile.username}</p>}
 
         {/* Bio */}

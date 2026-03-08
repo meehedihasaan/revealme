@@ -275,6 +275,7 @@ export type Database = {
           display_name: string | null
           id: string
           is_private: boolean
+          is_verified: boolean
           location: string | null
           onboarding_completed: boolean
           updated_at: string
@@ -288,6 +289,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           is_private?: boolean
+          is_verified?: boolean
           location?: string | null
           onboarding_completed?: boolean
           updated_at?: string
@@ -301,6 +303,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           is_private?: boolean
+          is_verified?: boolean
           location?: string | null
           onboarding_completed?: boolean
           updated_at?: string
