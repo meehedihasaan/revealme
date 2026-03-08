@@ -66,7 +66,7 @@ const Feed = () => {
 
   // Derived post lists
   const followingPosts = posts.filter(p => followingIds.has(p.user_id));
-  const forYouPosts = posts.filter(p => p.user_id !== user?.id);
+  const forYouPosts = posts;
   const savedPosts = posts.filter(p => p.isSaved);
 
   const handleRefresh = async () => {
