@@ -11,6 +11,7 @@ interface UserItem {
   username: string;
   avatar_url: string | null;
   display_name: string | null;
+  is_verified: boolean;
   isFollowing: boolean;
 }
 
