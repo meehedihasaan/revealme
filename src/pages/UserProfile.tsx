@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { MapPin, CalendarDays } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
