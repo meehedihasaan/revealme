@@ -162,7 +162,7 @@ const Feed = () => {
               onClick={() => navigate(`/story?user=${su.user_id}`)}
               className="flex shrink-0 flex-col items-center gap-1"
             >
-              <div className="rounded-full p-[3px] gradient-story-red">
+              <div className={`rounded-full p-[3px] ${su.hasSeen ? "bg-muted-foreground/30" : "gradient-story-red"}`}>
                 <div className="rounded-full border-2 border-background">
                   <img src={su.avatar_url || story2} alt={su.username} className="h-16 w-16 rounded-full object-cover" />
                 </div>
