@@ -4,11 +4,13 @@ import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import bannerImg from "@/assets/profile-banner.jpg";
 
 const EditProfile = () => {
   const navigate = useNavigate();
   const { profile, user, refreshProfile } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [username, setUsername] = useState(profile?.username || "");
@@ -16,6 +18,8 @@ const EditProfile = () => {
   const [location, setLocation] = useState(profile?.location || "");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>((profile as any)?.cover_url || null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
   const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,11 +29,19 @@ const EditProfile = () => {
     setAvatarPreview(URL.createObjectURL(f));
   };
 
+  const handleCover = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setCoverFile(f);
+    setCoverPreview(URL.createObjectURL(f));
+  };
+
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
     try {
       let avatar_url = profile?.avatar_url || null;
+      let cover_url = (profile as any)?.cover_url || null;
 
       if (avatarFile) {
         const ext = avatarFile.name.split(".").pop();
@@ -37,6 +49,14 @@ const EditProfile = () => {
         await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
         const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
         avatar_url = publicUrl;
+      }
+
+      if (coverFile) {
+        const ext = coverFile.name.split(".").pop();
+        const path = `${user.id}/cover.${ext}`;
+        await supabase.storage.from("avatars").upload(path, coverFile, { upsert: true });
+        const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+        cover_url = publicUrl;
       }
 
       if (username !== profile?.username && username) {
@@ -59,6 +79,7 @@ const EditProfile = () => {
           display_name: displayName,
           username,
           avatar_url,
+          cover_url,
           bio,
           location,
         })
@@ -92,12 +113,26 @@ const EditProfile = () => {
         </button>
       </div>
 
-      <div className="flex flex-col items-center py-8">
+      {/* Cover Picture */}
+      <button onClick={() => coverRef.current?.click()} className="relative w-full block">
+        <img
+          src={coverPreview || bannerImg}
+          alt="Cover"
+          className="h-36 w-full object-cover"
+        />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <PuffyIcon name="camera" size={28} className="invert" />
+        </div>
+      </button>
+      <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={handleCover} />
+
+      {/* Avatar */}
+      <div className="flex flex-col items-center -mt-12 pb-4">
         <button onClick={() => fileRef.current?.click()} className="relative">
           {avatarPreview ? (
-            <img src={avatarPreview} alt="Avatar" className="h-24 w-24 rounded-full object-cover" />
+            <img src={avatarPreview} alt="Avatar" className="h-24 w-24 rounded-full object-cover border-4 border-background" />
           ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-secondary">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-secondary border-4 border-background">
               <PuffyIcon name="user" size={40} />
             </div>
           )}
