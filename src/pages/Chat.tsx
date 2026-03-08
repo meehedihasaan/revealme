@@ -19,6 +19,7 @@ interface OtherUser {
   user_id: string;
   username: string;
   avatar_url: string | null;
+  is_verified: boolean;
 }
 
 const Chat = () => {
