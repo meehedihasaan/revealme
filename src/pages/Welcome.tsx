@@ -46,7 +46,7 @@ const Welcome = () => {
       >
         <p className="text-sm text-muted-foreground">Already have an account?</p>
         <button
-          onClick={() => navigate("/feed")}
+          onClick={() => navigate("/login")}
           className="text-lg font-bold text-foreground"
         >
           Log in
