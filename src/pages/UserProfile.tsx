@@ -55,6 +55,7 @@ const UserProfile = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
 
   // Check block status
   useEffect(() => {
