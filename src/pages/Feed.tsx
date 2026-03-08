@@ -49,9 +49,19 @@ const Feed = () => {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from("stories")
-        .select("user_id")
+        .select("id, user_id")
         .gte("created_at", since);
       if (!data) return;
+
+      // Get viewed story IDs
+      let viewedIds = new Set<string>();
+      if (user) {
+        const { data: views } = await supabase
+          .from("story_views")
+          .select("story_id")
+          .eq("viewer_id", user.id);
+        viewedIds = new Set((views || []).map(v => v.story_id));
+      }
 
       const uniqueIds = [...new Set(data.map(s => s.user_id))];
       if (user && uniqueIds.includes(user.id)) setUserHasStory(true);
@@ -59,7 +69,18 @@ const Feed = () => {
       const otherIds = uniqueIds.filter(id => id !== user?.id);
       if (otherIds.length > 0) {
         const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", otherIds);
-        setStoryUsers(profiles || []);
+
+        // For each user, check if ALL their stories are seen
+        const userStories: Record<string, string[]> = {};
+        for (const s of data) {
+          if (!userStories[s.user_id]) userStories[s.user_id] = [];
+          userStories[s.user_id].push(s.id);
+        }
+
+        setStoryUsers((profiles || []).map(p => ({
+          ...p,
+          hasSeen: (userStories[p.user_id] || []).every(sid => viewedIds.has(sid)),
+        })));
       }
     };
     fetchStories();
