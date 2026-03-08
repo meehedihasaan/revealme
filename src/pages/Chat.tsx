@@ -134,7 +134,7 @@ const Chat = () => {
     }, 2000);
   };
 
-  // Realtime messages
+  // Realtime messages (INSERT + UPDATE for read status)
   useEffect(() => {
     if (!conversationId || !user) return;
 
@@ -154,6 +154,15 @@ const Chat = () => {
         if (newMsg.sender_id !== user.id) {
           supabase.from("messages").update({ read: true }).eq("id", newMsg.id).then(() => {});
         }
+      })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "messages",
+        filter: `conversation_id=eq.${conversationId}`,
+      }, (payload) => {
+        const updated = payload.new as Message;
+        setMessages(prev => prev.map(m => m.id === updated.id ? { ...m, read: updated.read } : m));
       })
       .subscribe();
 
