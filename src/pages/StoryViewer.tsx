@@ -5,6 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 interface StoryItem {
   id: string;
