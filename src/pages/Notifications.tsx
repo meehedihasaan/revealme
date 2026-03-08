@@ -1,54 +1,155 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
-import { useNavigate } from "react-router-dom";
-
-import story1 from "@/assets/story1.jpg";
-import story2 from "@/assets/story2.jpg";
-import story3 from "@/assets/story3.jpg";
-import story4 from "@/assets/story4.jpg";
-import explore1 from "@/assets/explore1.jpg";
-import explore2 from "@/assets/explore2.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { NotificationsShimmer } from "@/components/ShimmerLoader";
+import { formatDistanceToNow } from "date-fns";
 
 type NotifType = "like" | "comment" | "follow";
 
-interface Notification {
-  username: string;
-  avatar: string;
-  text: string;
-  time: string;
+interface NotifItem {
+  id: string;
   type: NotifType;
-  commentPreview?: string;
+  actor_id: string;
+  post_id: string | null;
+  comment_text: string | null;
   read: boolean;
+  created_at: string;
+  actor_username: string;
+  actor_avatar: string | null;
 }
 
 const Notifications = () => {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<Notification[]>([
-    { username: "rohannatt", avatar: story1, text: "Commented on your post.", time: "8m", type: "comment", commentPreview: "👌", read: false },
-    { username: "anish_lohar72", avatar: story2, text: "liked your post.", time: "23h", type: "like", read: false },
-    { username: "subhamjohal", avatar: story3, text: "liked your post.", time: "3d", type: "like", read: true },
-    { username: "kshiprakulkarni", avatar: story4, text: "liked your post.", time: "3d", type: "like", read: true },
-    { username: "stavyanath", avatar: explore1, text: "liked your post.", time: "3d", type: "like", read: true },
-    { username: "saikiransathe", avatar: explore2, text: "Commented on your post.", time: "3d", type: "comment", commentPreview: "🔥🔥🔥", read: true },
-    { username: "triptijain", avatar: story1, text: "started following you.", time: "4d", type: "follow", read: true },
-    { username: "tarakchanda", avatar: story3, text: "liked your post.", time: "7d", type: "like", read: true },
-    { username: "usmanabbas99", avatar: story2, text: "liked your post.", time: "12d", type: "like", read: true },
-    { username: "mehedihasan", avatar: story4, text: "liked your post.", time: "12d", type: "like", read: true },
-  ]);
-
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<NotifItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
 
-  const handleFollowBack = (username: string) => {
-    setFollowStates((prev) => ({ ...prev, [username]: !prev[username] }));
+  const fetchNotifications = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (!data || data.length === 0) {
+      setNotifications([]);
+      setLoading(false);
+      return;
+    }
+
+    const actorIds = [...new Set(data.map(n => n.actor_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, username, avatar_url")
+      .in("user_id", actorIds);
+    const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+
+    // Check follow states
+    const followActors = data.filter(n => n.type === "follow").map(n => n.actor_id);
+    if (followActors.length > 0) {
+      const { data: follows } = await supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", user.id)
+        .in("following_id", followActors);
+      const followSet = new Set((follows || []).map(f => f.following_id));
+      const states: Record<string, boolean> = {};
+      followActors.forEach(id => { states[id] = followSet.has(id); });
+      setFollowStates(states);
+    }
+
+    setNotifications(data.map(n => ({
+      id: n.id,
+      type: n.type as NotifType,
+      actor_id: n.actor_id,
+      post_id: n.post_id,
+      comment_text: n.comment_text,
+      read: n.read,
+      created_at: n.created_at,
+      actor_username: profileMap[n.actor_id]?.username || "user",
+      actor_avatar: profileMap[n.actor_id]?.avatar_url || null,
+    })));
+    setLoading(false);
   };
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  useEffect(() => {
+    fetchNotifications();
+  }, [user]);
+
+  // Real-time subscription
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("notifications-realtime")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`,
+      }, async (payload) => {
+        const n = payload.new as any;
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("username, avatar_url")
+          .eq("user_id", n.actor_id)
+          .single();
+
+        const newNotif: NotifItem = {
+          id: n.id,
+          type: n.type,
+          actor_id: n.actor_id,
+          post_id: n.post_id,
+          comment_text: n.comment_text,
+          read: n.read,
+          created_at: n.created_at,
+          actor_username: prof?.username || "user",
+          actor_avatar: prof?.avatar_url || null,
+        };
+        setNotifications(prev => [newNotif, ...prev]);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  const markAllRead = async () => {
+    if (!user) return;
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("user_id", user.id)
+      .eq("read", false);
   };
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const toggleFollowBack = async (actorId: string) => {
+    if (!user) return;
+    const was = followStates[actorId] || false;
+    setFollowStates(prev => ({ ...prev, [actorId]: !was }));
+    if (was) {
+      await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", actorId);
+    } else {
+      await supabase.from("follows").insert({ follower_id: user.id, following_id: actorId });
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const getNotifText = (n: NotifItem) => {
+    switch (n.type) {
+      case "like": return "liked your post.";
+      case "comment": return "commented on your post.";
+      case "follow": return "started following you.";
+      default: return "";
+    }
+  };
 
   const NotifIcon = ({ type }: { type: NotifType }) => {
     if (type === "like") return <PuffyIcon name="heart-filled" size={20} />;
@@ -74,42 +175,61 @@ const Notifications = () => {
         </div>
       </div>
 
-      <div className="divide-y divide-border">
-        {notifications.map((n, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.03 }}
-            className={`flex items-center gap-3 px-4 py-3 ${!n.read ? "bg-primary/5" : ""}`}
-          >
-            <img src={n.avatar} alt={n.username} className="h-12 w-12 rounded-full object-cover" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-foreground">
-                <span className="font-bold">{n.username}</span> {n.text}
-              </p>
-              <p className="text-xs text-muted-foreground">{n.time}</p>
-              {n.commentPreview && (
-                <p className="mt-0.5 text-sm">{n.commentPreview}</p>
-              )}
-            </div>
-            {n.type === "follow" ? (
-              <button
-                onClick={() => handleFollowBack(n.username)}
-                className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-colors ${
-                  followStates[n.username]
-                    ? "bg-secondary text-secondary-foreground"
-                    : "bg-primary text-primary-foreground"
-                }`}
-              >
-                {followStates[n.username] ? "Following" : "Follow Back"}
+      {loading ? (
+        <NotificationsShimmer />
+      ) : notifications.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <PuffyIcon name="bell" size={48} className="opacity-30 mb-3" />
+          <p className="text-sm">No notifications yet</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-border">
+          {notifications.map((n, i) => (
+            <motion.div
+              key={n.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.02 }}
+              className={`flex items-center gap-3 px-4 py-3 ${!n.read ? "bg-primary/5" : ""}`}
+            >
+              <button onClick={() => navigate(`/user/${n.actor_id}`)} className="shrink-0">
+                {n.actor_avatar ? (
+                  <img src={n.actor_avatar} alt={n.actor_username} className="h-12 w-12 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                    <PuffyIcon name="user" size={22} />
+                  </div>
+                )}
               </button>
-            ) : (
-              <NotifIcon type={n.type} />
-            )}
-          </motion.div>
-        ))}
-      </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-foreground">
+                  <span className="font-bold">{n.actor_username}</span> {getNotifText(n)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
+                </p>
+                {n.comment_text && (
+                  <p className="mt-0.5 text-sm text-muted-foreground truncate">"{n.comment_text}"</p>
+                )}
+              </div>
+              {n.type === "follow" ? (
+                <button
+                  onClick={() => toggleFollowBack(n.actor_id)}
+                  className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-colors ${
+                    followStates[n.actor_id]
+                      ? "bg-secondary text-secondary-foreground"
+                      : "bg-primary text-primary-foreground"
+                  }`}
+                >
+                  {followStates[n.actor_id] ? "Following" : "Follow Back"}
+                </button>
+              ) : (
+                <NotifIcon type={n.type} />
+              )}
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <BottomNav />
     </div>
