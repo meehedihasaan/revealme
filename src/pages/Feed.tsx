@@ -151,7 +151,7 @@ const Feed = () => {
                   </div>
                 )}
                 {!userHasStory && (
-                  <div className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary border-2 border-background">
+                  <div className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary border-2 border-background text-primary-foreground">
                     <PuffyIcon name="plus" size={10} />
                   </div>
                 )}
