@@ -36,6 +36,21 @@ const UserProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  // Check block status
+  useEffect(() => {
+    if (!user || !userId) return;
+    supabase
+      .from("blocked_users")
+      .select("id")
+      .eq("blocker_id", user.id)
+      .eq("blocked_id", userId)
+      .maybeSingle()
+      .then(({ data }) => setIsBlocked(!!data));
+  }, [user, userId]);
 
   useEffect(() => {
     if (userId && user && userId === user.id) {
