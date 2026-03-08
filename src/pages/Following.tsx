@@ -11,7 +11,7 @@ import explore1 from "@/assets/explore1.jpg";
 import explore2 from "@/assets/explore2.jpg";
 import explore4 from "@/assets/explore4.jpg";
 
-type Status = "believe" | "requested";
+type Status = "believe" | "requested" | "believing";
 
 interface UserItem {
   username: string;
@@ -21,7 +21,7 @@ interface UserItem {
   status: Status;
 }
 
-const users: UserItem[] = [
+const initialUsers: UserItem[] = [
   { username: "hemlata", displayName: "Hemu Patel", avatar: story1, verified: true, status: "believe" },
   { username: "zeel.jogiwala", displayName: "zeel🦋", avatar: story2, status: "requested" },
   { username: "dhrumilvanani14", displayName: "Dhrumil", avatar: story3, status: "requested" },
@@ -34,6 +34,7 @@ const users: UserItem[] = [
 const Following = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [users, setUsers] = useState(initialUsers);
 
   const filtered = users.filter(
     (u) =>
@@ -41,13 +42,27 @@ const Following = () => {
       u.displayName.toLowerCase().includes(search.toLowerCase())
   );
 
+  const toggleStatus = (username: string) => {
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.username !== username) return u;
+        if (u.status === "believe") return { ...u, status: "believing" as Status };
+        if (u.status === "believing") return { ...u, status: "believe" as Status };
+        if (u.status === "requested") return { ...u, status: "believe" as Status };
+        return u;
+      })
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="flex items-center justify-between px-4 py-3">
         <button onClick={() => navigate(-1)}>
           <PuffyIcon name="arrow-left" size={22} />
         </button>
-        <span className="font-semibold text-foreground">Later</span>
+        <button onClick={() => navigate("/feed")} className="font-semibold text-foreground">
+          Done
+        </button>
       </div>
 
       <div className="px-4 pb-4">
@@ -90,16 +105,27 @@ const Following = () => {
               <p className="text-sm text-muted-foreground">{user.displayName}</p>
             </div>
             <button
-              className={`flex items-center gap-1 rounded-lg px-5 py-2 text-sm font-semibold ${
-                user.status === "requested"
+              onClick={() => toggleStatus(user.username)}
+              className={`flex items-center gap-1 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+                user.status === "believing"
+                  ? "bg-secondary text-secondary-foreground"
+                  : user.status === "requested"
                   ? "bg-secondary text-secondary-foreground"
                   : "bg-primary text-primary-foreground"
               }`}
             >
-              {user.status === "requested" ? (
-                <><PuffyIcon name="check" size={14} /> Requested</>
+              {user.status === "believing" ? (
+                <>
+                  <PuffyIcon name="check" size={14} /> Believing
+                </>
+              ) : user.status === "requested" ? (
+                <>
+                  <PuffyIcon name="check" size={14} /> Requested
+                </>
               ) : (
-                <><PuffyIcon name="plus" size={14} /> Believe</>
+                <>
+                  <PuffyIcon name="plus" size={14} /> Believe
+                </>
               )}
             </button>
           </motion.div>

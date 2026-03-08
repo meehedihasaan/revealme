@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
@@ -9,9 +10,28 @@ import explore4 from "@/assets/explore4.jpg";
 import explore5 from "@/assets/explore5.jpg";
 import explore6 from "@/assets/explore6.jpg";
 
-const images = [explore1, explore2, explore3, explore4, explore5, explore6, explore1, explore3, explore5];
+const allImages = [
+  { src: explore1, tags: ["nature", "landscape"] },
+  { src: explore2, tags: ["portrait", "people"] },
+  { src: explore3, tags: ["urban", "city"] },
+  { src: explore4, tags: ["nature", "travel"] },
+  { src: explore5, tags: ["food", "lifestyle"] },
+  { src: explore6, tags: ["portrait", "fashion"] },
+  { src: explore1, tags: ["nature", "landscape"] },
+  { src: explore3, tags: ["urban", "city"] },
+  { src: explore5, tags: ["food", "lifestyle"] },
+];
 
 const Explore = () => {
+  const [search, setSearch] = useState("");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const filteredImages = search.trim()
+    ? allImages.filter((img) =>
+        img.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
+      )
+    : allImages;
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -29,32 +49,60 @@ const Explore = () => {
           <PuffyIcon name="search" size={18} className="opacity-50" />
           <input
             type="text"
-            placeholder="Search"
+            placeholder="Search (try: nature, portrait, urban, food)"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
+          {search && (
+            <button onClick={() => setSearch("")} className="text-muted-foreground text-xs">
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
       {/* Grid */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="grid grid-cols-3 gap-0.5"
-      >
-        {images.map((img, i) => (
-          <div
-            key={i}
-            className={`overflow-hidden ${i === 0 ? "col-span-2 row-span-2" : ""}`}
-          >
-            <img
-              src={img}
-              alt={`Explore ${i}`}
-              className="h-full w-full object-cover"
-              style={{ aspectRatio: "1" }}
-            />
-          </div>
-        ))}
-      </motion.div>
+      {filteredImages.length > 0 ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="grid grid-cols-3 gap-0.5"
+        >
+          {filteredImages.map((img, i) => (
+            <motion.div
+              key={i}
+              whileTap={{ scale: 0.95 }}
+              className={`overflow-hidden cursor-pointer ${i === 0 && !search ? "col-span-2 row-span-2" : ""}`}
+              onClick={() => setSelectedImage(img.src)}
+            >
+              <img
+                src={img.src}
+                alt={`Explore ${i}`}
+                className="h-full w-full object-cover"
+                style={{ aspectRatio: "1" }}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+          <PuffyIcon name="search" size={48} className="opacity-30 mb-3" />
+          <p className="text-sm">No results for "{search}"</p>
+        </div>
+      )}
+
+      {/* Image preview overlay */}
+      {selectedImage && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <img src={selectedImage} alt="Preview" className="max-h-[80vh] max-w-full rounded-xl object-contain" />
+        </motion.div>
+      )}
 
       <BottomNav />
     </div>

@@ -12,14 +12,8 @@ interface Message {
   text: string;
   sent: boolean;
   mood?: string;
+  time: string;
 }
-
-const initialMessages: Message[] = [
-  { id: 1, text: "We have to assign new member of my team", sent: false },
-  { id: 2, text: "Scratch to reveal", sent: true, mood: "Casual" },
-  { id: 3, text: "You were late today", sent: false, mood: "Anger" },
-  { id: 4, text: "I want to share something I am holding it for a long time", sent: true, mood: "Love" },
-];
 
 const moodStyles: Record<string, string> = {
   Casual: "bg-primary text-primary-foreground",
@@ -31,15 +25,40 @@ const moodStyles: Record<string, string> = {
 
 const Chat = () => {
   const navigate = useNavigate();
-  const [messages] = useState(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([
+    { id: 1, text: "We have to assign new member of my team", sent: false, time: "10:30 AM" },
+    { id: 2, text: "Scratch to reveal", sent: true, mood: "Casual", time: "10:32 AM" },
+    { id: 3, text: "You were late today", sent: false, mood: "Anger", time: "10:35 AM" },
+    { id: 4, text: "I want to share something I am holding it for a long time", sent: true, mood: "Love", time: "10:40 AM" },
+  ]);
   const [activeMood, setActiveMood] = useState("Casual");
   const [input, setInput] = useState("");
 
+  const sendMessage = () => {
+    if (!input.trim()) return;
+    const newMsg: Message = {
+      id: messages.length + 1,
+      text: input.trim(),
+      sent: true,
+      mood: activeMood,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+    setMessages([...messages, newMsg]);
+    setInput("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
   return (
-    <div className="flex min-h-screen flex-col bg-background pb-20">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <button onClick={() => navigate(-1)}>
+        <button onClick={() => navigate("/messages")}>
           <PuffyIcon name="arrow-left" size={22} />
         </button>
         <img src={story2} alt="Harry" className="h-10 w-10 rounded-full object-cover" />
@@ -58,23 +77,28 @@ const Chat = () => {
             animate={{ opacity: 1, y: 0 }}
             className={`flex ${msg.sent ? "justify-end" : "justify-start"}`}
           >
-            <div
-              className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
-                msg.mood
-                  ? moodStyles[msg.mood] || "bg-secondary text-secondary-foreground"
-                  : msg.sent
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-secondary-foreground"
-              }`}
-            >
-              {msg.text}
+            <div className="flex flex-col gap-0.5">
+              <div
+                className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
+                  msg.mood
+                    ? moodStyles[msg.mood] || "bg-secondary text-secondary-foreground"
+                    : msg.sent
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground"
+                }`}
+              >
+                {msg.text}
+              </div>
+              <span className={`text-[10px] text-muted-foreground ${msg.sent ? "text-right" : "text-left"}`}>
+                {msg.time}
+              </span>
             </div>
           </motion.div>
         ))}
       </div>
 
       {/* Mood selector + Input */}
-      <div className="border-t border-border bg-background px-4 py-3">
+      <div className="border-t border-border bg-background px-4 py-3 pb-safe">
         <div className="mb-3 flex items-center gap-2 overflow-x-auto">
           <PuffyIcon name="heart-filled" size={18} />
           {moods.map((mood) => (
@@ -96,13 +120,19 @@ const Chat = () => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             className="flex-1 rounded-full bg-secondary px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
+          <button
+            onClick={sendMessage}
+            disabled={!input.trim()}
+            className="rounded-full bg-primary p-2.5 transition-opacity disabled:opacity-30"
+          >
+            <PuffyIcon name="send" size={18} />
+          </button>
         </div>
       </div>
-
-      <BottomNav />
     </div>
   );
 };
