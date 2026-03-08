@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { MessageCircle, Plus, Heart, Send, Bookmark, MoreHorizontal } from "lucide-react";
-import { motion } from "framer-motion";
+import { MessageCircle, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
+import PostCard from "@/components/PostCard";
 
 import story1 from "@/assets/story1.jpg";
 import story2 from "@/assets/story2.jpg";
 import story3 from "@/assets/story3.jpg";
 import story4 from "@/assets/story4.jpg";
 import post1 from "@/assets/post1.jpg";
+import post2 from "@/assets/post2.jpg";
+import post3 from "@/assets/post3.jpg";
 
 const stories = [
   { name: "Engin", img: story1, gradient: "gradient-story-red" },
@@ -18,10 +21,42 @@ const stories = [
 
 const tabs = ["For you", "Believing", "favourites"];
 
+const posts = [
+  {
+    username: "victor.travels",
+    avatar: story3,
+    image: post1,
+    caption: "Night vibes in the garden 🌿✨",
+    likes: 1243,
+    timeAgo: "2 hours ago",
+    verified: false,
+    location: "Tropical Garden, Bali",
+  },
+  {
+    username: "hemlata",
+    avatar: story1,
+    image: post2,
+    caption: "Golden hour never disappoints 🌅",
+    likes: 3891,
+    timeAgo: "5 hours ago",
+    verified: true,
+    location: "Malibu Beach",
+  },
+  {
+    username: "bruno.lens",
+    avatar: story2,
+    image: post3,
+    caption: "City lights reflecting on water 🌃",
+    likes: 7520,
+    timeAgo: "8 hours ago",
+    verified: true,
+    location: "Shanghai, China",
+  },
+];
+
 const Feed = () => {
   const [activeTab, setActiveTab] = useState("For you");
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -29,7 +64,10 @@ const Feed = () => {
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-reveal text-2xl text-foreground">Reveal.</h1>
         <div className="flex items-center gap-3">
-          <button className="relative text-foreground">
+          <button
+            className="relative text-foreground"
+            onClick={() => navigate("/messages")}
+          >
             <MessageCircle size={24} />
             <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground">
               12
@@ -61,7 +99,7 @@ const Feed = () => {
       {/* Stories */}
       <div className="flex gap-4 overflow-x-auto px-4 pb-4 pt-1">
         {stories.map((s) => (
-          <div key={s.name} className="flex flex-col items-center gap-1">
+          <div key={s.name} className="flex shrink-0 flex-col items-center gap-1">
             <div className={`rounded-full p-[3px] ${s.gradient}`}>
               <div className="rounded-full border-2 border-background">
                 <img
@@ -76,53 +114,12 @@ const Feed = () => {
         ))}
       </div>
 
-      {/* Post */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="px-4"
-      >
-        <div className="overflow-hidden rounded-2xl" style={{ backgroundColor: "hsl(40 30% 85%)" }}>
-          <div className="flex justify-center p-6 pb-0">
-            <img
-              src={post1}
-              alt="Post"
-              className="w-72 rounded-xl object-cover shadow-2xl"
-            />
-          </div>
-          <div className="p-4" />
-        </div>
-
-        {/* Post actions */}
-        <div className="flex items-center justify-between py-3">
-          <div className="flex items-center gap-1">
-            <img src={story3} alt="user" className="h-8 w-8 rounded-full object-cover" />
-          </div>
-          <div className="flex items-center gap-5">
-            <button onClick={() => setLiked(!liked)}>
-              <Heart
-                size={26}
-                className={liked ? "fill-accent text-accent" : "text-foreground"}
-              />
-            </button>
-            <button className="text-foreground">
-              <MessageCircle size={24} />
-            </button>
-            <button className="text-foreground">
-              <Send size={22} />
-            </button>
-            <button onClick={() => setSaved(!saved)}>
-              <Bookmark
-                size={24}
-                className={saved ? "fill-foreground text-foreground" : "text-foreground"}
-              />
-            </button>
-            <button className="text-foreground">
-              <MoreHorizontal size={24} />
-            </button>
-          </div>
-        </div>
-      </motion.div>
+      {/* Posts */}
+      <div>
+        {posts.map((post, i) => (
+          <PostCard key={i} {...post} />
+        ))}
+      </div>
 
       <BottomNav />
     </div>
