@@ -354,7 +354,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
           </AnimatePresence>
 
           {/* Input */}
-          <div className="border-t border-border px-4 py-3 flex items-center gap-2 pb-safe">
+          <div className="border-t border-border px-4 py-3 flex items-center gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}>
             <input
               ref={inputRef}
               type="text"
