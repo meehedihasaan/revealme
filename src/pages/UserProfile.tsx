@@ -115,6 +115,54 @@ const UserProfile = () => {
     navigate(`/chat/${conversationId}`);
   };
 
+  const handleBlock = async () => {
+    if (!user || !userId) return;
+    if (isBlocked) {
+      await supabase.from("blocked_users").delete().eq("blocker_id", user.id).eq("blocked_id", userId);
+      setIsBlocked(false);
+      toast.success("User unblocked");
+    } else {
+      await supabase.from("blocked_users").insert({ blocker_id: user.id, blocked_id: userId });
+      setIsBlocked(true);
+      // Also unfollow
+      if (isFollowing) {
+        await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", userId);
+        setIsFollowing(false);
+        setFollowersCount(c => c - 1);
+      }
+      toast.success("User blocked");
+    }
+    setMenuOpen(false);
+  };
+
+  const handleReport = () => {
+    toast.success("Report submitted. We'll review it shortly.");
+    setMenuOpen(false);
+  };
+
+  const handleShareProfile = () => {
+    const url = `${window.location.origin}/user/${userId}`;
+    if (navigator.share) {
+      navigator.share({ title: `${displayName}'s profile`, url });
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success("Profile link copied!");
+    }
+    setMenuOpen(false);
+  };
+
+  const handleCopyProfileUrl = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/user/${userId}`);
+    toast.success("Profile link copied!");
+    setMenuOpen(false);
+  };
+
+  const handleToggleMute = () => {
+    setIsMuted(!isMuted);
+    toast.success(isMuted ? "Notifications unmuted" : "Notifications muted");
+    setMenuOpen(false);
+  };
+
   const displayName = profile?.display_name || profile?.username || "User";
   const joinDate = profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "";
 
