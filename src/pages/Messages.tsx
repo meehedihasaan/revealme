@@ -48,7 +48,7 @@ const Messages = () => {
     const [profilesRes, messagesRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("user_id, username, avatar_url")
+        .select("user_id, username, avatar_url, is_verified")
         .in("user_id", otherUserIds as string[]),
       supabase
         .from("messages")
