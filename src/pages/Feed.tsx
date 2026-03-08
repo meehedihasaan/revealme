@@ -170,7 +170,13 @@ const Feed = () => {
             >
               <div className={`rounded-full p-[3px] ${su.hasSeen ? "bg-muted-foreground/30" : "gradient-story-red"}`}>
                 <div className="rounded-full border-2 border-background">
-                  <img src={su.avatar_url || story2} alt={su.username} className="h-16 w-16 rounded-full object-cover" />
+                  {su.avatar_url ? (
+                    <img src={su.avatar_url} alt={su.username} className="h-16 w-16 rounded-full object-cover" />
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
+                      <PuffyIcon name="user" size={28} />
+                    </div>
+                  )}
                 </div>
               </div>
               <span className="max-w-[72px] truncate text-xs text-foreground">{su.username}</span>
