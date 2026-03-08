@@ -365,6 +365,19 @@ export type Database = {
         Args: { other_user_id: string }
         Returns: string
       }
+      get_conversation_other_participants: {
+        Args: { p_user_id: string }
+        Returns: {
+          conversation_id: string
+          other_user_id: string
+        }[]
+      }
+      get_conversation_partner: {
+        Args: { p_conversation_id: string }
+        Returns: {
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
