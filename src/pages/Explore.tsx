@@ -31,6 +31,7 @@ interface PostResult {
 const Explore = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { blockedIds } = useBlockedUsers();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"content" | "users">("content");
   const [users, setUsers] = useState<UserResult[]>([]);
