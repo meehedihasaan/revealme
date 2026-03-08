@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { MapPin, CalendarDays, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
@@ -19,6 +20,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
 
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || "User";
   const avatarUrl = profile?.avatar_url;
@@ -149,8 +151,10 @@ const Profile = () => {
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-0.5">
-            {posts.map((post) => (
-              <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+            {posts.map((post, idx) => (
+              <button key={post.id} onClick={() => setSelectedPostIndex(idx)}>
+                <img src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+              </button>
             ))}
           </div>
         )
@@ -160,6 +164,45 @@ const Profile = () => {
           <p className="text-sm">No tagged posts yet</p>
         </div>
       )}
+
+      {/* Full-screen post viewer */}
+      <AnimatePresence>
+        {selectedPostIndex !== null && posts[selectedPostIndex] && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background overflow-y-auto"
+          >
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border sticky top-0 bg-background z-10">
+              <button onClick={() => setSelectedPostIndex(null)}>
+                <PuffyIcon name="arrow-left" size={22} />
+              </button>
+              <span className="text-lg font-bold text-foreground">Posts</span>
+            </div>
+            <div>
+              {posts.slice(selectedPostIndex).map((post) => (
+                <PostCard
+                  key={post.id}
+                  postId={post.id}
+                  postUserId={post.user_id}
+                  username={post.username}
+                  avatar={post.avatar_url || ""}
+                  image={post.image_url}
+                  caption={post.caption}
+                  likesCount={post.likesCount}
+                  timeAgo={post.timeAgo}
+                  verified={post.is_verified}
+                  location={post.location}
+                  isLiked={post.isLiked}
+                  isSaved={post.isSaved}
+                  onDelete={() => { setSelectedPostIndex(null); }}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <BottomNav />
     </div>
