@@ -27,6 +27,7 @@ import CreateStory from "./pages/CreateStory";
 import StoryViewer from "./pages/StoryViewer";
 import EditProfile from "./pages/EditProfile";
 import FollowersList from "./pages/FollowersList";
+import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
