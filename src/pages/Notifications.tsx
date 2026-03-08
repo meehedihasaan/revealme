@@ -11,7 +11,7 @@ import story4 from "@/assets/story4.jpg";
 import explore1 from "@/assets/explore1.jpg";
 import explore2 from "@/assets/explore2.jpg";
 
-type NotifType = "like" | "comment" | "believe";
+type NotifType = "like" | "comment" | "follow";
 
 interface Notification {
   username: string;
@@ -32,16 +32,16 @@ const Notifications = () => {
     { username: "kshiprakulkarni", avatar: story4, text: "liked your post.", time: "3d", type: "like", read: true },
     { username: "stavyanath", avatar: explore1, text: "liked your post.", time: "3d", type: "like", read: true },
     { username: "saikiransathe", avatar: explore2, text: "Commented on your post.", time: "3d", type: "comment", commentPreview: "🔥🔥🔥", read: true },
-    { username: "triptijain", avatar: story1, text: "started believing you.", time: "4d", type: "believe", read: true },
+    { username: "triptijain", avatar: story1, text: "started following you.", time: "4d", type: "follow", read: true },
     { username: "tarakchanda", avatar: story3, text: "liked your post.", time: "7d", type: "like", read: true },
     { username: "usmanabbas99", avatar: story2, text: "liked your post.", time: "12d", type: "like", read: true },
     { username: "mehedihasan", avatar: story4, text: "liked your post.", time: "12d", type: "like", read: true },
   ]);
 
-  const [believeStates, setBelieveStates] = useState<Record<string, boolean>>({});
+  const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
 
-  const handleBelieveBack = (username: string) => {
-    setBelieveStates((prev) => ({ ...prev, [username]: !prev[username] }));
+  const handleFollowBack = (username: string) => {
+    setFollowStates((prev) => ({ ...prev, [username]: !prev[username] }));
   };
 
   const markAllRead = () => {
@@ -93,16 +93,16 @@ const Notifications = () => {
                 <p className="mt-0.5 text-sm">{n.commentPreview}</p>
               )}
             </div>
-            {n.type === "believe" ? (
+            {n.type === "follow" ? (
               <button
-                onClick={() => handleBelieveBack(n.username)}
+                onClick={() => handleFollowBack(n.username)}
                 className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-colors ${
-                  believeStates[n.username]
+                  followStates[n.username]
                     ? "bg-secondary text-secondary-foreground"
                     : "bg-primary text-primary-foreground"
                 }`}
               >
-                {believeStates[n.username] ? "Believing" : "Believe Back"}
+                {followStates[n.username] ? "Following" : "Follow Back"}
               </button>
             ) : (
               <NotifIcon type={n.type} />

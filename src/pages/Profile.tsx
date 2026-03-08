@@ -68,9 +68,18 @@ const Profile = () => {
         )}
 
         <div className="mt-2 flex gap-6">
-          <div><span className="font-bold text-foreground">{followersCount}</span> <span className="text-sm text-muted-foreground">Believers</span></div>
-          <div><span className="font-bold text-foreground">{followingCount}</span> <span className="text-sm text-muted-foreground">Believing</span></div>
-          <div><span className="font-bold text-foreground">{posts.length}</span> <span className="text-sm text-muted-foreground">Posts</span></div>
+          <button onClick={() => navigate(`/followers?tab=followers&userId=${user?.id}`)}>
+            <span className="font-bold text-foreground">{followersCount}</span>{" "}
+            <span className="text-sm text-muted-foreground">Followers</span>
+          </button>
+          <button onClick={() => navigate(`/followers?tab=following&userId=${user?.id}`)}>
+            <span className="font-bold text-foreground">{followingCount}</span>{" "}
+            <span className="text-sm text-muted-foreground">Following</span>
+          </button>
+          <div>
+            <span className="font-bold text-foreground">{posts.length}</span>{" "}
+            <span className="text-sm text-muted-foreground">Posts</span>
+          </div>
         </div>
 
         <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
@@ -105,7 +114,11 @@ const Profile = () => {
       {/* Grid */}
       {activeTab === "grid" ? (
         loading ? (
-          <ProfileShimmer />
+          <div className="grid grid-cols-3 gap-0.5 mt-1">
+            {[...Array(9)].map((_, i) => (
+              <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
+            ))}
+          </div>
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
