@@ -226,23 +226,24 @@ const Explore = () => {
                       </div>
                     )}
                   </button>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground text-sm">{u.username || "user"}</p>
-                    {u.display_name && <p className="text-xs text-muted-foreground truncate">{u.display_name}</p>}
-                  </div>
+                  <button onClick={() => navigate(`/user/${u.user_id}`)} className="flex-1 min-w-0 text-left">
+                    <p className="font-bold text-foreground truncate flex items-center gap-1">{u.username || "user"}</p>
+                    {u.display_name && <p className="text-sm text-muted-foreground truncate">{u.display_name}</p>}
+                  </button>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => startConversation(u.user_id)}
-                      className="rounded-lg bg-secondary p-2 text-secondary-foreground"
+                      className="rounded-lg bg-secondary p-2.5 text-secondary-foreground"
                     >
                       <PuffyIcon name="message-circle" size={16} />
                     </button>
                     <button
                       onClick={() => toggleFollow(u.user_id)}
-                      className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-colors ${
+                      className={`flex items-center gap-1 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
                         u.isFollowing ? "bg-secondary text-secondary-foreground" : "bg-primary text-primary-foreground"
                       }`}
                     >
+                      <PuffyIcon name={u.isFollowing ? "check" : "plus"} size={14} />
                       {u.isFollowing ? "Following" : "Follow"}
                     </button>
                   </div>
