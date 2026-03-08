@@ -57,6 +57,17 @@ const UserProfile = () => {
   const [isBlocked, setIsBlocked] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
+  const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(userId);
+  const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (taggedPostIds.length === 0) { setTaggedPosts([]); return; }
+    const fetchTagged = async () => {
+      const { data } = await supabase.from("posts").select("id, image_url").in("id", taggedPostIds);
+      setTaggedPosts(data || []);
+    };
+    fetchTagged();
+  }, [taggedPostIds]);
 
   // Check block status
   useEffect(() => {
