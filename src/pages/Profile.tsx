@@ -151,8 +151,10 @@ const Profile = () => {
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-0.5">
-            {posts.map((post) => (
-              <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+            {posts.map((post, idx) => (
+              <button key={post.id} onClick={() => setSelectedPostIndex(idx)}>
+                <img src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+              </button>
             ))}
           </div>
         )
