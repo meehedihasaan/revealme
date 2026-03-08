@@ -228,10 +228,7 @@ const PostCard = ({
       </div>
 
       {/* Image */}
-      <div className="relative w-full cursor-pointer select-none overflow-hidden" onDoubleClick={handleDoubleTap}>
-        <img src={image} alt="Post" className="w-full object-cover" style={{ maxHeight: "580px" }} draggable={false} />
-        <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
-      </div>
+      <PostImage postId={postId} image={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} />
 
       {/* Actions */}
       <div className="flex items-center justify-between px-4 py-2.5">
