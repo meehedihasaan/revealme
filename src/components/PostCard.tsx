@@ -159,17 +159,18 @@ const PostCard = ({
     <div className="border-b border-border">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-2.5">
-        <div className="gradient-story-red rounded-full p-[2px]">
+        <button onClick={() => navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`)} className="gradient-story-red rounded-full p-[2px]">
           <div className="rounded-full border-[1.5px] border-background">
             <img src={avatar} alt={username} className="h-8 w-8 rounded-full object-cover" />
           </div>
-        </div>
-        <div className="flex-1 min-w-0">
+        </button>
+        <button onClick={() => navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`)} className="flex-1 min-w-0 text-left">
           <div className="flex items-center gap-1">
             <span className="text-sm font-semibold text-foreground">{username}</span>
             {verified && <span className="text-xs text-primary">✓</span>}
           </div>
           {location && <p className="text-[11px] text-muted-foreground">{location}</p>}
+        </button>
         </div>
         <PostMenu postId={postId} postUserId={postUserId || ""} onDelete={onDelete} />
       </div>
