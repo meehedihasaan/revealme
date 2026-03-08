@@ -51,6 +51,15 @@ const Profile = () => {
 
   const joinDate = profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "";
 
+  if (!profile || loading) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <ProfileShimmer />
+        <BottomNav />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
