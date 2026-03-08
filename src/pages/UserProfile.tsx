@@ -8,6 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
+import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
