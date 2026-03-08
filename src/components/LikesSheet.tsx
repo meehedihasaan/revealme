@@ -72,7 +72,7 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
                 <div className="space-y-0">
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="flex items-center gap-3 px-4 py-3">
-                      <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+                      <div className="h-12 w-12 rounded-full bg-muted animate-pulse" />
                       <div className="h-3 w-24 rounded bg-muted animate-pulse" />
                     </div>
                   ))}
@@ -83,13 +83,13 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
                 users.map((u) => (
                   <div key={u.user_id} className="flex items-center gap-3 px-4 py-3">
                     {u.avatar_url ? (
-                      <img src={u.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+                      <img src={u.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover" />
                     ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
-                        <PuffyIcon name="user" size={18} />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                        <PuffyIcon name="user" size={20} />
                       </div>
                     )}
-                    <span className="text-sm font-semibold text-foreground flex items-center gap-1">{u.username || "user"}{u.is_verified && <VerifiedBadge size={13} />}</span>
+                    <span className="font-bold text-foreground flex items-center gap-1">{u.username || "user"}{u.is_verified && <VerifiedBadge size={13} />}</span>
                   </div>
                 ))
               )}
