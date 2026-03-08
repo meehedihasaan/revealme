@@ -80,6 +80,7 @@ const Messages = () => {
         other_user_id: otherUserId,
         username: prof?.username || "user",
         avatar_url: prof?.avatar_url || null,
+        is_verified: prof?.is_verified || false,
         lastMessage: latestMsg?.image_url ? "📷 Photo" : (latestMsg?.text || ""),
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
