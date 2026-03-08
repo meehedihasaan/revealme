@@ -171,7 +171,6 @@ const PostCard = ({
           </div>
           {location && <p className="text-[11px] text-muted-foreground">{location}</p>}
         </button>
-        </div>
         <PostMenu postId={postId} postUserId={postUserId || ""} onDelete={onDelete} />
       </div>
 
