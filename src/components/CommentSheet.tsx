@@ -56,7 +56,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
     const commentIds = commentsData.map((c: any) => c.id);
 
     const [{ data: profiles }, { data: allLikes }, { data: myLikes }] = await Promise.all([
-      supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", userIds),
+      supabase.from("profiles").select("user_id, username, avatar_url, is_verified").in("user_id", userIds),
       supabase.from("comment_likes").select("comment_id").in("comment_id", commentIds),
       user
         ? supabase.from("comment_likes").select("comment_id").in("comment_id", commentIds).eq("user_id", user.id)
