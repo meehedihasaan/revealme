@@ -108,7 +108,7 @@ const Messages = () => {
               if (c.conversation_id !== msg.conversation_id) return c;
               return {
                 ...c,
-                lastMessage: msg.text,
+                lastMessage: msg.image_url ? "📷 Photo" : msg.text,
                 lastMessageTime: msg.created_at,
                 unread: msg.sender_id !== user.id ? c.unread + 1 : c.unread,
               };
