@@ -78,6 +78,7 @@ const Notifications = () => {
       created_at: n.created_at,
       actor_username: profileMap[n.actor_id]?.username || "user",
       actor_avatar: profileMap[n.actor_id]?.avatar_url || null,
+      actor_verified: profileMap[n.actor_id]?.is_verified || false,
     })));
     setLoading(false);
   };
