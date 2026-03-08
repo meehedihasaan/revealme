@@ -280,7 +280,7 @@ const UserProfile = () => {
                 <ProfileMenuItem icon="info" label="Report this user" onClick={handleReport} destructive />
               </div>
 
-              <div className="px-5 pt-1 pb-5">
+              <div className="px-5 pt-1 pb-5 safe-bottom">
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setMenuOpen(false)}
