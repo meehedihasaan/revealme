@@ -1,33 +1,121 @@
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const tabs = [
   { icon: "camera", path: "/feed", label: "Feed" },
   { icon: "search", path: "/explore", label: "Explore" },
-  { icon: "message-circle", path: "/messages", label: "Messages" },
-  { icon: "bell", path: "/notifications", label: "Alerts" },
+  { icon: "message-circle", path: "/messages", label: "Messages", badgeKey: "messages" },
+  { icon: "bell", path: "/notifications", label: "Alerts", badgeKey: "notifications" },
   { icon: "user", path: "/profile", label: "Profile" },
 ];
 
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  // Fetch unread counts
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchCounts = async () => {
+      const { count: notifCount } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
+      setUnreadNotifs(notifCount || 0);
+
+      // Unread messages
+      const { data: myConvs } = await supabase
+        .from("conversation_participants")
+        .select("conversation_id")
+        .eq("user_id", user.id);
+      if (myConvs && myConvs.length > 0) {
+        const convIds = myConvs.map(c => c.conversation_id);
+        const { count: msgCount } = await supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .in("conversation_id", convIds)
+          .eq("read", false)
+          .neq("sender_id", user.id);
+        setUnreadMessages(msgCount || 0);
+      }
+    };
+    fetchCounts();
+
+    // Real-time notifications badge
+    const notifChannel = supabase
+      .channel("bottomnav-notifs")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`,
+      }, () => {
+        setUnreadNotifs(prev => prev + 1);
+      })
+      .subscribe();
+
+    // Real-time messages badge
+    const msgChannel = supabase
+      .channel("bottomnav-messages")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+      }, (payload) => {
+        const msg = payload.new as any;
+        if (msg.sender_id !== user.id) {
+          setUnreadMessages(prev => prev + 1);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(notifChannel);
+      supabase.removeChannel(msgChannel);
+    };
+  }, [user]);
+
+  // Reset badge when visiting the page
+  useEffect(() => {
+    if (location.pathname === "/notifications") setUnreadNotifs(0);
+    if (location.pathname === "/messages") setUnreadMessages(0);
+  }, [location.pathname]);
+
+  const getBadge = (badgeKey?: string) => {
+    if (badgeKey === "notifications" && unreadNotifs > 0) return unreadNotifs;
+    if (badgeKey === "messages" && unreadMessages > 0) return unreadMessages;
+    return 0;
+  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-bottom">
       <div className="mx-auto flex max-w-md items-center justify-around py-2">
-        {tabs.map(({ icon, path, label }) => {
+        {tabs.map(({ icon, path, label, badgeKey }) => {
           const active = location.pathname === path || (path === "/feed" && location.pathname === "/");
+          const badge = getBadge(badgeKey);
           return (
             <button
               key={path}
               onClick={() => navigate(path)}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 transition-opacity ${
+              className={`relative flex flex-col items-center gap-0.5 px-3 py-1 transition-opacity ${
                 active ? "opacity-100" : "opacity-50"
               }`}
               aria-label={label}
             >
               <PuffyIcon name={icon} size={24} />
+              {badge > 0 && (
+                <span className="absolute -top-0.5 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
             </button>
           );
         })}

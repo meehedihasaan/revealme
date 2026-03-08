@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
@@ -24,78 +24,112 @@ const Messages = () => {
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchConversations = useCallback(async () => {
+    if (!user) return;
+    const { data: myParticipations } = await supabase
+      .from("conversation_participants")
+      .select("conversation_id")
+      .eq("user_id", user.id);
+
+    if (!myParticipations || myParticipations.length === 0) {
+      setConversations([]);
+      setLoading(false);
+      return;
+    }
+
+    const convIds = myParticipations.map(p => p.conversation_id);
+
+    const { data: allParticipants } = await supabase
+      .from("conversation_participants")
+      .select("conversation_id, user_id")
+      .in("conversation_id", convIds)
+      .neq("user_id", user.id);
+
+    if (!allParticipants || allParticipants.length === 0) {
+      setConversations([]);
+      setLoading(false);
+      return;
+    }
+
+    const otherUserIds = [...new Set(allParticipants.map(p => p.user_id))];
+    const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", otherUserIds);
+    const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+
+    const items: ConversationItem[] = [];
+    for (const convId of convIds) {
+      const otherParticipant = allParticipants.find(p => p.conversation_id === convId);
+      if (!otherParticipant) continue;
+
+      const { data: msgs } = await supabase
+        .from("messages")
+        .select("text, created_at, read, sender_id")
+        .eq("conversation_id", convId)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      const { count: unreadCount } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("conversation_id", convId)
+        .eq("read", false)
+        .neq("sender_id", user.id);
+
+      const prof = profileMap[otherParticipant.user_id];
+      items.push({
+        conversation_id: convId,
+        other_user_id: otherParticipant.user_id,
+        username: prof?.username || "user",
+        avatar_url: prof?.avatar_url || null,
+        lastMessage: msgs?.[0]?.text || "",
+        lastMessageTime: msgs?.[0]?.created_at || "",
+        unread: unreadCount || 0,
+      });
+    }
+
+    items.sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
+    setConversations(items);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations]);
+
+  // Real-time: listen for new messages to update inbox
   useEffect(() => {
     if (!user) return;
-    const fetchConversations = async () => {
-      // Get user's conversations
-      const { data: myParticipations } = await supabase
-        .from("conversation_participants")
-        .select("conversation_id")
-        .eq("user_id", user.id);
-
-      if (!myParticipations || myParticipations.length === 0) {
-        setConversations([]);
-        setLoading(false);
-        return;
-      }
-
-      const convIds = myParticipations.map(p => p.conversation_id);
-
-      // Get other participants
-      const { data: allParticipants } = await supabase
-        .from("conversation_participants")
-        .select("conversation_id, user_id")
-        .in("conversation_id", convIds)
-        .neq("user_id", user.id);
-
-      if (!allParticipants || allParticipants.length === 0) {
-        setConversations([]);
-        setLoading(false);
-        return;
-      }
-
-      const otherUserIds = [...new Set(allParticipants.map(p => p.user_id))];
-      const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", otherUserIds);
-      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
-
-      // Get latest message per conversation
-      const items: ConversationItem[] = [];
-      for (const convId of convIds) {
-        const otherParticipant = allParticipants.find(p => p.conversation_id === convId);
-        if (!otherParticipant) continue;
-
-        const { data: msgs } = await supabase
-          .from("messages")
-          .select("text, created_at, read, sender_id")
-          .eq("conversation_id", convId)
-          .order("created_at", { ascending: false })
-          .limit(1);
-
-        const { count: unreadCount } = await supabase
-          .from("messages")
-          .select("*", { count: "exact", head: true })
-          .eq("conversation_id", convId)
-          .eq("read", false)
-          .neq("sender_id", user.id);
-
-        const prof = profileMap[otherParticipant.user_id];
-        items.push({
-          conversation_id: convId,
-          other_user_id: otherParticipant.user_id,
-          username: prof?.username || "user",
-          avatar_url: prof?.avatar_url || null,
-          lastMessage: msgs?.[0]?.text || "",
-          lastMessageTime: msgs?.[0]?.created_at || "",
-          unread: unreadCount || 0,
+    const channel = supabase
+      .channel("messages-inbox-realtime")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+      }, (payload) => {
+        const msg = payload.new as any;
+        // Update conversations list in real time
+        setConversations(prev => {
+          const existing = prev.find(c => c.conversation_id === msg.conversation_id);
+          if (existing) {
+            const updated = prev.map(c => {
+              if (c.conversation_id !== msg.conversation_id) return c;
+              return {
+                ...c,
+                lastMessage: msg.text,
+                lastMessageTime: msg.created_at,
+                unread: msg.sender_id !== user.id ? c.unread + 1 : c.unread,
+              };
+            });
+            return updated.sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
+          }
+          // New conversation — refetch
+          fetchConversations();
+          return prev;
         });
-      }
+      })
+      .subscribe();
 
-      items.sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
-      setConversations(items);
-      setLoading(false);
-    };
-    fetchConversations();
-  }, [user]);
+    return () => { supabase.removeChannel(channel); };
+  }, [user, fetchConversations]);
 
   const filtered = conversations.filter(c => c.username.toLowerCase().includes(search.toLowerCase()));
   const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
