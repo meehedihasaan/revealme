@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import BottomNav from "@/components/BottomNav";
 
 import story1 from "@/assets/story1.jpg";
 import story2 from "@/assets/story2.jpg";
@@ -43,14 +44,18 @@ const Messages = () => {
     c.username.toLowerCase().includes(search.toLowerCase())
   );
 
+  const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
-        <button onClick={() => navigate(-1)}>
+        <button onClick={() => navigate("/feed")}>
           <PuffyIcon name="arrow-left" size={22} />
         </button>
-        <h1 className="text-lg font-bold text-foreground">Messages</h1>
+        <h1 className="text-lg font-bold text-foreground">
+          Messages {totalUnread > 0 && <span className="text-primary">({totalUnread})</span>}
+        </h1>
         <button>
           <PuffyIcon name="edit" size={20} />
         </button>
@@ -98,41 +103,50 @@ const Messages = () => {
 
       {/* Conversation list */}
       <div>
-        {filtered.map((conv, i) => (
-          <motion.button
-            key={conv.id}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.02 }}
-            onClick={() => navigate("/chat")}
-            className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-secondary/50"
-          >
-            <div className="relative shrink-0">
-              <img src={conv.avatar} alt={conv.username} className="h-14 w-14 rounded-full object-cover" />
-              {conv.online && (
-                <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-background bg-success" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1">
-                <span className="font-semibold text-foreground">{conv.username}</span>
-                {conv.verified && <span className="text-xs text-primary">✓</span>}
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+            <PuffyIcon name="search" size={40} className="opacity-30 mb-3" />
+            <p className="text-sm">No conversations found</p>
+          </div>
+        ) : (
+          filtered.map((conv, i) => (
+            <motion.button
+              key={conv.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.02 }}
+              onClick={() => navigate("/chat")}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-secondary/50"
+            >
+              <div className="relative shrink-0">
+                <img src={conv.avatar} alt={conv.username} className="h-14 w-14 rounded-full object-cover" />
+                {conv.online && (
+                  <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-background bg-success" />
+                )}
               </div>
-              <p className={`truncate text-sm ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                {conv.lastMessage}
-              </p>
-            </div>
-            <div className="flex flex-col items-end gap-1 shrink-0">
-              <span className="text-xs text-muted-foreground">{conv.time}</span>
-              {conv.unread > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                  {conv.unread}
-                </span>
-              )}
-            </div>
-          </motion.button>
-        ))}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="font-semibold text-foreground">{conv.username}</span>
+                  {conv.verified && <span className="text-xs text-primary">✓</span>}
+                </div>
+                <p className={`truncate text-sm ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                  {conv.lastMessage}
+                </p>
+              </div>
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <span className="text-xs text-muted-foreground">{conv.time}</span>
+                {conv.unread > 0 && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                    {conv.unread}
+                  </span>
+                )}
+              </div>
+            </motion.button>
+          ))
+        )}
       </div>
+
+      <BottomNav />
     </div>
   );
 };

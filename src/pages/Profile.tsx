@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
+import { useAuth } from "@/contexts/AuthContext";
 
 import bannerImg from "@/assets/profile-banner.jpg";
-import logoImg from "@/assets/reveal-logo.png";
 import explore1 from "@/assets/explore1.jpg";
 import explore2 from "@/assets/explore2.jpg";
 import explore3 from "@/assets/explore3.jpg";
@@ -17,19 +17,23 @@ const gridImages = [explore1, explore2, explore3, explore4, explore5, explore6];
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { profile, user } = useAuth();
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
-  const [believing, setBelieving] = useState(true);
+
+  const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || "User";
+  const avatarUrl = profile?.avatar_url;
 
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-foreground">
+        <button onClick={() => navigate("/feed")} className="flex items-center gap-2 text-foreground">
           <PuffyIcon name="arrow-left" size={20} />
-          <span className="text-lg font-bold">reveal</span>
-          <span className="text-primary">✓</span>
+          <span className="text-lg font-bold">{profile?.username || "reveal"}</span>
         </button>
-        <button><PuffyIcon name="more-horizontal" size={24} /></button>
+        <button onClick={() => navigate("/settings")}>
+          <PuffyIcon name="settings" size={22} />
+        </button>
       </div>
 
       {/* Banner */}
@@ -38,35 +42,39 @@ const Profile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
-          <div className="inline-block rounded-2xl border-4 border-background bg-background p-2">
-            <img src={logoImg} alt="Reveal" className="h-16 w-16 rounded-xl" />
+          <div className="inline-block rounded-2xl border-4 border-background bg-background overflow-hidden">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-xl object-cover" />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-secondary">
+                <PuffyIcon name="user" size={32} />
+              </div>
+            )}
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold text-foreground">Reveal</h2>
+        <h2 className="text-2xl font-bold text-foreground">{displayName}</h2>
+        {profile?.username && (
+          <p className="text-sm text-muted-foreground">@{profile.username}</p>
+        )}
 
-        <div className="mt-1 flex gap-6">
-          <div><span className="font-bold text-foreground">538</span> <span className="text-sm text-muted-foreground">Believers</span></div>
-          <div><span className="font-bold text-foreground">22</span> <span className="text-sm text-muted-foreground">Believing</span></div>
-          <div><span className="font-bold text-foreground">13</span> <span className="text-sm text-muted-foreground">Post</span></div>
+        <div className="mt-2 flex gap-6">
+          <div><span className="font-bold text-foreground">0</span> <span className="text-sm text-muted-foreground">Believers</span></div>
+          <div><span className="font-bold text-foreground">0</span> <span className="text-sm text-muted-foreground">Believing</span></div>
+          <div><span className="font-bold text-foreground">{gridImages.length}</span> <span className="text-sm text-muted-foreground">Posts</span></div>
         </div>
 
         <p className="mt-2 text-sm text-foreground">Hey there, Enjoy the world!</p>
         <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-          <span>🎭 Entertainer</span>
-          <span>📍 Born 14 March 2019</span>
+          <span>📧 {user?.email}</span>
         </div>
 
         <motion.button
           whileTap={{ scale: 0.97 }}
-          onClick={() => setBelieving(!believing)}
-          className={`mt-4 w-full rounded-lg py-2.5 text-sm font-semibold transition-colors ${
-            believing
-              ? "bg-secondary text-secondary-foreground"
-              : "bg-primary text-primary-foreground"
-          }`}
+          onClick={() => navigate("/settings/account")}
+          className="mt-4 w-full rounded-lg bg-secondary py-2.5 text-sm font-semibold text-secondary-foreground transition-colors"
         >
-          {believing ? "Believing" : "Believe"}
+          Edit Profile
         </motion.button>
       </div>
 
@@ -86,12 +94,19 @@ const Profile = () => {
         </button>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-3 gap-0.5">
-        {gridImages.map((img, i) => (
-          <img key={i} src={img} alt={`Post ${i}`} className="aspect-square w-full object-cover" />
-        ))}
-      </div>
+      {/* Grid / Tagged */}
+      {activeTab === "grid" ? (
+        <div className="grid grid-cols-3 gap-0.5">
+          {gridImages.map((img, i) => (
+            <img key={i} src={img} alt={`Post ${i}`} className="aspect-square w-full object-cover" />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+          <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />
+          <p className="text-sm">No tagged posts yet</p>
+        </div>
+      )}
 
       <BottomNav />
     </div>
