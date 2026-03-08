@@ -170,12 +170,17 @@ const UserProfile = () => {
     setMenuOpen(false);
   };
 
-  const handleShareProfile = () => {
+  const handleShareProfile = async () => {
     const url = `${window.location.origin}/user/${userId}`;
-    if (navigator.share) {
-      navigator.share({ title: `${displayName}'s profile`, url });
-    } else {
-      navigator.clipboard.writeText(url);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${displayName}'s profile`, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Profile link copied!");
+      }
+    } catch {
+      await navigator.clipboard.writeText(url);
       toast.success("Profile link copied!");
     }
     setMenuOpen(false);

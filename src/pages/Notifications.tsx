@@ -156,6 +156,20 @@ const Notifications = () => {
     }
   };
 
+  const handleNotifClick = async (n: NotifItem) => {
+    // Mark as read
+    if (!n.read) {
+      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+      await supabase.from("notifications").update({ read: true }).eq("id", n.id);
+    }
+    // Navigate
+    if (n.type === "follow") {
+      navigate(`/user/${n.actor_id}`);
+    } else if (n.post_id) {
+      navigate(`/user/${n.actor_id}`);
+    }
+  };
+
   const NotifIcon = ({ type }: { type: NotifType }) => {
     if (type === "like") return <PuffyIcon name="heart-filled" size={20} />;
     if (type === "comment") return <PuffyIcon name="message-circle" size={20} />;
@@ -195,7 +209,8 @@ const Notifications = () => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.02 }}
-              className={`flex items-center gap-3 px-4 py-3 ${!n.read ? "bg-primary/5" : ""}`}
+              className={`flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-secondary/50 ${!n.read ? "bg-primary/5" : ""}`}
+              onClick={() => handleNotifClick(n)}
             >
               <button onClick={() => navigate(`/user/${n.actor_id}`)} className="shrink-0">
                 {n.actor_avatar ? (
