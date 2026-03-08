@@ -8,6 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsShimmer } from "@/components/ShimmerLoader";
 import { formatDistanceToNow } from "date-fns";
 
+import VerifiedBadge from "@/components/VerifiedBadge";
+
 type NotifType = "like" | "comment" | "follow";
 
 interface NotifItem {
@@ -20,6 +22,7 @@ interface NotifItem {
   created_at: string;
   actor_username: string;
   actor_avatar: string | null;
+  actor_verified: boolean;
 }
 
 const Notifications = () => {
