@@ -107,48 +107,6 @@ const DoubleTapHeart = () => (
 );
 
 
-const PostImage = ({ postId, image, onDoubleTap, showHeart }: { postId: string; image: string; onDoubleTap: () => void; showHeart: boolean }) => {
-  const navigate = useNavigate();
-  const { tags } = usePostTags(postId);
-  const [showTags, setShowTags] = useState(false);
-
-  const handleTap = () => {
-    setShowTags(prev => !prev);
-  };
-
-  return (
-    <div className="relative w-full cursor-pointer select-none overflow-hidden" onDoubleClick={onDoubleTap} onClick={handleTap}>
-      <img src={image} alt="Post" className="w-full object-cover" style={{ maxHeight: "580px" }} draggable={false} />
-      {/* Tag indicators */}
-      <AnimatePresence>
-        {showTags && tags.length > 0 && tags.map(tag => (
-          <motion.div
-            key={tag.user_id}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute z-10 cursor-pointer"
-            style={{ left: `${tag.x_position}%`, top: `${tag.y_position}%`, transform: "translate(-50%, -100%)" }}
-            onClick={(e) => { e.stopPropagation(); navigate(`/user/${tag.user_id}`); }}
-          >
-            <div className="bg-black/80 text-white text-xs px-2.5 py-1 rounded-md whitespace-nowrap flex items-center gap-1 shadow-lg">
-              <PuffyIcon name="user" size={10} className="invert" />
-              {tag.username}
-            </div>
-            <div className="w-0 h-0 mx-auto border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black/80" />
-          </motion.div>
-        ))}
-      </AnimatePresence>
-      {/* Tag icon indicator */}
-      {tags.length > 0 && (
-        <div className="absolute bottom-3 left-3 bg-black/60 rounded-full p-1.5">
-          <PuffyIcon name="user" size={12} className="invert" />
-        </div>
-      )}
-      <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
-    </div>
-  );
-};
 
 const PostCard = ({
   postId,
