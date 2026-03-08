@@ -93,20 +93,46 @@ const Chat = () => {
       config: { presence: { key: user.id } },
     });
 
+    presenceChannelRef.current = presenceChannel;
+
     presenceChannel
       .on("presence", { event: "sync" }, () => {
         const state = presenceChannel.presenceState();
         const onlineIds = Object.keys(state);
         setIsOnline(onlineIds.includes(otherUser.user_id));
+
+        // Check if other user is typing
+        const otherState = state[otherUser.user_id];
+        if (otherState && Array.isArray(otherState) && otherState.length > 0) {
+          setIsTyping(!!(otherState[0] as any).is_typing);
+        } else {
+          setIsTyping(false);
+        }
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
-          await presenceChannel.track({ user_id: user.id, online_at: new Date().toISOString() });
+          await presenceChannel.track({ user_id: user.id, online_at: new Date().toISOString(), is_typing: false });
         }
       });
 
-    return () => { supabase.removeChannel(presenceChannel); };
+    return () => {
+      presenceChannelRef.current = null;
+      supabase.removeChannel(presenceChannel);
+    };
   }, [conversationId, user, otherUser]);
+
+  // Broadcast typing status
+  const broadcastTyping = () => {
+    if (!presenceChannelRef.current || !user) return;
+    presenceChannelRef.current.track({ user_id: user.id, online_at: new Date().toISOString(), is_typing: true });
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      if (presenceChannelRef.current) {
+        presenceChannelRef.current.track({ user_id: user.id, online_at: new Date().toISOString(), is_typing: false });
+      }
+    }, 2000);
+  };
 
   // Realtime messages
   useEffect(() => {
