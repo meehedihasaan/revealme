@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
@@ -173,6 +173,19 @@ const PostCard = ({
   const [liked, setLiked] = useState(initialLiked);
   const [saved, setSaved] = useState(initialSaved);
   const [likeCount, setLikeCount] = useState(likesCount);
+  const [hasStory, setHasStory] = useState(false);
+
+  // Check if post user has active stories
+  useEffect(() => {
+    if (!postUserId) return;
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    supabase
+      .from("stories")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", postUserId)
+      .gte("created_at", since)
+      .then(({ count }) => setHasStory((count || 0) > 0));
+  }, [postUserId]);
   const [showHeart, setShowHeart] = useState(false);
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -228,8 +241,17 @@ const PostCard = ({
     <div className="border-b border-border">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-2.5">
-        <button onClick={() => navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`)} className="gradient-story-red rounded-full p-[2px]">
-          <div className="rounded-full border-[1.5px] border-background">
+        <button
+          onClick={() => {
+            if (hasStory) {
+              navigate(`/story?user=${postUserId}`);
+            } else {
+              navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`);
+            }
+          }}
+          className={`rounded-full p-[2px] ${hasStory ? "gradient-story-red" : ""}`}
+        >
+          <div className={`rounded-full ${hasStory ? "border-[1.5px] border-background" : ""}`}>
             {avatar ? (
               <img src={avatar} alt={username} className="h-8 w-8 rounded-full object-cover" />
             ) : (
