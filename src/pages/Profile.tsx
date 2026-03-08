@@ -214,7 +214,7 @@ const Profile = () => {
               </button>
               <span className="text-lg font-bold text-foreground">Posts</span>
             </div>
-            <div>
+            <div className="pb-16">
               {posts.slice(selectedPostIndex).map((post) => (
                 <PostCard
                   key={post.id}
