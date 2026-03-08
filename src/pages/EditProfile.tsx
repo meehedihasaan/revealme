@@ -12,6 +12,8 @@ const EditProfile = () => {
 
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [username, setUsername] = useState(profile?.username || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [location, setLocation] = useState(profile?.location || "");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -37,7 +39,6 @@ const EditProfile = () => {
         avatar_url = publicUrl;
       }
 
-      // Check username availability if changed
       if (username !== profile?.username && username) {
         const { data: existing } = await supabase
           .from("profiles")
@@ -54,7 +55,13 @@ const EditProfile = () => {
 
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: displayName, username, avatar_url })
+        .update({
+          display_name: displayName,
+          username,
+          avatar_url,
+          bio,
+          location,
+        })
         .eq("user_id", user.id);
 
       if (error) throw error;
@@ -115,6 +122,27 @@ const EditProfile = () => {
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._]/g, ""))}
+            className="mt-1 w-full rounded-lg bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground">Bio</label>
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder="Tell something about yourself..."
+            rows={3}
+            maxLength={160}
+            className="mt-1 w-full rounded-lg bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+          />
+          <p className="text-right text-[10px] text-muted-foreground mt-1">{bio.length}/160</p>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground">Location</label>
+          <input
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="City, Country"
             className="mt-1 w-full rounded-lg bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>

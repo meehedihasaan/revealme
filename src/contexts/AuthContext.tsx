@@ -8,7 +8,10 @@ interface Profile {
   username: string | null;
   display_name: string | null;
   avatar_url: string | null;
+  bio: string | null;
+  location: string | null;
   onboarding_completed: boolean;
+  created_at: string;
 }
 
 interface AuthContextType {
@@ -56,7 +59,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          // Use setTimeout to avoid Supabase deadlock
           setTimeout(() => fetchProfile(session.user.id), 0);
         } else {
           setProfile(null);
