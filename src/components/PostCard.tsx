@@ -251,8 +251,8 @@ const PostCard = ({
         <PostMenu postId={postId} postUserId={postUserId || ""} caption={caption} location={location} onDelete={onDelete} />
       </div>
 
-      {/* Image */}
-      <PostImage postId={postId} image={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} />
+      {/* Image Carousel */}
+      <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
 
       {/* Actions */}
       <div className="flex items-center justify-between px-4 py-2.5">
