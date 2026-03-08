@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPin, CalendarDays } from "lucide-react";
+import { MapPin, CalendarDays, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import VerifiedBadge from "@/components/VerifiedBadge";
