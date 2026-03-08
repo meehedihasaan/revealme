@@ -16,6 +16,7 @@ interface DiscoverUser {
 const Following = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { blockedIds } = useBlockedUsers();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<DiscoverUser[]>([]);
