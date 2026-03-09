@@ -38,7 +38,9 @@ const Explore = () => {
   const [users, setUsers] = useState<UserResult[]>([]);
   const [posts, setPosts] = useState<PostResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchLoading, setSearchLoading] = us// Fetch explconst [selectedImore posts
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  // Fetch explore posts
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
