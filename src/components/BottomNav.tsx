@@ -18,7 +18,6 @@ const BottomNav = () => {
   const { user } = useAuth();
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
-  const [lastFeedTap, setLastFeedTap] = useState(0);
 
   // Fetch unread counts
   useEffect(() => {
