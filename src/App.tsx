@@ -40,6 +40,7 @@ import AdminUserManagement from "./pages/admin/AdminUserManagement";
 import AdminRoleManagement from "./pages/admin/AdminRoleManagement";
 import AdminAppSettings from "./pages/admin/AdminAppSettings";
 import AdminPosts from "./pages/admin/AdminPosts";
+import PostDetail from "./pages/PostDetail";
 
 const queryClient = new QueryClient();
 
