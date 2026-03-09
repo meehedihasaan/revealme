@@ -19,6 +19,9 @@ function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { data: permissions } = useUserPermissions();
+
+  const adminItems = getAdminItems(permissions);
 
   const isActive = (path: string) => {
     if (path === '/admin') {
