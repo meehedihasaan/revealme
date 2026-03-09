@@ -104,22 +104,7 @@ const BottomNav = () => {
           return (
             <button
               key={path}
-              onClick={() => {
-                if (path === "/feed") {
-                  const now = Date.now();
-                  const isOnFeed = location.pathname === "/feed" || location.pathname === "/";
-                  if (isOnFeed && now - lastFeedTap < 300) {
-                    toast({
-                      title: "Refreshing feed…",
-                      duration: 1500,
-                    });
-                    setTimeout(() => window.location.reload(), 400);
-                    return;
-                  }
-                  setLastFeedTap(now);
-                }
-                navigate(path);
-              }}
+              onClick={() => navigate(path)}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1 transition-opacity ${
                 active ? "opacity-100" : "opacity-50"
               }`}
