@@ -54,6 +54,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, profile, loading } = useAuth();
   if (loading) return <PageLoader />;
+  // Wait for both user and profile to be loaded before making routing decisions
+  if (user && profile === null) return <PageLoader />;
   if (user && profile?.onboarding_completed) return <Navigate to="/feed" replace />;
   if (user && !profile?.onboarding_completed) return <Navigate to="/onboarding/avatar" replace />;
   return <>{children}</>;
