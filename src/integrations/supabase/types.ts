@@ -592,6 +592,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_posts: { Args: { _user_id: string }; Returns: boolean }
+      can_manage_users: { Args: { _user_id: string }; Returns: boolean }
+      can_manage_verification: { Args: { _user_id: string }; Returns: boolean }
       create_direct_conversation: {
         Args: { other_user_id: string }
         Returns: string
@@ -615,6 +618,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      has_admin_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -622,6 +626,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

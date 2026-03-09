@@ -1,23 +1,27 @@
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
-import { useAdmin } from "@/hooks/useAdmin";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import PageLoader from "@/components/PageLoader";
 import { NavLink } from "@/components/NavLink";
-import { LayoutDashboard, Users, CheckCircle, Image as ImageIcon, Settings, UserCog } from "lucide-react";
+import { LayoutDashboard, Users, CheckCircle, Image as ImageIcon, Settings, UserCog, Shield } from "lucide-react";
 
-const adminItems = [
-  { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
-  { title: "Verifications", url: "/admin/verifications", icon: CheckCircle },
-  { title: "Users", url: "/admin/users", icon: Users },
-  { title: "User Management", url: "/admin/user-management", icon: UserCog },
-  { title: "Posts", url: "/admin/posts", icon: ImageIcon },
-  { title: "App Settings", url: "/admin/settings", icon: Settings },
-];
+const getAdminItems = (permissions: any) => [
+  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, show: permissions?.isAdmin },
+  { title: "Verifications", url: "/admin/verifications", icon: CheckCircle, show: permissions?.canManageVerifications },
+  { title: "Users", url: "/admin/users", icon: Users, show: permissions?.canManageVerifications },
+  { title: "User Management", url: "/admin/user-management", icon: UserCog, show: permissions?.canManageUsers },
+  { title: "Role Management", url: "/admin/roles", icon: Shield, show: permissions?.canManageRoles },
+  { title: "Posts", url: "/admin/posts", icon: ImageIcon, show: permissions?.canManagePosts },
+  { title: "App Settings", url: "/admin/settings", icon: Settings, show: permissions?.canManageAppSettings },
+].filter(item => item.show);
 
 function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { data: permissions } = useUserPermissions();
+
+  const adminItems = getAdminItems(permissions);
 
   const isActive = (path: string) => {
     if (path === '/admin') {
@@ -52,13 +56,13 @@ function AdminSidebar() {
 }
 
 export default function AdminLayout() {
-  const { isAdmin, loading } = useAdmin();
+  const { data: permissions, isLoading } = useUserPermissions();
 
-  if (loading) {
+  if (isLoading) {
     return <PageLoader />;
   }
 
-  if (!isAdmin) {
+  if (!permissions?.isAdmin) {
     return <Navigate to="/feed" replace />;
   }
 

@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Save, Settings, Palette } from "lucide-react";
+import { Save, Settings, Palette, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 
 type AppSettings = {
   id: string;
@@ -23,6 +24,7 @@ type AppSettings = {
 export default function AdminAppSettings() {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<Partial<AppSettings>>({});
+  const { data: permissions } = useUserPermissions();
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['app-settings'],
@@ -69,6 +71,18 @@ export default function AdminAppSettings() {
   const handleInputChange = (field: keyof AppSettings, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  if (!permissions?.canManageAppSettings) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
+          <p className="text-muted-foreground">You don't have permission to manage app settings.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

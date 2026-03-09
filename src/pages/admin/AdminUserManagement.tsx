@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { CheckCircle, Shield, Search, User, UserX, UserPlus, Trash2, Edit } from "lucide-react";
+import { CheckCircle, Shield, Search, User, UserX, UserPlus, Trash2, Edit, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 
 type Profile = {
   id: string;
@@ -39,6 +40,7 @@ export default function AdminUserManagement() {
   const [newUser, setNewUser] = useState<NewUser>({ email: '', password: '', display_name: '', username: '' });
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const { data: permissions } = useUserPermissions();
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin-users'],
@@ -140,6 +142,18 @@ export default function AdminUserManagement() {
     u.username?.toLowerCase().includes(search.toLowerCase()) ||
     u.display_name?.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (!permissions?.canManageUsers) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
+          <p className="text-muted-foreground">You don't have permission to manage users.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
