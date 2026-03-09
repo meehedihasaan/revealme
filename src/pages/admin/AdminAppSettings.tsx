@@ -33,11 +33,15 @@ export default function AdminAppSettings() {
         .single();
       if (error) throw error;
       return data as AppSettings;
-    },
-    onSuccess: (data) => {
-      setFormData(data);
     }
   });
+
+  // Update form data when settings are loaded
+  useState(() => {
+    if (settings && Object.keys(formData).length === 0) {
+      setFormData(settings);
+    }
+  }, [settings]);
 
   const updateSettings = useMutation({
     mutationFn: async (updatedSettings: Partial<AppSettings>) => {
