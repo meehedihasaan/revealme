@@ -36,6 +36,8 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminVerifications from "./pages/admin/AdminVerifications";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminUserManagement from "./pages/admin/AdminUserManagement";
+import AdminAppSettings from "./pages/admin/AdminAppSettings";
 import AdminPosts from "./pages/admin/AdminPosts";
 
 const queryClient = new QueryClient();
@@ -85,6 +87,8 @@ const AppRoutes = () => (
         <Route index element={<AdminDashboard />} />
         <Route path="verifications" element={<AdminVerifications />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="user-management" element={<AdminUserManagement />} />
+        <Route path="settings" element={<AdminAppSettings />} />
         <Route path="posts" element={<AdminPosts />} />
       </Route>
       <Route path="*" element={<NotFound />} />

@@ -3,13 +3,15 @@ import { SidebarProvider, SidebarTrigger, Sidebar, SidebarContent, SidebarGroup,
 import { useAdmin } from "@/hooks/useAdmin";
 import PageLoader from "@/components/PageLoader";
 import { NavLink } from "@/components/NavLink";
-import { LayoutDashboard, Users, CheckCircle, Image as ImageIcon } from "lucide-react";
+import { LayoutDashboard, Users, CheckCircle, Image as ImageIcon, Settings, UserCog } from "lucide-react";
 
 const adminItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Verifications", url: "/admin/verifications", icon: CheckCircle },
   { title: "Users", url: "/admin/users", icon: Users },
+  { title: "User Management", url: "/admin/user-management", icon: UserCog },
   { title: "Posts", url: "/admin/posts", icon: ImageIcon },
+  { title: "App Settings", url: "/admin/settings", icon: Settings },
 ];
 
 function AdminSidebar() {
