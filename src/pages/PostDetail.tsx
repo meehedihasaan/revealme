@@ -174,22 +174,12 @@ const PostDetail = () => {
         />
       </motion.div>
 
-      {/* Force open comment sheet if needed */}
-      {commentOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50">
-          <div className="fixed bottom-0 left-0 right-0 bg-background rounded-t-3xl max-h-[80vh] overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <h2 className="text-lg font-semibold text-foreground">Comments</h2>
-              <button onClick={() => setCommentOpen(false)}>
-                <PuffyIcon name="chevron-down" size={24} />
-              </button>
-            </div>
-            <div className="p-4">
-              <p className="text-sm text-muted-foreground">Comments will load here...</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Use CommentSheet component */}
+      <CommentSheet 
+        postId={post.id} 
+        isOpen={commentOpen} 
+        onClose={() => setCommentOpen(false)} 
+      />
     </div>
   );
 };
