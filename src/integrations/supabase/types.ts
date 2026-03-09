@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          app_description: string | null
+          app_logo_url: string | null
+          app_name: string
+          created_at: string
+          id: string
+          primary_color: string | null
+          secondary_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          app_description?: string | null
+          app_logo_url?: string | null
+          app_name?: string
+          created_at?: string
+          id?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          app_description?: string | null
+          app_logo_url?: string | null
+          app_name?: string
+          created_at?: string
+          id?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blocked_users: {
         Row: {
           blocked_id: string
