@@ -72,6 +72,18 @@ export default function AdminAppSettings() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  if (!permissions?.canManageAppSettings) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
+          <p className="text-muted-foreground">You don't have permission to manage app settings.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-6">

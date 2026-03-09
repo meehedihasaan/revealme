@@ -62,7 +62,7 @@ export default function AdminLayout() {
     return <PageLoader />;
   }
 
-  if (!isAdmin) {
+  if (!permissions?.isAdmin) {
     return <Navigate to="/feed" replace />;
   }
 

@@ -89,6 +89,7 @@ const AppRoutes = () => (
         <Route path="verifications" element={<AdminVerifications />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="user-management" element={<AdminUserManagement />} />
+        <Route path="roles" element={<AdminRoleManagement />} />
         <Route path="settings" element={<AdminAppSettings />} />
         <Route path="posts" element={<AdminPosts />} />
       </Route>
