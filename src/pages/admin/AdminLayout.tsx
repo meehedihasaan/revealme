@@ -56,9 +56,9 @@ function AdminSidebar() {
 }
 
 export default function AdminLayout() {
-  const { isAdmin, loading } = useAdmin();
+  const { data: permissions, isLoading } = useUserPermissions();
 
-  if (loading) {
+  if (isLoading) {
     return <PageLoader />;
   }
 
