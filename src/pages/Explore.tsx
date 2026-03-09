@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,7 +39,6 @@ const Explore = () => {
   const [posts, setPosts] = useState<PostResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Fetch explore posts
   useEffect(() => {
@@ -268,7 +267,7 @@ const Explore = () => {
                 key={p.id}
                 whileTap={{ scale: 0.95 }}
                 className={`overflow-hidden cursor-pointer ${i === 0 ? "col-span-2 row-span-2" : ""}`}
-                onClick={() => setSelectedImage(p.image_url)}
+                onClick={() => navigate(`/post/${p.id}`)}
               >
                 <img src={p.image_url} alt="" className="h-full w-full object-cover" style={{ aspectRatio: "1" }} />
               </motion.div>
@@ -277,20 +276,6 @@ const Explore = () => {
         )
       )}
 
-      {/* Image preview */}
-      <AnimatePresence>
-        {selectedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 p-4"
-            onClick={() => setSelectedImage(null)}
-          >
-            <img src={selectedImage} alt="Preview" className="max-h-[80vh] max-w-full rounded-xl object-contain" />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <BottomNav />
     </div>
