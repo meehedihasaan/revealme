@@ -40,6 +40,7 @@ export default function AdminUserManagement() {
   const [newUser, setNewUser] = useState<NewUser>({ email: '', password: '', display_name: '', username: '' });
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const { data: permissions } = useUserPermissions();
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin-users'],
