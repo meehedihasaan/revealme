@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motionotion";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,9 +39,7 @@ const Explore = () => {
   const [posts, setPosts] = useState<PostResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-  // Fetch explore posts
+  const [selectedImore posts
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
