@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ const BottomNav = () => {
   const { user } = useAuth();
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const lastFeedTapRef = useRef(0);
 
   // Fetch unread counts
   useEffect(() => {
@@ -104,7 +105,19 @@ const BottomNav = () => {
           return (
             <button
               key={path}
-              onClick={() => navigate(path)}
+              onClick={() => {
+                const isOnFeed = location.pathname === "/feed" || location.pathname === "/";
+                if (path === "/feed" && isOnFeed) {
+                  const now = Date.now();
+                  if (now - lastFeedTapRef.current < 400) {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    window.dispatchEvent(new CustomEvent("pull-to-refresh"));
+                  }
+                  lastFeedTapRef.current = now;
+                  return;
+                }
+                navigate(path);
+              }}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1 transition-opacity ${
                 active ? "opacity-100" : "opacity-50"
               }`}

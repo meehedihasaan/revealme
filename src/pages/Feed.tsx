@@ -42,6 +42,13 @@ const Feed = () => {
 
   useEffect(() => { fetchFollowing(); }, [fetchFollowing]);
 
+  // Listen for double-tap home refresh event
+  useEffect(() => {
+    const handler = () => refetch();
+    window.addEventListener("pull-to-refresh", handler);
+    return () => window.removeEventListener("pull-to-refresh", handler);
+  }, [refetch]);
+
   useEffect(() => {
     const fetchStories = async () => {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
