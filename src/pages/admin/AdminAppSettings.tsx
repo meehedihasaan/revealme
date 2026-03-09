@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Save, Settings, Palette, Type } from "lucide-react";
+import { Save, Settings, Palette } from "lucide-react";
 import { toast } from "sonner";
 
 type AppSettings = {
@@ -26,7 +26,7 @@ export default function AdminAppSettings() {
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['app-settings'],
-    queryFn: async () => {
+    queryFn: async (): Promise<AppSettings> => {
       const { data, error } = await supabase
         .from('app_settings')
         .select('*')
@@ -37,7 +37,7 @@ export default function AdminAppSettings() {
   });
 
   // Update form data when settings are loaded
-  React.useEffect(() => {
+  useEffect(() => {
     if (settings && Object.keys(formData).length === 0) {
       setFormData(settings);
     }
@@ -45,10 +45,11 @@ export default function AdminAppSettings() {
 
   const updateSettings = useMutation({
     mutationFn: async (updatedSettings: Partial<AppSettings>) => {
+      if (!settings?.id) throw new Error("Settings not loaded");
       const { error } = await supabase
         .from('app_settings')
         .update(updatedSettings)
-        .eq('id', settings?.id);
+        .eq('id', settings.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -198,7 +199,7 @@ export default function AdminAppSettings() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">
-                  Last updated: {settings ? new Date(settings.updated_at).toLocaleDateString() : 'Never'}
+                  Last updated: {settings?.updated_at ? new Date(settings.updated_at).toLocaleDateString() : 'Never'}
                 </p>
               </div>
               <Button
