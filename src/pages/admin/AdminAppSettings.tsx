@@ -37,11 +37,11 @@ export default function AdminAppSettings() {
   });
 
   // Update form data when settings are loaded
-  useState(() => {
+  React.useEffect(() => {
     if (settings && Object.keys(formData).length === 0) {
       setFormData(settings);
     }
-  }, [settings]);
+  }, [settings, formData]);
 
   const updateSettings = useMutation({
     mutationFn: async (updatedSettings: Partial<AppSettings>) => {
