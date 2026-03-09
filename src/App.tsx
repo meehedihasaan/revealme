@@ -37,6 +37,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminVerifications from "./pages/admin/AdminVerifications";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
+import AdminRoleManagement from "./pages/admin/AdminRoleManagement";
 import AdminAppSettings from "./pages/admin/AdminAppSettings";
 import AdminPosts from "./pages/admin/AdminPosts";
 
