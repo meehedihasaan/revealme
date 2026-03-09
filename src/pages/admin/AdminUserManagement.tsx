@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { CheckCircle, Shield, Search, User, UserX, UserPlus, Trash2, Edit } from "lucide-react";
+import { CheckCircle, Shield, Search, User, UserX, UserPlus, Trash2, Edit, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 
 type Profile = {
   id: string;
