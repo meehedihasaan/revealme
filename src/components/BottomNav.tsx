@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
 const tabs = [
   { icon: "camera", path: "/feed", label: "Feed" },
@@ -110,7 +111,11 @@ const BottomNav = () => {
                   const now = Date.now();
                   const isOnFeed = location.pathname === "/feed" || location.pathname === "/";
                   if (isOnFeed && now - lastFeedTap < 300) {
-                    window.location.reload();
+                    toast({
+                      title: "Refreshing feed…",
+                      duration: 1500,
+                    });
+                    setTimeout(() => window.location.reload(), 400);
                     return;
                   }
                   setLastFeedTap(now);
