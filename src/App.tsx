@@ -81,7 +81,7 @@ const AppRoutes = () => (
       <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
       <Route path="/followers" element={<ProtectedRoute><FollowersList /></ProtectedRoute>} />
       <Route path="/user/:userId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path="verifications" element={<AdminVerifications />} />
         <Route path="users" element={<AdminUsers />} />
