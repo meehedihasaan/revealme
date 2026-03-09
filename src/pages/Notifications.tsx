@@ -162,11 +162,14 @@ const Notifications = () => {
       setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
       await supabase.from("notifications").update({ read: true }).eq("id", n.id);
     }
-    // Navigate
+    
+    // Navigate based on notification type
     if (n.type === "follow") {
       navigate(`/user/${n.actor_id}`);
-    } else if (n.post_id) {
-      navigate(`/user/${n.actor_id}`);
+    } else if (n.type === "comment" && n.post_id) {
+      navigate(`/post/${n.post_id}?openComments=true`);
+    } else if (n.type === "like" && n.post_id) {
+      navigate(`/post/${n.post_id}`);
     }
   };
 
