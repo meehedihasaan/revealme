@@ -2,11 +2,13 @@ import { useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { t } = useLanguage();
+  const { data: permissions } = useUserPermissions();
 
   const sections = [
     {
@@ -37,6 +39,13 @@ const Settings = () => {
       description: "",
       path: "",
     },
+    ...(permissions?.isSuperAdmin ? [{
+      icon: "settings",
+      title: "Admin Panel",
+      subtitle: "Manage platform",
+      description: "Users, roles, verifications & settings",
+      path: "/admin",
+    }] : []),
   ];
 
   return (
