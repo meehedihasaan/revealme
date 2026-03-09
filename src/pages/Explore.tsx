@@ -277,20 +277,6 @@ const Explore = () => {
         )
       )}
 
-      {/* Image preview */}
-      <AnimatePresence>
-        {selectedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 p-4"
-            onClick={() => setSelectedImage(null)}
-          >
-            <img src={selectedImage} alt="Preview" className="max-h-[80vh] max-w-full rounded-xl object-contain" />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <BottomNav />
     </div>
