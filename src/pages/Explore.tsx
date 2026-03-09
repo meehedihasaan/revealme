@@ -268,7 +268,7 @@ const Explore = () => {
                 key={p.id}
                 whileTap={{ scale: 0.95 }}
                 className={`overflow-hidden cursor-pointer ${i === 0 ? "col-span-2 row-span-2" : ""}`}
-                onClick={() => setSelectedImage(p.image_url)}
+                onClick={() => navigate(`/post/${p.id}`)}
               >
                 <img src={p.image_url} alt="" className="h-full w-full object-cover" style={{ aspectRatio: "1" }} />
               </motion.div>
