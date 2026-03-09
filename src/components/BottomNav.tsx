@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/hooks/use-toast";
 
 const tabs = [
   { icon: "camera", path: "/feed", label: "Feed" },
