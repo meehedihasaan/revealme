@@ -24,6 +24,7 @@ type AppSettings = {
 export default function AdminAppSettings() {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<Partial<AppSettings>>({});
+  const { data: permissions } = useUserPermissions();
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['app-settings'],
