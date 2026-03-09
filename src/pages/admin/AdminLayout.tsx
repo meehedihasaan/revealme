@@ -1,6 +1,6 @@
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
-import { useAdmin } from "@/hooks/useAdmin";
+import { useUserPermissions } from "@/hooks/useUserPermissions";
 import PageLoader from "@/components/PageLoader";
 import { NavLink } from "@/components/NavLink";
 import { LayoutDashboard, Users, CheckCircle, Image as ImageIcon, Settings, UserCog } from "lucide-react";
