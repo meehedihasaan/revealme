@@ -40,13 +40,10 @@ const PostDetail = () => {
     
     setLoading(true);
     
-    // Fetch post with user profile data
+    // Fetch post data
     const { data: postData } = await supabase
       .from("posts")
-      .select(`
-        id, caption, image_url, location, created_at, user_id,
-        profiles!posts_user_id_fkey(username, avatar_url, is_verified)
-      `)
+      .select("id, caption, image_url, location, created_at, user_id")
       .eq("id", postId)
       .single();
 
@@ -54,6 +51,13 @@ const PostDetail = () => {
       setLoading(false);
       return;
     }
+
+    // Fetch profile separately
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("username, avatar_url, is_verified")
+      .eq("user_id", postData.user_id)
+      .single();
 
     // Get likes count and check if user liked
     const { data: likes, count: likesCount } = await supabase
@@ -71,8 +75,6 @@ const PostDetail = () => {
       .eq("user_id", user.id)
       .single();
 
-    const profile = postData.profiles as any;
-    
     setPost({
       id: postData.id,
       caption: postData.caption || "",
@@ -80,9 +82,9 @@ const PostDetail = () => {
       location: postData.location || "",
       created_at: postData.created_at,
       user_id: postData.user_id,
-      username: profile?.username || "user",
-      avatar: profile?.avatar_url || "",
-      verified: profile?.is_verified || false,
+      username: profileData?.username || "user",
+      avatar: profileData?.avatar_url || "",
+      verified: profileData?.is_verified || false,
       likesCount: likesCount || 0,
       isLiked,
       isSaved: !!saved,

@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/hooks/use-toast";
 
 const tabs = [
   { icon: "camera", path: "/feed", label: "Feed" },
@@ -19,7 +18,6 @@ const BottomNav = () => {
   const { user } = useAuth();
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
-  const [lastFeedTap, setLastFeedTap] = useState(0);
 
   // Fetch unread counts
   useEffect(() => {
@@ -106,22 +104,7 @@ const BottomNav = () => {
           return (
             <button
               key={path}
-              onClick={() => {
-                if (path === "/feed") {
-                  const now = Date.now();
-                  const isOnFeed = location.pathname === "/feed" || location.pathname === "/";
-                  if (isOnFeed && now - lastFeedTap < 300) {
-                    toast({
-                      title: "Refreshing feed…",
-                      duration: 1500,
-                    });
-                    setTimeout(() => window.location.reload(), 400);
-                    return;
-                  }
-                  setLastFeedTap(now);
-                }
-                navigate(path);
-              }}
+              onClick={() => navigate(path)}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1 transition-opacity ${
                 active ? "opacity-100" : "opacity-50"
               }`}
