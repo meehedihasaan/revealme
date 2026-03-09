@@ -111,7 +111,11 @@ const BottomNav = () => {
                   const now = Date.now();
                   const isOnFeed = location.pathname === "/feed" || location.pathname === "/";
                   if (isOnFeed && now - lastFeedTap < 300) {
-                    window.location.reload();
+                    toast({
+                      title: "Refreshing feed…",
+                      duration: 1500,
+                    });
+                    setTimeout(() => window.location.reload(), 400);
                     return;
                   }
                   setLastFeedTap(now);
