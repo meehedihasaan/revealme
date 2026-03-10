@@ -158,13 +158,13 @@ const Feed = () => {
       <PullToRefresh onRefresh={handleRefresh}>
         {/* Stories */}
         <div className="flex gap-4 overflow-x-auto px-4 pb-4 pt-1">
-          {/* Your story - taps avatar to view, taps camera to add */}
-          <div className="flex shrink-0 flex-col items-center gap-1">
+          {/* Your story */}
+          <div className="flex shrink-0 flex-col items-center gap-1 relative">
             <button
               onClick={() => userHasStory ? navigate(`/story?user=${user?.id}`) : navigate("/create-story")}
             >
               <div className={`rounded-[26px] p-[5px] ${userHasStory ? getStoryColor(user?.id || "") : ""}`}>
-                <div className="rounded-[21px] border-[3px] border-background relative">
+                <div className="rounded-[21px] border-[3px] border-background">
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt="You" className="h-[68px] w-[68px] rounded-[18px] object-cover" />
                   ) : (
@@ -175,13 +175,11 @@ const Feed = () => {
                 </div>
               </div>
             </button>
-            {/* Always show camera icon to add more stories */}
             <button
-              onClick={() => navigate("/create-story")}
-              className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary border-2 border-background text-primary-foreground"
-              style={{ position: 'relative', marginTop: -18, marginLeft: 36, zIndex: 2 }}
+              onClick={(e) => { e.stopPropagation(); navigate("/create-story"); }}
+              className="absolute bottom-5 right-0 flex h-6 w-6 items-center justify-center rounded-full bg-primary border-2 border-background text-primary-foreground z-10"
             >
-              <PuffyIcon name="camera" size={12} />
+              <PuffyIcon name="camera" size={11} />
             </button>
             <span className="max-w-[72px] truncate text-xs text-foreground">Your story</span>
           </div>
@@ -192,6 +190,20 @@ const Feed = () => {
               onClick={() => navigate(`/story?user=${su.user_id}`)}
               className="flex shrink-0 flex-col items-center gap-1"
             >
+              <div className={`rounded-[26px] p-[5px] ${su.hasSeen ? "bg-muted-foreground/30" : getStoryColor(su.user_id)}`}>
+                <div className="rounded-[21px] border-[3px] border-background">
+                  {su.avatar_url ? (
+                    <img src={su.avatar_url} alt={su.username} className="h-[68px] w-[68px] rounded-[18px] object-cover" />
+                  ) : (
+                    <div className="flex h-[68px] w-[68px] items-center justify-center rounded-[18px] bg-secondary">
+                      <PuffyIcon name="user" size={28} />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <span className="max-w-[72px] truncate text-xs text-foreground">{su.username}</span>
+            </button>
+          ))}
               <div className={`rounded-[24px] p-[4px] ${su.hasSeen ? "bg-muted-foreground/30" : getStoryColor(su.user_id)}`}>
                 <div className="rounded-[20px] border-[3px] border-background">
                   {su.avatar_url ? (
