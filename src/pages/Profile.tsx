@@ -188,7 +188,7 @@ const Profile = () => {
         <div className="flex items-center gap-1.5">
           <h2 className="text-2xl font-bold text-foreground">{displayName}</h2>
           {profile?.is_verified && <VerifiedBadge size={20} />}
-          {profile?.is_private && <Lock size={16} className="text-muted-foreground" />}
+          {profile?.is_private && <Lock size={16} className="text-foreground" />}
         </div>
         {profile?.username && (
           <p className="text-sm text-muted-foreground">@{profile.username}</p>
