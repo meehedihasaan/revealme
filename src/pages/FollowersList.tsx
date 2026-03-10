@@ -144,9 +144,9 @@ const FollowersList = () => {
               className="flex items-center gap-3 px-4 py-3"
             >
               {u.avatar_url ? (
-                <img src={u.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover" />
+                <img src={u.avatar_url} alt="" className="h-12 w-12 rounded-xl object-cover" />
               ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
                   <PuffyIcon name="user" size={22} />
                 </div>
               )}
