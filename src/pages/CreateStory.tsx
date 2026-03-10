@@ -299,7 +299,7 @@ const CreateStory = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm"
           >
             <div className="w-[85%] flex flex-col items-center gap-4">
               <input
@@ -307,7 +307,7 @@ const CreateStory = () => {
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
                 placeholder="Type your text..."
-                className="w-full bg-transparent text-center text-2xl font-bold text-white placeholder:text-white/40 focus:outline-none"
+                className="w-full bg-transparent text-center text-2xl font-bold text-foreground placeholder:text-muted-foreground focus:outline-none"
                 style={{ color: textColor }}
               />
               <div className="flex gap-2">
@@ -315,13 +315,13 @@ const CreateStory = () => {
                   <button
                     key={c}
                     onClick={() => setTextColor(c)}
-                    className={`h-7 w-7 rounded-full border-2 ${textColor === c ? "border-white" : "border-white/30"}`}
+                    className={`h-7 w-7 rounded-full border-2 ${textColor === c ? "border-foreground" : "border-muted-foreground/30"}`}
                     style={{ backgroundColor: c }}
                   />
                 ))}
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setShowTextInput(false)} className="rounded-full bg-white/20 px-5 py-2 text-sm font-semibold text-white">
+                <button onClick={() => setShowTextInput(false)} className="rounded-full bg-secondary px-5 py-2 text-sm font-semibold text-foreground">
                   Cancel
                 </button>
                 <button onClick={addText} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">
