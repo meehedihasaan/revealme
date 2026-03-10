@@ -106,6 +106,15 @@ const PostCard = ({
   const [likesOpen, setLikesOpen] = useState(false);
   const [following, setFollowing] = useState(initialFollowing);
   const [followLoading, setFollowLoading] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
+
+  useEffect(() => {
+    supabase
+      .from("comments")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", postId)
+      .then(({ count }) => setCommentCount(count || 0));
+  }, [postId]);
 
   const handleDoubleTap = () => {
     if (!liked) toggleLike();
@@ -212,10 +221,10 @@ const PostCard = ({
         <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
       ) : (
         <div
-          className="relative px-5 py-8 min-h-[120px] flex items-center"
+          className="relative px-5 py-4"
           onDoubleClick={handleDoubleTap}
         >
-          <p className="text-base text-foreground leading-relaxed">{caption}</p>
+          <p className="text-[15px] text-foreground leading-relaxed">{caption}</p>
           <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
         </div>
       )}
@@ -244,14 +253,17 @@ const PostCard = ({
         </motion.button>
       </div>
 
-      {/* Likes - clickable */}
-      <div className="px-4">
+      {/* Likes & Comments count */}
+      <div className="px-4 flex items-center gap-3">
         <button onClick={() => setLikesOpen(true)} className="text-sm font-semibold text-foreground">
           {likeCount.toLocaleString()} likes
         </button>
+        <button onClick={() => setCommentOpen(true)} className="text-sm font-semibold text-foreground">
+          {commentCount.toLocaleString()} comments
+        </button>
       </div>
 
-      {/* Caption - only show if post has an image (text-only posts already display the text) */}
+      {/* Caption - only show if post has an image */}
       {image && caption && (
         <div className="px-4 pb-1 pt-0.5">
           <p className="text-sm text-foreground">
@@ -260,11 +272,6 @@ const PostCard = ({
           </p>
         </div>
       )}
-
-      {/* View comments */}
-      <button onClick={() => setCommentOpen(true)} className="px-4 pb-1">
-        <span className="text-xs text-muted-foreground">View comments</span>
-      </button>
 
       {/* Time */}
       <div className="px-4 pb-3">
