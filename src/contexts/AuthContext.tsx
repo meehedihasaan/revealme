@@ -14,6 +14,7 @@ interface Profile {
   onboarding_completed: boolean;
   is_private: boolean;
   is_verified: boolean;
+  gender: string | null;
   created_at: string;
 }
 
