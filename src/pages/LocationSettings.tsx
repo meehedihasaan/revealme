@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Navigation, Loader2 } from "lucide-react";
+import { MapPin, Navigation, Loader2, Shield, Eye, EyeOff } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,34 +49,22 @@ const LocationSettings = () => {
         const lng = pos.coords.longitude;
         setLatitude(lat);
         setLongitude(lng);
-
-        // Reverse geocode to get city name
         try {
           const res = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`
           );
           const data = await res.json();
           const city =
-            data.address?.city ||
-            data.address?.town ||
-            data.address?.village ||
-            data.address?.county ||
-            data.address?.state ||
-            "";
+            data.address?.city || data.address?.town || data.address?.village ||
+            data.address?.county || data.address?.state || "";
           if (city) setLocationName(city);
-        } catch {
-          // Reverse geocode failed, coordinates still saved
-        }
+        } catch {}
         setDetecting(false);
-        toast({ title: "Location detected!", description: `Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}` });
+        toast({ title: "Location detected!", description: `${locationName || "Your area"} found` });
       },
-      (err) => {
+      () => {
         setDetecting(false);
-        toast({
-          title: "Location access denied",
-          description: "Please allow location access in your browser settings.",
-          variant: "destructive",
-        });
+        toast({ title: "Location access denied", description: "Please allow location access in your browser settings.", variant: "destructive" });
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -107,11 +96,11 @@ const LocationSettings = () => {
     return (
       <div className="min-h-screen bg-background">
         <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-          <button onClick={() => navigate(-1)}><PuffyIcon name="arrow-left" size={24} /></button>
-          <h1 className="text-lg font-semibold text-foreground">Location Settings</h1>
+          <button onClick={() => navigate(-1)}><PuffyIcon name="arrow-left" size={22} /></button>
+          <h1 className="text-lg font-semibold text-foreground">Location</h1>
         </div>
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          <Loader2 size={28} className="animate-spin text-primary" />
         </div>
       </div>
     );
@@ -121,104 +110,161 @@ const LocationSettings = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-        <button onClick={() => navigate(-1)}><PuffyIcon name="arrow-left" size={24} /></button>
-        <h1 className="text-lg font-semibold text-foreground">Location Settings</h1>
+        <button onClick={() => navigate(-1)}><PuffyIcon name="arrow-left" size={22} /></button>
+        <h1 className="text-lg font-semibold text-foreground">Location</h1>
       </div>
 
-      <div className="px-4 py-5 space-y-6">
-        {/* Show on map toggle */}
-        <div className="flex items-center justify-between rounded-xl bg-card border border-border p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-              <MapPin size={20} className="text-primary" />
+      <div className="px-4 py-5 space-y-5">
+        {/* Hero illustration */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center py-6"
+        >
+          <div className="relative">
+            <div className="h-20 w-20 rounded-[22px] bg-primary/10 flex items-center justify-center">
+              <MapPin size={36} className="text-primary" />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">Show me on map</p>
-              <p className="text-xs text-muted-foreground">Others can see your location on the map</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowOnMap(!showOnMap)}
-            className={`relative h-7 w-12 rounded-full transition-colors ${showOnMap ? "bg-primary" : "bg-muted"}`}
-          >
-            <span
-              className={`absolute top-0.5 h-6 w-6 rounded-full bg-background shadow transition-transform ${
-                showOnMap ? "translate-x-5" : "translate-x-0.5"
-              }`}
+            <motion.div
+              animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0, 0.4] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="absolute inset-0 rounded-[22px] border-2 border-primary/30"
             />
-          </button>
-        </div>
+          </div>
+          <h2 className="text-xl font-bold text-foreground mt-4">Location Settings</h2>
+          <p className="text-xs text-muted-foreground mt-1 text-center max-w-[260px]">
+            Control how others discover you on the map
+          </p>
+        </motion.div>
 
-        {showOnMap && (
-          <>
-            {/* Auto detect */}
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-foreground">Automatic Location</p>
-              <p className="text-xs text-muted-foreground">
-                Reveal will detect your location with your permission. Your exact address is never shared — only your approximate area is shown on the map.
-              </p>
-              <button
-                onClick={detectLocation}
-                disabled={detecting}
-                className="flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-5 py-3 text-sm font-semibold w-full justify-center"
-              >
-                {detecting ? (
-                  <Loader2 size={18} className="animate-spin" />
-                ) : (
-                  <Navigation size={18} />
-                )}
-                {detecting ? "Detecting..." : "Detect My Location"}
-              </button>
-              {latitude !== null && longitude !== null && (
-                <div className="flex items-center gap-2 rounded-lg bg-secondary px-4 py-2.5">
-                  <MapPin size={14} className="text-primary shrink-0" />
-                  <p className="text-xs text-foreground">
-                    {locationName ? `${locationName} · ` : ""}
-                    {latitude.toFixed(4)}, {longitude.toFixed(4)}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Manual location */}
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-foreground">Manual Location</p>
-              <p className="text-xs text-muted-foreground">
-                Or type your city/area name manually.
-              </p>
-              <input
-                type="text"
-                value={locationName}
-                onChange={(e) => setLocationName(e.target.value)}
-                placeholder="e.g. Dhaka, Sylhet, Chittagong..."
-                className="w-full rounded-xl bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
-
-            {/* Privacy note */}
-            <div className="rounded-xl bg-primary/5 border border-primary/10 p-4">
-              <div className="flex gap-3">
-                <PuffyIcon name="shield" size={18} className="shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs font-semibold text-foreground">Privacy</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Your location is only used to show your approximate area on the map. You can turn this off anytime, and your location data will be removed.
-                  </p>
-                </div>
+        {/* Visibility toggle */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="rounded-2xl bg-card border border-border p-4"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                {showOnMap ? <Eye size={18} className="text-primary" /> : <EyeOff size={18} className="text-muted-foreground" />}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Visible on map</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {showOnMap ? "Others can find you nearby" : "You're hidden from the map"}
+                </p>
               </div>
             </div>
-          </>
-        )}
+            <button
+              onClick={() => setShowOnMap(!showOnMap)}
+              className={`relative h-[28px] w-[50px] rounded-full transition-all duration-300 ${
+                showOnMap ? "bg-primary" : "bg-muted"
+              }`}
+            >
+              <motion.span
+                layout
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className={`absolute top-[3px] h-[22px] w-[22px] rounded-full bg-background shadow-md ${
+                  showOnMap ? "left-[25px]" : "left-[3px]"
+                }`}
+              />
+            </button>
+          </div>
+        </motion.div>
 
-        {/* Save button */}
-        <button
+        <AnimatePresence>
+          {showOnMap && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4 overflow-hidden"
+            >
+              {/* Detect location */}
+              <div className="rounded-2xl bg-card border border-border p-4 space-y-3">
+                <p className="text-sm font-semibold text-foreground">Auto Detect</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  We'll detect your approximate area. Your exact address is never shared.
+                </p>
+                <button
+                  onClick={detectLocation}
+                  disabled={detecting}
+                  className="flex items-center gap-2.5 rounded-xl bg-primary/10 text-primary px-4 py-3 text-sm font-semibold w-full justify-center active:scale-[0.98] transition-transform"
+                >
+                  {detecting ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Navigation size={16} />
+                  )}
+                  {detecting ? "Detecting..." : "Detect My Location"}
+                </button>
+
+                <AnimatePresence>
+                  {latitude !== null && longitude !== null && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center gap-2.5 rounded-xl bg-secondary px-4 py-3"
+                    >
+                      <MapPin size={14} className="text-primary shrink-0" />
+                      <p className="text-xs text-foreground">
+                        {locationName ? `${locationName} · ` : ""}
+                        {latitude.toFixed(4)}, {longitude.toFixed(4)}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Manual location */}
+              <div className="rounded-2xl bg-card border border-border p-4 space-y-3">
+                <p className="text-sm font-semibold text-foreground">Manual Location</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Or type your city/area name manually
+                </p>
+                <input
+                  type="text"
+                  value={locationName}
+                  onChange={(e) => setLocationName(e.target.value)}
+                  placeholder="e.g. Dhaka, Sylhet, Chittagong..."
+                  className="w-full rounded-xl bg-secondary border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-shadow"
+                />
+              </div>
+
+              {/* Privacy card */}
+              <div className="rounded-2xl bg-primary/5 border border-primary/10 p-4">
+                <div className="flex gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Shield size={14} className="text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-foreground">Your privacy matters</p>
+                    <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                      Only your approximate area is shown. Turn off anytime to remove your location.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Save */}
+        <motion.button
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          whileTap={{ scale: 0.97 }}
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center justify-center gap-2 w-full rounded-xl bg-primary text-primary-foreground py-3 text-sm font-semibold"
+          className="flex items-center justify-center gap-2 w-full rounded-2xl bg-primary text-primary-foreground py-3.5 text-sm font-semibold shadow-lg shadow-primary/20"
         >
-          {saving ? <Loader2 size={18} className="animate-spin" /> : <PuffyIcon name="check" size={16} className="!filter-none" />}
+          {saving ? <Loader2 size={16} className="animate-spin" /> : <PuffyIcon name="check" size={14} className="!filter-none" />}
           {saving ? "Saving..." : "Save Settings"}
-        </button>
+        </motion.button>
       </div>
     </div>
   );
