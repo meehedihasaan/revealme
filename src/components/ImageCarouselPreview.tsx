@@ -18,6 +18,7 @@ interface ImageCarouselPreviewProps {
   taggedUsers: TaggedUser[];
   onImageTap: (x: number, y: number) => void;
   onRemoveImage: (idx: number) => void;
+  filterStyles?: React.CSSProperties[];
 }
 
 const ImageCarouselPreview = ({
