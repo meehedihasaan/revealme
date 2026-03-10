@@ -21,6 +21,7 @@ interface UserData {
   username: string | null;
   display_name: string | null;
   avatar_url: string | null;
+  cover_url: string | null;
   bio: string | null;
   location: string | null;
   is_verified: boolean;
@@ -94,7 +95,7 @@ const UserProfile = () => {
       setProfileLoading(true);
       const { data: prof } = await supabase
         .from("profiles")
-        .select("user_id, username, display_name, avatar_url, bio, location, is_private, is_verified, created_at")
+        .select("user_id, username, display_name, avatar_url, cover_url, bio, location, is_private, is_verified, created_at")
         .eq("user_id", userId)
         .single();
       setProfile(prof);
@@ -300,16 +301,16 @@ const UserProfile = () => {
       </AnimatePresence>
 
       {/* Banner */}
-      <img src={bannerImg} alt="Banner" className="h-48 w-full object-cover" />
+      <img src={profile.cover_url || bannerImg} alt="Banner" className="h-48 w-full object-cover" />
 
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
-          <div className="inline-block rounded-2xl border-4 border-background bg-background overflow-hidden">
+          <div className="inline-block rounded-full border-4 border-background bg-background overflow-hidden">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-xl object-cover" />
+              <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-full object-cover" />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-secondary">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
                 <PuffyIcon name="user" size={32} />
               </div>
             )}

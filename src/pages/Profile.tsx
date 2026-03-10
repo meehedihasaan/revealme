@@ -6,7 +6,7 @@ import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
-import { ProfileShimmer } from "@/components/ShimmerLoader";
+import { ProfileShimmer, FeedShimmer } from "@/components/ShimmerLoader";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { useTaggedPosts } from "@/hooks/usePostTags";
@@ -18,11 +18,11 @@ import bannerImg from "@/assets/profile-banner.jpg";
 const Profile = () => {
   const navigate = useNavigate();
   const { profile, user } = useAuth();
-  const { posts, loading } = usePosts(user?.id);
+  const { posts, loading, refetch } = usePosts(user?.id);
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
-  const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
+  
   const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(user?.id);
   const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
 
@@ -79,11 +79,11 @@ const Profile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
-          <div className="inline-block rounded-2xl border-4 border-background bg-background overflow-hidden">
+          <div className="inline-block rounded-full border-4 border-background bg-background overflow-hidden">
             {avatarUrl ? (
-              <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-xl object-cover" />
+              <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-full object-cover" />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-secondary">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
                 <PuffyIcon name="user" size={32} />
               </div>
             )}
@@ -155,14 +155,10 @@ const Profile = () => {
         </button>
       </div>
 
-      {/* Grid */}
+      {/* Posts as cards */}
       {activeTab === "grid" ? (
         loading ? (
-          <div className="grid grid-cols-3 gap-0.5 mt-1">
-            {[...Array(9)].map((_, i) => (
-              <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
-            ))}
-          </div>
+          <FeedShimmer />
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
@@ -172,20 +168,29 @@ const Profile = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-0.5">
-            {posts.map((post, idx) => (
-              <button key={post.id} onClick={() => setSelectedPostIndex(idx)}>
-                <img src={post.image_url} alt="" className="aspect-square w-full object-cover" />
-              </button>
+          <div className="mt-2">
+            {posts.map((post) => (
+              <PostCard
+                key={post.id}
+                postId={post.id}
+                postUserId={post.user_id}
+                username={post.username}
+                avatar={post.avatar_url || ""}
+                image={post.image_url}
+                caption={post.caption}
+                likesCount={post.likesCount}
+                timeAgo={post.timeAgo}
+                verified={post.is_verified}
+                location={post.location}
+                isLiked={post.isLiked}
+                isSaved={post.isSaved}
+                onDelete={refetch}
+              />
             ))}
           </div>
         )
       ) : taggedLoading ? (
-        <div className="grid grid-cols-3 gap-0.5 mt-1">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
-          ))}
-        </div>
+        <FeedShimmer />
       ) : taggedPosts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />
@@ -199,44 +204,6 @@ const Profile = () => {
         </div>
       )}
 
-      {/* Full-screen post viewer */}
-      <AnimatePresence>
-        {selectedPostIndex !== null && posts[selectedPostIndex] && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background overflow-y-auto"
-          >
-            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border sticky top-0 bg-background z-10">
-              <button onClick={() => setSelectedPostIndex(null)}>
-                <PuffyIcon name="arrow-left" size={22} />
-              </button>
-              <span className="text-lg font-bold text-foreground">Posts</span>
-            </div>
-            <div className="pb-16">
-              {posts.slice(selectedPostIndex).map((post) => (
-                <PostCard
-                  key={post.id}
-                  postId={post.id}
-                  postUserId={post.user_id}
-                  username={post.username}
-                  avatar={post.avatar_url || ""}
-                  image={post.image_url}
-                  caption={post.caption}
-                  likesCount={post.likesCount}
-                  timeAgo={post.timeAgo}
-                  verified={post.is_verified}
-                  location={post.location}
-                  isLiked={post.isLiked}
-                  isSaved={post.isSaved}
-                  onDelete={() => { setSelectedPostIndex(null); }}
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <BottomNav />
     </div>

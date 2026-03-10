@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const tabs = [
   { icon: "camera", path: "/feed", label: "Feed" },
   { icon: "search", path: "/explore", label: "Explore" },
-  { icon: "message-circle", path: "/messages", label: "Messages", badgeKey: "messages" },
+  { icon: "plus", path: "/create-post", label: "Create", isCreate: true },
   { icon: "bell", path: "/notifications", label: "Alerts", badgeKey: "notifications" },
   { icon: "user", path: "/profile", label: "Profile" },
 ];
@@ -99,7 +99,7 @@ const BottomNav = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-bottom">
       <div className="mx-auto flex max-w-md items-center justify-around py-2">
-        {tabs.map(({ icon, path, label, badgeKey }) => {
+        {tabs.map(({ icon, path, label, badgeKey, isCreate }) => {
           const active = location.pathname === path || (path === "/feed" && location.pathname === "/");
           const badge = getBadge(badgeKey);
           return (
@@ -119,11 +119,18 @@ const BottomNav = () => {
                 navigate(path);
               }}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1 transition-opacity ${
-                active ? "opacity-100" : "opacity-50"
+                isCreate ? "opacity-100" : active ? "opacity-100" : "opacity-50"
               }`}
               aria-label={label}
             >
-              <PuffyIcon name={icon} size={24} />
+              {isCreate ? (
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-foreground">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              ) : (
+                <PuffyIcon name={icon} size={24} />
+              )}
               {badge > 0 && (
                 <span className="absolute -top-0.5 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
                   {badge > 99 ? "99+" : badge}
