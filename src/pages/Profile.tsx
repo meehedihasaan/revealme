@@ -22,6 +22,7 @@ const Profile = () => {
   const { profile, user } = useAuth();
   const { posts, loading, refetch } = usePosts(user?.id);
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [hasStory, setHasStory] = useState(false);
@@ -147,7 +148,13 @@ const Profile = () => {
       <div className="px-4">
         <div className="-mt-10 mb-3">
           <button
-            onClick={() => hasStory ? navigate(`/story?user=${user?.id}`) : undefined}
+            onClick={() => {
+              if (hasStory) {
+                navigate(`/story?user=${user?.id}`);
+              } else if (avatarUrl) {
+                setShowAvatarModal(true);
+              }
+            }}
             className={`inline-block rounded-[26px] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
           >
             <div className={`rounded-[23px] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
@@ -290,6 +297,42 @@ const Profile = () => {
         </div>
       )}
 
+
+      {/* Avatar full-screen viewer */}
+      <AnimatePresence>
+        {showAvatarModal && avatarUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+            onClick={() => setShowAvatarModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain"
+              />
+              <button
+                onClick={() => setShowAvatarModal(false)}
+                className="absolute -top-10 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white"
+              >
+                <span className="text-lg font-bold">✕</span>
+              </button>
+              <p className="mt-3 text-center text-sm font-semibold text-white">{displayName}</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <BottomNav />
     </div>
