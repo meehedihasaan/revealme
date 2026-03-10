@@ -62,6 +62,9 @@ const UserProfile = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
   const [hasStory, setHasStory] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const avatarLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const avatarDidLongPress = useRef(false);
   const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(userId);
 
   const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
