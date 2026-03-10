@@ -15,8 +15,6 @@ import { format } from "date-fns";
 
 import bannerImg from "@/assets/profile-banner.jpg";
 
-import bannerImg from "@/assets/profile-banner.jpg";
-
 const Profile = () => {
   const navigate = useNavigate();
   const { profile, user } = useAuth();
