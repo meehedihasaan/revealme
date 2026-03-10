@@ -18,6 +18,7 @@ interface ConversationItem {
   lastMessage: string;
   lastMessageTime: string;
   unread: number;
+  is_online: boolean;
 }
 
 const Messages = () => {
@@ -49,7 +50,7 @@ const Messages = () => {
     const [profilesRes, messagesRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("user_id, username, avatar_url, is_verified")
+        .select("user_id, username, avatar_url, is_verified, last_online")
         .in("user_id", otherUserIds as string[]),
       supabase
         .from("messages")
@@ -76,6 +77,8 @@ const Messages = () => {
       ).length;
 
       const prof = profileMap[otherUserId];
+      const lastOnline = (prof as any)?.last_online;
+      const isRecentlyOnline = lastOnline ? (Date.now() - new Date(lastOnline).getTime()) < 2 * 60 * 1000 : false;
       items.push({
         conversation_id: convId,
         other_user_id: otherUserId,
@@ -85,6 +88,7 @@ const Messages = () => {
         lastMessage: latestMsg?.image_url ? "📷 Photo" : (latestMsg?.text || ""),
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
+        is_online: isRecentlyOnline,
       });
     }
 
@@ -200,13 +204,16 @@ const Messages = () => {
               onClick={() => navigate(`/chat/${conv.conversation_id}`)}
               className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-secondary/50"
             >
-              <div className="shrink-0">
+              <div className="relative shrink-0">
                 {conv.avatar_url ? (
                   <img src={conv.avatar_url} alt={conv.username} className="h-12 w-12 rounded-xl object-cover" />
                 ) : (
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
                     <PuffyIcon name="user" size={20} />
                   </div>
+                )}
+                {conv.is_online && (
+                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background bg-success" />
                 )}
               </div>
               <div className="flex-1 min-w-0">

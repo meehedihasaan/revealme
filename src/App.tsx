@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import PageLoader from "@/components/PageLoader";
 import PageLoadWrapper from "@/components/PageLoadWrapper";
+import { usePresence } from "@/hooks/usePresence";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -62,7 +63,9 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const AppRoutes = () => (
+const AppRoutes = () => {
+  usePresence(); // Track global online presence
+  return (
   <div className="mx-auto max-w-md min-h-screen">
     <Routes>
       <Route path="/" element={<PublicRoute><Welcome /></PublicRoute>} />
@@ -102,7 +105,8 @@ const AppRoutes = () => (
       <Route path="*" element={<NotFound />} />
     </Routes>
   </div>
-);
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

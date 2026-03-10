@@ -6,6 +6,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatShimmer } from "@/components/ShimmerLoader";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserOnlineStatus, formatLastOnline } from "@/hooks/usePresence";
 
 interface Message {
   id: string;
@@ -32,7 +33,7 @@ const Chat = () => {
   const [sending, setSending] = useState(false);
   const [otherUser, setOtherUser] = useState<OtherUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState(false);
+  const { isOnline, lastOnline } = useUserOnlineStatus(otherUser?.user_id);
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const presenceChannelRef = useRef<any>(null);
@@ -88,7 +89,7 @@ const Chat = () => {
     init();
   }, [conversationId, user]);
 
-  // Online/offline presence
+  // Chat-level presence for typing indicator
   useEffect(() => {
     if (!conversationId || !user || !otherUser) return;
 
@@ -101,10 +102,6 @@ const Chat = () => {
     presenceChannel
       .on("presence", { event: "sync" }, () => {
         const state = presenceChannel.presenceState();
-        const onlineIds = Object.keys(state);
-        setIsOnline(onlineIds.includes(otherUser.user_id));
-
-        // Check if other user is typing
         const otherState = state[otherUser.user_id];
         if (otherState && Array.isArray(otherState) && otherState.length > 0) {
           setIsTyping(!!(otherState[0] as any).is_typing);
@@ -341,7 +338,11 @@ const Chat = () => {
             <p className="text-[11px] text-muted-foreground">
               {isTyping ? (
                 <span className="text-primary font-medium">typing...</span>
-              ) : isOnline ? "Online" : "Offline"}
+              ) : isOnline ? (
+                <span className="text-success font-medium">Online</span>
+              ) : (
+                `Last seen ${formatLastOnline(lastOnline)}`
+              )}
             </p>
           </div>
         </button>
