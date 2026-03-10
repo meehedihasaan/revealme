@@ -61,14 +61,25 @@ const StoryViewer = () => {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const viewedRef = useRef<Set<string>>(new Set());
 
-  // Fetch all story groups
+  // Fetch all story groups (only from followed users + self)
   useEffect(() => {
     const fetchAllStories = async () => {
+      if (!user) { navigate(-1); return; }
+
+      // Get who the current user follows
+      const { data: followData } = await supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", user.id);
+      const followedIds = new Set((followData || []).map(f => f.following_id));
+      followedIds.add(user.id); // Always include own stories
+
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data: storiesData } = await supabase
         .from("stories")
         .select("id, image_url, created_at, user_id")
         .gte("created_at", since)
+        .in("user_id", [...followedIds])
         .order("created_at", { ascending: true });
 
       if (!storiesData || storiesData.length === 0) { navigate(-1); return; }
