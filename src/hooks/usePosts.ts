@@ -72,6 +72,7 @@ export const usePosts = (filterUserId?: string) => {
       created_at: p.created_at,
       user_id: p.user_id,
       username: profileMap[p.user_id]?.username || "user",
+      display_name: profileMap[p.user_id]?.display_name || profileMap[p.user_id]?.username || "User",
       avatar_url: profileMap[p.user_id]?.avatar_url || null,
       is_verified: profileMap[p.user_id]?.is_verified || false,
       is_private: profileMap[p.user_id]?.is_private || false,
