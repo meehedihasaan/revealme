@@ -146,7 +146,7 @@ const ImageEffectsEditor = ({ images, onApply, onBack }: ImageEffectsEditorProps
                 className="flex flex-col items-center gap-1.5 shrink-0"
               >
                 <div
-                  className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-colors ${
+                  className={`w-16 h-20 rounded-xl overflow-hidden border-2 transition-colors ${
                     selectedFilters[currentImageIndex] === idx ? "border-primary" : "border-transparent"
                   }`}
                 >
