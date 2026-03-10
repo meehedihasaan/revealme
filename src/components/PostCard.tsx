@@ -12,6 +12,23 @@ import LikesSheet from "@/components/LikesSheet";
 import PostImageCarousel from "@/components/PostImageCarousel";
 import heartFilledRedIcon from "@/assets/icons/heart-filled-red.png";
 
+const STORY_RING_COLORS = [
+  "gradient-story-red",
+  "gradient-story-yellow",
+  "gradient-story-green",
+  "gradient-story-blue",
+  "gradient-story-purple",
+  "gradient-story-orange",
+  "gradient-story-pink",
+  "gradient-story-cyan",
+];
+
+const getStoryColor = (userId: string) => {
+  let hash = 0;
+  for (let i = 0; i < userId.length; i++) hash = ((hash << 5) - hash + userId.charCodeAt(i)) | 0;
+  return STORY_RING_COLORS[Math.abs(hash) % STORY_RING_COLORS.length];
+};
+
 interface PostCardProps {
   postId: string;
   postUserId?: string;
@@ -173,13 +190,13 @@ const PostCard = ({
               navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`);
             }
           }}
-          className={`rounded-xl p-[2px] ${hasStory ? "gradient-story-red" : ""}`}
+          className={`rounded-[14px] p-[3px] ${hasStory ? getStoryColor(postUserId || "") : ""}`}
         >
-          <div className={`rounded-xl ${hasStory ? "border-[1.5px] border-background" : ""}`}>
+          <div className={`rounded-[12px] ${hasStory ? "border-[2px] border-background" : ""}`}>
             {avatar ? (
-              <img src={avatar} alt={username} className="h-8 w-8 rounded-xl object-cover" />
+              <img src={avatar} alt={username} className="h-9 w-9 rounded-[10px] object-cover" />
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-secondary">
+              <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-secondary">
                 <PuffyIcon name="user" size={16} />
               </div>
             )}
