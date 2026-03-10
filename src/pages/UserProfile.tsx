@@ -388,7 +388,14 @@ const UserProfile = () => {
           <h2 className="text-2xl font-bold text-foreground">{displayName}</h2>
           {profile.is_verified && <VerifiedBadge size={20} />}
         </div>
-        {profile.username && <p className="text-sm text-muted-foreground">@{profile.username}</p>}
+        <div className="flex items-center gap-2">
+          {profile.username && <p className="text-sm text-muted-foreground">@{profile.username}</p>}
+          {followsBack && (
+            <span className="rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+              Follows you
+            </span>
+          )}
+        </div>
 
         {/* Bio */}
         {profile.bio && (
@@ -430,7 +437,7 @@ const UserProfile = () => {
               isFollowing ? "bg-secondary text-secondary-foreground" : "bg-primary text-primary-foreground"
             }`}
           >
-            {isFollowing ? "Following" : "Follow"}
+            {isFollowing ? "Following" : followsBack ? "Follow back" : "Follow"}
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.97 }}
