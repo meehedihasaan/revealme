@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,6 +15,9 @@ const ThoughtBubble = ({ userId, isOwnProfile = false }: ThoughtBubbleProps) => 
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didLongPress = useRef(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -34,7 +37,6 @@ const ThoughtBubble = ({ userId, isOwnProfile = false }: ThoughtBubbleProps) => 
     if (!user) return;
     const trimmed = inputValue.trim();
     if (!trimmed) {
-      // Delete thought
       await supabase.from("user_thoughts").delete().eq("user_id", user.id);
       setThought(null);
       setIsEditing(false);
@@ -53,9 +55,36 @@ const ThoughtBubble = ({ userId, isOwnProfile = false }: ThoughtBubbleProps) => 
     toast.success("Thought updated!");
   };
 
-  if (loading) return null;
+  const handleDelete = async () => {
+    if (!user) return;
+    await supabase.from("user_thoughts").delete().eq("user_id", user.id);
+    setThought(null);
+    setShowDeleteConfirm(false);
+    toast.success("Thought removed");
+  };
 
-  // Show "Drop a thought..." prompt only on own profile when no thought exists
+  const handlePointerDown = () => {
+    if (!isOwnProfile || !thought) return;
+    didLongPress.current = false;
+    longPressTimer.current = setTimeout(() => {
+      didLongPress.current = true;
+      setShowDeleteConfirm(true);
+    }, 500);
+  };
+
+  const handlePointerUp = () => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    if (!didLongPress.current && isOwnProfile) {
+      setInputValue(thought || "");
+      setIsEditing(true);
+    }
+  };
+
+  const handlePointerCancel = () => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+  };
+
+  if (loading) return null;
   if (!thought && !isOwnProfile) return null;
 
   return (
@@ -65,53 +94,94 @@ const ThoughtBubble = ({ userId, isOwnProfile = false }: ThoughtBubbleProps) => 
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative mb-2"
+            className="relative mb-1"
           >
-            <button
-              onClick={isOwnProfile ? () => { setInputValue(thought || ""); setIsEditing(true); } : undefined}
-              className="relative max-w-[220px]"
+            <div
+              onPointerDown={handlePointerDown}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerCancel}
+              onContextMenu={(e) => e.preventDefault()}
+              className="relative max-w-[200px] cursor-pointer select-none"
             >
-              <div className="relative rounded-full bg-foreground/90 px-4 py-2 shadow-lg">
-                <p className="text-background text-[13px] font-medium leading-snug font-bangla line-clamp-1">
+              <div className="relative rounded-full bg-foreground/90 px-3.5 py-1.5 shadow-lg">
+                <p className="text-background text-[12px] font-medium leading-snug font-bangla line-clamp-1">
                   {thought}
                 </p>
               </div>
-              {/* Triangle tail pointing down-left */}
+              {/* Triangle tail */}
               <div
-                className="absolute -bottom-[6px] left-5 w-0 h-0"
+                className="absolute -bottom-[5px] left-3 w-0 h-0"
                 style={{
-                  borderLeft: '6px solid transparent',
-                  borderRight: '6px solid transparent',
-                  borderTop: '8px solid hsl(var(--foreground) / 0.9)',
+                  borderLeft: '5px solid transparent',
+                  borderRight: '5px solid transparent',
+                  borderTop: '7px solid hsl(var(--foreground) / 0.9)',
                 }}
               />
-            </button>
+            </div>
           </motion.div>
         ) : isOwnProfile ? (
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative mb-2"
+            className="relative mb-1"
           >
             <button
               onClick={() => { setInputValue(""); setIsEditing(true); }}
-              className="relative max-w-[200px]"
+              className="relative max-w-[180px]"
             >
-              <div className="relative rounded-full bg-foreground/80 px-4 py-2 shadow-lg">
-                <p className="text-background/70 text-[13px] font-medium font-bangla">Thinking about...</p>
+              <div className="relative rounded-full bg-foreground/80 px-3.5 py-1.5 shadow-lg">
+                <p className="text-background/70 text-[12px] font-medium font-bangla">Thinking about...</p>
               </div>
               <div
-                className="absolute -bottom-[6px] left-5 w-0 h-0"
+                className="absolute -bottom-[5px] left-3 w-0 h-0"
                 style={{
-                  borderLeft: '6px solid transparent',
-                  borderRight: '6px solid transparent',
-                  borderTop: '8px solid hsl(var(--foreground) / 0.8)',
+                  borderLeft: '5px solid transparent',
+                  borderRight: '5px solid transparent',
+                  borderTop: '7px solid hsl(var(--foreground) / 0.8)',
                 }}
               />
             </button>
           </motion.div>
         ) : null}
       </div>
+
+      {/* Delete confirmation */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-6"
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="w-full max-w-xs rounded-2xl bg-card p-5 shadow-xl text-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="text-sm font-semibold text-foreground mb-1">Remove thought?</p>
+              <p className="text-xs text-muted-foreground mb-4">This will delete your current thought.</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 rounded-xl bg-secondary py-2.5 text-sm font-semibold text-secondary-foreground"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 rounded-xl bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground"
+                >
+                  Remove
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Edit modal */}
       <AnimatePresence>
@@ -143,17 +213,6 @@ const ThoughtBubble = ({ userId, isOwnProfile = false }: ThoughtBubbleProps) => 
               <div className="flex items-center justify-between mt-2">
                 <span className="text-xs text-muted-foreground">{inputValue.length}/100</span>
                 <div className="flex gap-2">
-                  {thought && (
-                    <button
-                      onClick={async () => {
-                        setInputValue("");
-                        await handleSave();
-                      }}
-                      className="rounded-lg px-3 py-1.5 text-xs font-semibold text-destructive"
-                    >
-                      Remove
-                    </button>
-                  )}
                   <button
                     onClick={() => setIsEditing(false)}
                     className="rounded-lg px-3 py-1.5 text-xs font-semibold text-muted-foreground"
