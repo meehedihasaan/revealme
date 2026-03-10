@@ -117,11 +117,11 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
                         <PuffyIcon name="user" size={20} />
                       </div>
                     )}
-                    <span className="flex-1 font-bold text-foreground flex items-center gap-1">{u.username || "user"}{u.is_verified && <VerifiedBadge size={13} />}</span>
-                    {user && u.user_id !== user.id && (
+                    <span className="flex-1 min-w-0 font-bold text-foreground flex items-center gap-1 truncate">{u.username || "user"}{u.is_verified && <VerifiedBadge size={13} />}</span>
+                    {user && u.user_id !== user.id ? (
                       <button
-                        onClick={() => toggleFollow(u.user_id)}
-                        className={`flex items-center gap-1 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+                        onClick={(e) => { e.stopPropagation(); toggleFollow(u.user_id); }}
+                        className={`shrink-0 flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                           followStates[u.user_id]
                             ? "bg-secondary text-secondary-foreground"
                             : "bg-primary text-primary-foreground"
@@ -130,7 +130,7 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
                         <PuffyIcon name={followStates[u.user_id] ? "check" : "plus"} size={14} className={followStates[u.user_id] ? "" : "!filter-none"} />
                         {followStates[u.user_id] ? "Following" : "Follow"}
                       </button>
-                    )}
+                    ) : null}
                   </div>
                 ))
               )}
