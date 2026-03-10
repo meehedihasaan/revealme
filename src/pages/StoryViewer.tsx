@@ -537,62 +537,66 @@ const StoryViewer = () => {
         )}
       </AnimatePresence>
 
-      {/* Bottom: Viewers (for own stories) or reply area */}
+      {/* Bottom: Viewers (for own stories) or reply area - separated from story */}
       {isOwn ? (
-        <div className="absolute bottom-0 left-0 right-0 z-20 pb-8">
-          <button
-            onClick={(e) => { e.stopPropagation(); fetchViewers(); }}
-            className="flex items-center justify-center gap-2 w-full py-3"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <polyline points="18 15 12 9 6 15" />
-            </svg>
-            <span className="text-sm text-white font-medium drop-shadow">
-              {viewedRef.current.size > 0 ? `Viewed` : "No views yet"}
-            </span>
-          </button>
+        <div className="absolute bottom-0 left-0 right-0 z-20">
+          <div className="bg-background/95 dark:bg-card/95 backdrop-blur-md border-t border-border safe-bottom">
+            <button
+              onClick={(e) => { e.stopPropagation(); fetchViewers(); }}
+              className="flex items-center justify-center gap-2 w-full py-4"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-foreground">
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+              <span className="text-sm text-foreground font-medium">
+                {viewedRef.current.size > 0 ? `Viewed` : "No views yet"}
+              </span>
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="absolute bottom-0 left-0 right-0 z-20 pb-6 px-4" onClick={(e) => e.stopPropagation()}>
-          <div className="flex items-center gap-3">
-            <form
-              onSubmit={(e) => { e.preventDefault(); handleSendReply(); }}
-              className="flex-1"
-            >
-              <input
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                onFocus={() => { setReplyFocused(true); setPaused(true); }}
-                onBlur={() => { if (!replyText) { setReplyFocused(false); setPaused(false); } }}
-                placeholder="Send message..."
-                className="w-full rounded-full border border-white/30 bg-white/10 backdrop-blur-sm px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-white/50"
-              />
-            </form>
-            {replyFocused && replyText.trim() ? (
-              <button
-                onClick={handleSendReply}
-                disabled={sendingReply}
-                className="p-1"
+        <div className="absolute bottom-0 left-0 right-0 z-20" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-background/95 dark:bg-card/95 backdrop-blur-md border-t border-border px-4 py-3 safe-bottom">
+            <div className="flex items-center gap-3">
+              <form
+                onSubmit={(e) => { e.preventDefault(); handleSendReply(); }}
+                className="flex-1"
               >
-                <PuffyIcon name="send" size={22} className="invert" />
-              </button>
-            ) : (
-              <>
-                <motion.button
-                  whileTap={{ scale: 0.8 }}
-                  onClick={(e) => { e.stopPropagation(); handleHeartReact(); }}
-                  className="p-1"
-                >
-                  <PuffyIcon name={hearted ? "heart-filled" : "heart"} size={24} className="invert" />
-                </motion.button>
+                <input
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  onFocus={() => { setReplyFocused(true); setPaused(true); }}
+                  onBlur={() => { if (!replyText) { setReplyFocused(false); setPaused(false); } }}
+                  placeholder="Send message..."
+                  className="w-full rounded-full border border-border bg-secondary px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
+                />
+              </form>
+              {replyFocused && replyText.trim() ? (
                 <button
-                  onClick={(e) => { e.stopPropagation(); navigate(`/messages`); }}
+                  onClick={handleSendReply}
+                  disabled={sendingReply}
                   className="p-1"
                 >
-                  <PuffyIcon name="send" size={22} className="invert" />
+                  <PuffyIcon name="send" size={22} />
                 </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <motion.button
+                    whileTap={{ scale: 0.8 }}
+                    onClick={(e) => { e.stopPropagation(); handleHeartReact(); }}
+                    className="p-1"
+                  >
+                    <PuffyIcon name={hearted ? "heart-filled" : "heart"} size={24} />
+                  </motion.button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate(`/messages`); }}
+                    className="p-1"
+                  >
+                    <PuffyIcon name="send" size={22} />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
