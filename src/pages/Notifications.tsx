@@ -165,7 +165,7 @@ const Notifications = () => {
     }
     
     // Navigate based on notification type
-    if (n.type === "follow") {
+    if (n.type === "follow" || n.type === "story_react") {
       navigate(`/user/${n.actor_id}`);
     } else if (n.type === "comment" && n.post_id) {
       navigate(`/post/${n.post_id}?openComments=true`);
