@@ -7,8 +7,10 @@ import { toast } from "sonner";
 
 const SetUsername = () => {
   const navigate = useNavigate();
-  const { user, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
+  const [fullName, setFullName] = useState(profile?.display_name || "");
   const [username, setUsername] = useState("");
+  const [userLocation, setUserLocation] = useState(profile?.location || "");
   const [loading, setLoading] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
 
@@ -39,9 +41,14 @@ const SetUsername = () => {
     }
     setLoading(true);
 
-    const { error } = await supabase
+      const { error } = await supabase
       .from("profiles")
-      .update({ username, onboarding_completed: true })
+      .update({
+        display_name: fullName || null,
+        username,
+        location: userLocation || null,
+        onboarding_completed: true,
+      })
       .eq("user_id", user.id);
 
     if (error) {
@@ -63,12 +70,27 @@ const SetUsername = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-1 flex-col"
       >
-        <h1 className="mb-2 text-2xl font-bold text-foreground">Create your username</h1>
-        <p className="mb-10 text-sm text-muted-foreground">
-          Pick a unique username for your profile
+        <h1 className="mb-2 text-2xl font-bold text-foreground">Complete your profile</h1>
+        <p className="mb-8 text-sm text-muted-foreground">
+          Set up your name and username
         </p>
 
-        <div className="mb-2">
+        {/* Full Name */}
+        <div className="mb-4">
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Full Name</label>
+          <input
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Your full name"
+            maxLength={50}
+            className="w-full rounded-xl bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        {/* Username */}
+        <div className="mb-4">
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Username</label>
           <div className="flex items-center gap-2 rounded-xl bg-secondary px-4 py-3">
             <span className="text-muted-foreground">@</span>
             <input
@@ -90,6 +112,19 @@ const SetUsername = () => {
               Username must be at least 3 characters
             </p>
           )}
+        </div>
+
+        {/* Location */}
+        <div className="mb-2">
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Location (optional)</label>
+          <input
+            type="text"
+            value={userLocation}
+            onChange={(e) => setUserLocation(e.target.value)}
+            placeholder="City, Country"
+            maxLength={60}
+            className="w-full rounded-xl bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
         </div>
 
         <div className="mt-auto flex w-full flex-col gap-3 pt-8">
