@@ -41,6 +41,7 @@ import AdminRoleManagement from "./pages/admin/AdminRoleManagement";
 import AdminAppSettings from "./pages/admin/AdminAppSettings";
 import AdminPosts from "./pages/admin/AdminPosts";
 import PostDetail from "./pages/PostDetail";
+import VerifyCode from "./pages/VerifyCode";
 
 const queryClient = new QueryClient();
 
