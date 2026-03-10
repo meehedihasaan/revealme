@@ -41,9 +41,14 @@ const SetUsername = () => {
     }
     setLoading(true);
 
-    const { error } = await supabase
+      const { error } = await supabase
       .from("profiles")
-      .update({ username, onboarding_completed: true })
+      .update({
+        display_name: fullName || null,
+        username,
+        location: userLocation || null,
+        onboarding_completed: true,
+      })
       .eq("user_id", user.id);
 
     if (error) {
