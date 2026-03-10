@@ -8,7 +8,6 @@ import { toast } from "sonner";
 const SetUsername = () => {
   const navigate = useNavigate();
   const { user, profile, refreshProfile } = useAuth();
-  const [fullName, setFullName] = useState(profile?.display_name || "");
   const [username, setUsername] = useState("");
   const [userLocation, setUserLocation] = useState(profile?.location || "");
   const [loading, setLoading] = useState(false);
@@ -44,7 +43,6 @@ const SetUsername = () => {
       const { error } = await supabase
       .from("profiles")
       .update({
-        display_name: fullName || null,
         username,
         location: userLocation || null,
         onboarding_completed: true,
@@ -72,20 +70,33 @@ const SetUsername = () => {
       >
         <h1 className="mb-2 text-2xl font-bold text-foreground">Complete your profile</h1>
         <p className="mb-8 text-sm text-muted-foreground">
-          Set up your name and username
+          Set up your username
         </p>
 
-        {/* Full Name */}
+        {/* Username */}
         <div className="mb-4">
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Full Name</label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Your full name"
-            maxLength={50}
-            className="w-full rounded-xl bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Username</label>
+          <div className="flex items-center gap-2 rounded-xl bg-secondary px-4 py-3">
+            <span className="text-muted-foreground">@</span>
+            <input
+              type="text"
+              value={username}
+              onChange={handleChange}
+              placeholder="username"
+              maxLength={30}
+              className="flex-1 bg-transparent text-lg text-foreground placeholder:text-muted-foreground focus:outline-none"
+            />
+          </div>
+          {username.length >= 3 && available !== null && (
+            <p className={`mt-2 text-sm ${available ? "text-success" : "text-accent"}`}>
+              {available ? "✓ Username available" : "✗ Username taken"}
+            </p>
+          )}
+          {username.length > 0 && username.length < 3 && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Username must be at least 3 characters
+            </p>
+          )}
         </div>
 
         {/* Username */}
