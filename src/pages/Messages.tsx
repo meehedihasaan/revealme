@@ -77,6 +77,8 @@ const Messages = () => {
       ).length;
 
       const prof = profileMap[otherUserId];
+      const lastOnline = (prof as any)?.last_online;
+      const isRecentlyOnline = lastOnline ? (Date.now() - new Date(lastOnline).getTime()) < 2 * 60 * 1000 : false;
       items.push({
         conversation_id: convId,
         other_user_id: otherUserId,
@@ -86,6 +88,7 @@ const Messages = () => {
         lastMessage: latestMsg?.image_url ? "📷 Photo" : (latestMsg?.text || ""),
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
+        is_online: isRecentlyOnline,
       });
     }
 
