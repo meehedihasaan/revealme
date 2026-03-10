@@ -168,7 +168,7 @@ const Feed = () => {
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt="You" className="h-[68px] w-[68px] rounded-[20px] object-cover" />
                   ) : (
-                    <div className="flex h-[68px] w-[68px] items-center justify-center rounded-[18px] bg-secondary">
+                    <div className="flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-secondary">
                       <PuffyIcon name="user" size={28} />
                     </div>
                   )}
