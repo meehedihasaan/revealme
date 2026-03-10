@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
@@ -16,7 +17,9 @@ interface StoryItem {
 interface StoryGroup {
   user_id: string;
   username: string;
+  display_name: string;
   avatar_url: string | null;
+  is_verified: boolean;
   stories: StoryItem[];
 }
 
@@ -72,7 +75,7 @@ const StoryViewer = () => {
       const userIds = [...new Set(storiesData.map(s => s.user_id))];
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, username, avatar_url")
+        .select("user_id, username, display_name, avatar_url, is_verified")
         .in("user_id", userIds);
       const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
 
@@ -93,7 +96,9 @@ const StoryViewer = () => {
           groupMap[s.user_id] = {
             user_id: s.user_id,
             username: profileMap[s.user_id]?.username || "user",
+            display_name: profileMap[s.user_id]?.display_name || profileMap[s.user_id]?.username || "User",
             avatar_url: profileMap[s.user_id]?.avatar_url || null,
+            is_verified: profileMap[s.user_id]?.is_verified || false,
             stories: [],
           };
         }
@@ -403,15 +408,16 @@ const StoryViewer = () => {
           className="flex items-center gap-2.5"
         >
           {currentGroup.avatar_url ? (
-            <img src={currentGroup.avatar_url} alt="" className="h-9 w-9 rounded-xl object-cover ring-2 ring-white/30" />
+            <img src={currentGroup.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-white/30" />
           ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 ring-2 ring-white/30">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 ring-2 ring-white/30">
               <PuffyIcon name="user" size={16} className="invert" />
             </div>
           )}
-          <div>
-            <span className="text-sm font-semibold text-white drop-shadow">{currentGroup.username}</span>
-            <span className="ml-2 text-xs text-white/60 drop-shadow">{timeAgo}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-semibold text-white drop-shadow">{currentGroup.display_name}</span>
+            {currentGroup.is_verified && <VerifiedBadge size={15} />}
+            <span className="text-xs text-white/60 drop-shadow">• {timeAgo}</span>
           </div>
         </button>
         <div className="flex-1" />
