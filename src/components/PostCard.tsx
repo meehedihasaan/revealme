@@ -207,8 +207,18 @@ const PostCard = ({
         <PostMenu postId={postId} postUserId={postUserId || ""} caption={caption} location={location} onDelete={onDelete} />
       </div>
 
-      {/* Image Carousel */}
-      <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
+      {/* Image Carousel or Text-only post */}
+      {image ? (
+        <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
+      ) : (
+        <div
+          className="relative px-5 py-8 min-h-[120px] flex items-center"
+          onDoubleClick={handleDoubleTap}
+        >
+          <p className="text-base text-foreground leading-relaxed">{caption}</p>
+          <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex items-center justify-between px-4 py-2.5">
