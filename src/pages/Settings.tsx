@@ -33,6 +33,13 @@ const Settings = () => {
       path: "/settings/privacy",
     },
     {
+      icon: "search",
+      title: "Location",
+      subtitle: "Map visibility",
+      description: "Share your location on the map",
+      path: "/settings/location",
+    },
+    {
       icon: "info",
       title: t("about"),
       subtitle: "",
