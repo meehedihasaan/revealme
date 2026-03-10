@@ -44,6 +44,7 @@ import AdminPosts from "./pages/admin/AdminPosts";
 import PostDetail from "./pages/PostDetail";
 import VerifyCode from "./pages/VerifyCode";
 import UserMap from "./pages/UserMap";
+import NearbyUsers from "./pages/NearbyUsers";
 import LocationSettings from "./pages/LocationSettings";
 
 const queryClient = new QueryClient();
