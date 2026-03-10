@@ -351,9 +351,10 @@ const UserProfile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
+          {userId && <ThoughtBubble userId={userId} />}
           <button
                 onPointerDown={() => {
-                  avatarDidLongPress.current = false;
+                   avatarDidLongPress.current = false;
                   avatarLongPressTimer.current = setTimeout(() => {
                     avatarDidLongPress.current = true;
                     if (profile.avatar_url) setShowAvatarModal(true);
