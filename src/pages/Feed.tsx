@@ -187,8 +187,8 @@ const Feed = () => {
               onClick={() => navigate(`/story?user=${su.user_id}`)}
               className="flex shrink-0 flex-col items-center gap-1"
             >
-              <div className={`rounded-[22px] p-[3px] ${su.hasSeen ? "bg-muted-foreground/30" : getStoryColor(su.user_id)}`}>
-                <div className="rounded-[20px] border-2 border-background">
+              <div className={`rounded-[24px] p-[4px] ${su.hasSeen ? "bg-muted-foreground/30" : getStoryColor(su.user_id)}`}>
+                <div className="rounded-[20px] border-[3px] border-background">
                   {su.avatar_url ? (
                     <img src={su.avatar_url} alt={su.username} className="h-[68px] w-[68px] rounded-[18px] object-cover" />
                   ) : (
