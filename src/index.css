@@ -50,7 +50,7 @@
   }
 
   .light-theme {
-    --background: 0 0% 98%;
+    --background: 0 0% 100%;
     --foreground: 0 0% 8%;
 
     --card: 0 0% 100%;
