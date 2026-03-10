@@ -30,79 +30,34 @@ interface PostCardProps {
   onFollowChange?: (userId: string, isNowFollowing: boolean) => void;
 }
 
-const HeartParticle = ({ index, total }: { index: number; total: number }) => {
-  const angle = (360 / total) * index;
-  const rad = (angle * Math.PI) / 180;
-  const distance = 60 + Math.random() * 40;
-  const x = Math.cos(rad) * distance;
-  const y = Math.sin(rad) * distance;
-  const size = 8 + Math.random() * 10;
-  const delay = Math.random() * 0.1;
-  return (
-    <motion.div
-      initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
-      animate={{ x, y, scale: [0, 1.2, 0], opacity: [1, 1, 0] }}
-      transition={{ duration: 0.7, delay, ease: "easeOut" }}
-      className="absolute text-accent"
-      style={{ fontSize: size }}
-    >
-      ❤️
-    </motion.div>
-  );
-};
-
 const DoubleTapHeart = () => (
   <motion.div
     className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
-    initial={{ opacity: 1 }}
+    initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    transition={{ duration: 0.2, delay: 0.8 }}
+    exit={{ opacity: 0, transition: { duration: 0.15, delay: 0.6 } }}
   >
-    <motion.div
-      initial={{ scale: 0, rotate: -15 }}
-      animate={{ scale: [0, 1.3, 1, 1.1, 1], rotate: [-15, 5, -3, 0] }}
+    <motion.svg
+      width="90"
+      height="90"
+      viewBox="0 0 24 24"
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{
+        scale: [0, 1.2, 0.95, 1],
+        opacity: [0, 1, 1, 1],
+      }}
       exit={{ scale: 0, opacity: 0 }}
-      transition={{ duration: 0.6, ease: [0.17, 0.67, 0.21, 1.2] }}
-      className="relative"
+      transition={{
+        duration: 0.45,
+        ease: [0.215, 0.61, 0.355, 1],
+      }}
+      className="drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)]"
     >
-      <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: [0.5, 2.5], opacity: [0.6, 0] }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="absolute inset-0 flex items-center justify-center"
-      >
-        <div className="h-24 w-24 rounded-full bg-accent/30" />
-      </motion.div>
-      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" className="drop-shadow-[0_0_20px_hsl(var(--accent)/0.6)]">
-        <motion.path
-          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-          fill="hsl(340, 82%, 60%)"
-          stroke="hsl(340, 82%, 50%)"
-          strokeWidth="0.5"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.4 }}
-        />
-      </svg>
-    </motion.div>
-    {Array.from({ length: 12 }).map((_, i) => (
-      <HeartParticle key={i} index={i} total={12} />
-    ))}
-    {Array.from({ length: 6 }).map((_, i) => {
-      const angle = (360 / 6) * i + 30;
-      const rad = (angle * Math.PI) / 180;
-      const dist = 90 + Math.random() * 20;
-      return (
-        <motion.div
-          key={`sparkle-${i}`}
-          initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
-          animate={{ x: Math.cos(rad) * dist, y: Math.sin(rad) * dist, scale: [0, 1, 0], opacity: [1, 1, 0] }}
-          transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
-          className="absolute h-2 w-2 rounded-full bg-accent"
-        />
-      );
-    })}
+      <path
+        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+        fill="white"
+      />
+    </motion.svg>
   </motion.div>
 );
 
