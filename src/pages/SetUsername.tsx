@@ -99,32 +99,6 @@ const SetUsername = () => {
           )}
         </div>
 
-        {/* Username */}
-        <div className="mb-4">
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Username</label>
-          <div className="flex items-center gap-2 rounded-xl bg-secondary px-4 py-3">
-            <span className="text-muted-foreground">@</span>
-            <input
-              type="text"
-              value={username}
-              onChange={handleChange}
-              placeholder="username"
-              maxLength={30}
-              className="flex-1 bg-transparent text-lg text-foreground placeholder:text-muted-foreground focus:outline-none"
-            />
-          </div>
-          {username.length >= 3 && available !== null && (
-            <p className={`mt-2 text-sm ${available ? "text-success" : "text-accent"}`}>
-              {available ? "✓ Username available" : "✗ Username taken"}
-            </p>
-          )}
-          {username.length > 0 && username.length < 3 && (
-            <p className="mt-2 text-sm text-muted-foreground">
-              Username must be at least 3 characters
-            </p>
-          )}
-        </div>
-
         {/* Location */}
         <div className="mb-2">
           <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Location (optional)</label>
