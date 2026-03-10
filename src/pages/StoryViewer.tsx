@@ -238,14 +238,31 @@ const StoryViewer = () => {
 
     // Get all story IDs for this group
     const storyIds = currentGroup.stories.map(s => s.id);
-    const { data } = await supabase
-      .from("story_views")
-      .select("viewer_id, created_at, story_id")
-      .in("story_id", storyIds)
-      .order("created_at", { ascending: false });
+    
+    // Fetch views and reactions in parallel
+    const [viewsResult, reactionsResult] = await Promise.all([
+      supabase
+        .from("story_views")
+        .select("viewer_id, created_at, story_id")
+        .in("story_id", storyIds)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("story_reactions" as any)
+        .select("user_id, reaction, story_id")
+        .in("story_id", storyIds),
+    ]);
 
-    if (data && data.length > 0) {
-      const viewerIds = [...new Set(data.map(v => v.viewer_id))];
+    const viewsData = viewsResult.data || [];
+    const reactionsData = (reactionsResult.data || []) as any[];
+
+    // Build reaction map: user_id -> reaction
+    const reactionMap = new Map<string, string>();
+    for (const r of reactionsData) {
+      reactionMap.set(r.user_id, r.reaction);
+    }
+
+    if (viewsData.length > 0) {
+      const viewerIds = [...new Set(viewsData.map(v => v.viewer_id))];
       const { data: profiles } = await supabase
         .from("profiles")
         .select("user_id, username, avatar_url")
@@ -254,13 +271,14 @@ const StoryViewer = () => {
 
       // Deduplicate by viewer_id, keep most recent
       const seenMap = new Map<string, ViewerInfo>();
-      for (const v of data) {
+      for (const v of viewsData) {
         if (!seenMap.has(v.viewer_id)) {
           seenMap.set(v.viewer_id, {
             user_id: v.viewer_id,
             username: profileMap[v.viewer_id]?.username || "user",
             avatar_url: profileMap[v.viewer_id]?.avatar_url || null,
             viewed_at: v.created_at,
+            reaction: reactionMap.get(v.viewer_id) || null,
           });
         }
       }
