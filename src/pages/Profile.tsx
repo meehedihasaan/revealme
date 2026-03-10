@@ -66,6 +66,13 @@ const Profile = () => {
     fetchTagged();
   }, [taggedPostIds]);
 
+  // Refetch posts when upload finishes
+  useEffect(() => {
+    if (!upload.isUploading && upload.progress === 100) {
+      refetch();
+    }
+  }, [upload.isUploading, upload.progress]);
+
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || "User";
   const avatarUrl = profile?.avatar_url;
 
@@ -277,18 +284,28 @@ const Profile = () => {
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-foreground truncate">
-                  {upload.progress < 100 ? "Sharing..." : "Finishing up..."}
+                  {upload.thumbnail
+                    ? (upload.progress < 100 ? "Uploading..." : "Finishing up...")
+                    : (upload.progress < 100 ? "Posting..." : "Finishing up...")}
                 </p>
-                <div className="mt-1 h-1 w-full rounded-full bg-secondary overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full bg-primary"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${upload.progress}%` }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </div>
+                {upload.thumbnail ? (
+                  <div className="mt-1 h-1 w-full rounded-full bg-secondary overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full bg-primary"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${upload.progress}%` }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-1 h-1 w-full rounded-full bg-secondary overflow-hidden">
+                    <div className="h-full rounded-full bg-primary animate-pulse w-full" />
+                  </div>
+                )}
               </div>
-              <span className="text-[10px] text-muted-foreground font-medium">{Math.round(upload.progress)}%</span>
+              {upload.thumbnail && (
+                <span className="text-[10px] text-muted-foreground font-medium">{Math.round(upload.progress)}%</span>
+              )}
             </div>
           </motion.div>
         )}
