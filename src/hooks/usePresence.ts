@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -15,7 +15,6 @@ export const usePresence = () => {
   useEffect(() => {
     if (!user) return;
 
-    // Update last_online in profile
     const updateLastOnline = () => {
       supabase
         .from("profiles")
@@ -24,10 +23,8 @@ export const usePresence = () => {
         .then(() => {});
     };
 
-    // Update immediately on mount
     updateLastOnline();
 
-    // Join a global presence channel
     const channel = supabase.channel("global-presence", {
       config: { presence: { key: user.id } },
     });
@@ -39,10 +36,8 @@ export const usePresence = () => {
       }
     });
 
-    // Update last_online every 60 seconds
     intervalRef.current = setInterval(updateLastOnline, 60000);
 
-    // Update on visibility change (tab focus)
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
         updateLastOnline();
@@ -52,7 +47,7 @@ export const usePresence = () => {
     document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      updateLastOnline(); // Final update when unmounting
+      updateLastOnline();
       if (intervalRef.current) clearInterval(intervalRef.current);
       document.removeEventListener("visibilitychange", handleVisibility);
       if (channelRef.current) supabase.removeChannel(channelRef.current);
@@ -62,8 +57,8 @@ export const usePresence = () => {
 };
 
 /**
- * Hook to check if a specific user is online via the global presence channel.
- * Returns { isOnline, lastOnline } for the given userId.
+ * Hook to check if a specific user is online via the global presence channel
+ * and get their last_online timestamp.
  */
 export const useUserOnlineStatus = (userId: string | undefined) => {
   const { user } = useAuth();
@@ -83,29 +78,42 @@ export const useUserOnlineStatus = (userId: string | undefined) => {
         if (data) setLastOnline((data as any).last_online);
       });
 
-    // Check global presence
-    const channel = supabase.channel("global-presence");
-
+    // Subscribe to global presence to detect real-time online status
+    const channel = supabase.channel("global-presence-check-" + userId);
+    
+    // Also listen to global presence channel
+    const globalChannel = supabase.channel("global-presence");
+    
     const checkPresence = () => {
-      const state = channel.presenceState();
+      const state = globalChannel.presenceState();
       setIsOnline(!!state[userId]);
     };
 
-    channel.on("presence", { event: "sync" }, checkPresence);
-
-    // If not already subscribed, subscribe
-    if ((channel as any).state !== "joined") {
-      channel.subscribe();
-    } else {
-      checkPresence();
-    }
+    globalChannel.on("presence", { event: "sync" }, checkPresence);
+    
+    // Check immediately
+    const timer = setTimeout(checkPresence, 500);
 
     return () => {
-      // Don't remove the global channel here, it may be shared
+      clearTimeout(timer);
     };
   }, [userId, user]);
 
   return { isOnline, lastOnline };
 };
 
-import { useState } from "react";
+/**
+ * Format last online time for display
+ */
+export const formatLastOnline = (lastOnline: string | null): string => {
+  if (!lastOnline) return "Offline";
+  const diff = Date.now() - new Date(lastOnline).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return `${Math.floor(days / 7)}w ago`;
+};
