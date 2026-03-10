@@ -22,6 +22,7 @@ const Profile = () => {
   const { profile, user } = useAuth();
   const { posts, loading, refetch } = usePosts(user?.id);
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [hasStory, setHasStory] = useState(false);
