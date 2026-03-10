@@ -203,21 +203,7 @@ const Feed = () => {
               </div>
               <span className="max-w-[72px] truncate text-xs text-foreground">{su.username}</span>
             </button>
-          ))}
-              <div className={`rounded-[24px] p-[4px] ${su.hasSeen ? "bg-muted-foreground/30" : getStoryColor(su.user_id)}`}>
-                <div className="rounded-[20px] border-[3px] border-background">
-                  {su.avatar_url ? (
-                    <img src={su.avatar_url} alt={su.username} className="h-[68px] w-[68px] rounded-[18px] object-cover" />
-                  ) : (
-                    <div className="flex h-[68px] w-[68px] items-center justify-center rounded-[18px] bg-secondary">
-                      <PuffyIcon name="user" size={28} />
-                    </div>
-                  )}
-                </div>
-              </div>
-              <span className="max-w-[72px] truncate text-xs text-foreground">{su.username}</span>
-            </button>
-          ))}
+        </div>
         </div>
 
         {/* Posts */}
