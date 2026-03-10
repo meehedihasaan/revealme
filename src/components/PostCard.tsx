@@ -107,6 +107,7 @@ const PostCard = ({
   const [following, setFollowing] = useState(initialFollowing);
   const [followLoading, setFollowLoading] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
+  const [captionExpanded, setCaptionExpanded] = useState(false);
 
   useEffect(() => {
     supabase
