@@ -43,27 +43,12 @@ const DoubleTapHeart = () => (
     animate={{ opacity: 1 }}
     exit={{ opacity: 0, transition: { duration: 0.15, delay: 0.6 } }}
   >
-    <motion.svg
-      width="90"
-      height="90"
-      viewBox="0 0 24 24"
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{
-        scale: [0, 1.2, 0.95, 1],
-        opacity: [0, 1, 1, 1],
-      }}
-      exit={{ scale: 0, opacity: 0 }}
-      transition={{
-        duration: 0.45,
-        ease: [0.215, 0.61, 0.355, 1],
-      }}
-      className="drop-shadow-[0_4px_12px_rgba(0,0,0,0.25)]"
-    >
-      <path
-        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-        fill="white"
-      />
-    </motion.svg>
+    <Lottie
+      animationData={heartAnimation}
+      loop={false}
+      autoplay
+      style={{ width: 200, height: 200 }}
+    />
   </motion.div>
 );
 
