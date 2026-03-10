@@ -102,8 +102,18 @@ const CreatePost = () => {
   const handlePost = async () => {
     if (!user || !canPost) return;
     setPosting(true);
+
+    const thumbnail = previews.length > 0 ? previews[0] : null;
+    uploadProgress.start(thumbnail, caption || null);
+
+    // Navigate to profile immediately
+    navigate("/profile");
+
     try {
       let imageUrls: string[] = [];
+      const totalSteps = files.length + 2; // files + insert post + insert extras
+      let completedSteps = 0;
+
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const style = filterStyles[i];
@@ -124,6 +134,8 @@ const CreatePost = () => {
         if (uploadError) throw uploadError;
         const { data: { publicUrl } } = supabase.storage.from("posts").getPublicUrl(path);
         imageUrls.push(publicUrl);
+        completedSteps++;
+        uploadProgress.update((completedSteps / totalSteps) * 100);
       }
 
       const { data: postData, error } = await supabase.from("posts").insert({
@@ -133,6 +145,8 @@ const CreatePost = () => {
         location,
       }).select("id").single();
       if (error) throw error;
+      completedSteps++;
+      uploadProgress.update((completedSteps / totalSteps) * 100);
 
       if (postData && imageUrls.length > 0) {
         await supabase.from("post_images").insert(
@@ -145,13 +159,16 @@ const CreatePost = () => {
           taggedUsers.map(t => ({ post_id: postData.id, tagged_user_id: t.user_id, x_position: t.x, y_position: t.y }))
         );
       }
+      completedSteps++;
+      uploadProgress.update(100);
 
-      toast.success("Post shared!");
-      navigate("/feed");
+      setTimeout(() => {
+        uploadProgress.finish();
+        toast.success("Post shared!");
+      }, 500);
     } catch (err: any) {
+      uploadProgress.error();
       toast.error(err.message || "Failed to post");
-    } finally {
-      setPosting(false);
     }
   };
 
