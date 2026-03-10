@@ -29,8 +29,21 @@ const Profile = () => {
   useEffect(() => {
     if (taggedPostIds.length === 0) { setTaggedPosts([]); return; }
     const fetchTagged = async () => {
-      const { data } = await supabase.from("posts").select("id, image_url").in("id", taggedPostIds);
-      setTaggedPosts(data || []);
+      const { data } = await supabase.from("posts").select("*").in("id", taggedPostIds);
+      if (!data) { setTaggedPosts([]); return; }
+      const userIds = [...new Set(data.map(p => p.user_id))];
+      const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url, is_verified").in("user_id", userIds);
+      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+      setTaggedPosts(data.map(p => ({
+        ...p,
+        username: profileMap[p.user_id]?.username || "user",
+        avatar_url: profileMap[p.user_id]?.avatar_url,
+        is_verified: profileMap[p.user_id]?.is_verified || false,
+        likesCount: 0,
+        timeAgo: "",
+        isLiked: false,
+        isSaved: false,
+      })));
     };
     fetchTagged();
   }, [taggedPostIds]);
