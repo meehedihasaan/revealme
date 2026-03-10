@@ -216,7 +216,7 @@ const PostCard = ({
           <motion.button whileTap={{ scale: 0.8 }} onClick={toggleLike}>
             <motion.div animate={liked ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}>
               {liked ? (
-                <img src={heartFilledIcon} alt="liked" width={26} height={26} className="inline-block shrink-0" style={{ filter: "none" }} draggable={false} />
+                <img src={heartFilledRedIcon} alt="liked" width={26} height={26} className="inline-block shrink-0" draggable={false} />
               ) : (
                 <PuffyIcon name="heart" size={26} />
               )}
