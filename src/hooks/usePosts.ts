@@ -12,6 +12,7 @@ export interface PostWithDetails {
   created_at: string;
   user_id: string;
   username: string;
+  display_name: string;
   avatar_url: string | null;
   is_verified: boolean;
   is_private: boolean;
