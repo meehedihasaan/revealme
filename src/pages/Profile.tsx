@@ -147,26 +147,53 @@ const Profile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
-          <button
-            onClick={() => {
-              if (hasStory) {
-                navigate(`/story?user=${user?.id}`);
-              } else if (avatarUrl) {
-                setShowAvatarModal(true);
+          {(() => {
+            const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+            const didLongPress = useRef(false);
+
+            const onPointerDown = useCallback(() => {
+              didLongPress.current = false;
+              longPressTimer.current = setTimeout(() => {
+                didLongPress.current = true;
+                if (avatarUrl) setShowAvatarModal(true);
+              }, 500);
+            }, [avatarUrl]);
+
+            const onPointerUp = useCallback(() => {
+              if (longPressTimer.current) clearTimeout(longPressTimer.current);
+              if (!didLongPress.current) {
+                if (hasStory) {
+                  navigate(`/story?user=${user?.id}`);
+                } else if (avatarUrl) {
+                  setShowAvatarModal(true);
+                }
               }
-            }}
-            className={`inline-block rounded-[26px] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
-          >
-            <div className={`rounded-[23px] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover block" />
-              ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
-                  <PuffyIcon name="user" size={32} />
+            }, [hasStory, avatarUrl, user?.id]);
+
+            const onPointerCancel = useCallback(() => {
+              if (longPressTimer.current) clearTimeout(longPressTimer.current);
+            }, []);
+
+            return (
+              <button
+                onPointerDown={onPointerDown}
+                onPointerUp={onPointerUp}
+                onPointerCancel={onPointerCancel}
+                onContextMenu={(e) => e.preventDefault()}
+                className={`inline-block rounded-[26px] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
+              >
+                <div className={`rounded-[23px] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover block" draggable={false} />
+                  ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
+                      <PuffyIcon name="user" size={32} />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </button>
+              </button>
+            );
+          })()}
         </div>
 
         <div className="flex items-center gap-1.5">
