@@ -63,7 +63,9 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const AppRoutes = () => (
+const AppRoutes = () => {
+  usePresence(); // Track global online presence
+  return (
   <div className="mx-auto max-w-md min-h-screen">
     <Routes>
       <Route path="/" element={<PublicRoute><Welcome /></PublicRoute>} />
