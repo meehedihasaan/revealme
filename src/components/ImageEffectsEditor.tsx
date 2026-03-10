@@ -85,8 +85,8 @@ const ImageEffectsEditor = ({ images, onApply, onBack }: ImageEffectsEditorProps
         </motion.button>
       </div>
 
-      {/* Image preview */}
-      <div className="relative w-full bg-black flex items-center justify-center" style={{ minHeight: 320 }}>
+      {/* Image preview - 4:5 aspect ratio like Instagram */}
+      <div className="relative w-full bg-black" style={{ aspectRatio: "4/5" }}>
         {images.length > 1 && (
           <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full z-10">
             {currentImageIndex + 1}/{images.length}
@@ -95,7 +95,7 @@ const ImageEffectsEditor = ({ images, onApply, onBack }: ImageEffectsEditorProps
         <img
           src={images[currentImageIndex]}
           alt="Preview"
-          className="max-h-[320px] w-full object-contain"
+          className="w-full h-full object-cover"
           style={getCombinedStyle(currentImageIndex)}
         />
       </div>
