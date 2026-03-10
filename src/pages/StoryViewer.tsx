@@ -473,7 +473,7 @@ const StoryViewer = () => {
             onClick={(e) => { e.stopPropagation(); setShowStoryMenu(!showStoryMenu); setPaused(true); }}
             className="p-1"
           >
-            <PuffyIcon name="more-horizontal" size={22} className="invert" />
+            <PuffyIcon name="more-horizontal" size={22} className="!filter-none brightness-0 invert" />
           </button>
           <AnimatePresence>
             {showStoryMenu && (
