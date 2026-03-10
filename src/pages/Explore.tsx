@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
@@ -146,6 +147,9 @@ const Explore = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-xl font-bold text-foreground">Explore</h1>
+        <button className="p-1">
+          <MapPin size={22} className="text-foreground" />
+        </button>
       </div>
 
       {/* Search */}
