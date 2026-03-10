@@ -228,10 +228,10 @@ const PostCard = ({
         <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
       ) : (
         <div
-          className="relative px-4 py-3"
+          className="relative px-4 py-1.5"
           onDoubleClick={handleDoubleTap}
         >
-          <p className="text-[15px] text-foreground leading-relaxed">{caption}</p>
+          <p className="text-[15px] text-foreground leading-snug">{caption}</p>
           <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
         </div>
       )}
