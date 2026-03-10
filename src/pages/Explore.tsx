@@ -147,7 +147,9 @@ const Explore = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-xl font-bold text-foreground">Explore</h1>
-      </div>
+        <button className="p-1">
+          <MapPin size={22} className="text-foreground" />
+        </button>
 
       {/* Search */}
       <div className="px-4 pb-2">
