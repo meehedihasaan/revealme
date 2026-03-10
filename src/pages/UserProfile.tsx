@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
-import bannerImg from "@/assets/profile-banner.jpg";
+
 
 const STORY_GRADIENT = "gradient-story-ring";
 
@@ -343,7 +343,11 @@ const UserProfile = () => {
       </AnimatePresence>
 
       {/* Banner */}
-      <img src={profile.cover_url || bannerImg} alt="Banner" className="h-48 w-full object-cover" />
+      {profile.cover_url ? (
+        <img src={profile.cover_url} alt="Banner" className="h-48 w-full object-cover" />
+      ) : (
+        <div className="h-48 w-full bg-secondary" />
+      )}
 
       {/* Avatar + Info */}
       <div className="px-4">
