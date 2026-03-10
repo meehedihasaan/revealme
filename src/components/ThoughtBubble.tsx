@@ -101,10 +101,10 @@ const ThoughtBubble = ({ userId, isOwnProfile = false }: ThoughtBubbleProps) => 
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerCancel}
               onContextMenu={(e) => e.preventDefault()}
-              className="relative max-w-[200px] cursor-pointer select-none"
+              className="relative cursor-pointer select-none"
             >
-              <div className="relative rounded-full bg-foreground/90 px-3.5 py-1.5 shadow-lg">
-                <p className="text-background text-[12px] font-medium leading-snug font-bangla line-clamp-1">
+              <div className="relative rounded-2xl bg-foreground/90 px-3.5 py-1.5 shadow-lg">
+                <p className="text-background text-[12px] font-medium leading-snug font-bangla whitespace-nowrap">
                   {thought}
                 </p>
               </div>
