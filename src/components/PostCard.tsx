@@ -231,7 +231,7 @@ const PostCard = ({
           className="relative px-4 py-1.5"
           onDoubleClick={handleDoubleTap}
         >
-          <p className="text-[15px] text-foreground leading-snug">{caption}</p>
+          <p className="text-[15px] text-foreground leading-snug whitespace-pre-line">{caption}</p>
           <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
         </div>
       )}
