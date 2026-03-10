@@ -13,7 +13,7 @@ import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
-import bannerImg from "@/assets/profile-banner.jpg";
+
 
 const STORY_GRADIENT = "gradient-story-ring";
 
