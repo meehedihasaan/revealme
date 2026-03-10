@@ -12,8 +12,7 @@ import { usePosts } from "@/hooks/usePosts";
 import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-
-
+import ThoughtBubble from "@/components/ThoughtBubble";
 
 const STORY_GRADIENT = "gradient-story-ring";
 
@@ -153,6 +152,7 @@ const Profile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
+          {user && <ThoughtBubble userId={user.id} isOwnProfile />}
           <button
                 onPointerDown={() => {
                   avatarDidLongPress.current = false;
