@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Inter', 'Hind Siliguri', 'sans-serif'],
         display: ['Playfair Display', 'serif'],
+        bangla: ['Hind Siliguri', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
