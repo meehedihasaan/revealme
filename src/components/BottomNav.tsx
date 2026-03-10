@@ -125,7 +125,7 @@ const BottomNav = () => {
               aria-label={label}
             >
               {isCreate ? (
-                <img src={createPostIcon} alt="Create" width={28} height={28} className="inline-block shrink-0 icon-adaptive-inverted" draggable={false} />
+                <img src={createPostIcon} alt="Create" width={28} height={28} className="inline-block shrink-0 icon-adaptive" draggable={false} />
               ) : (
                 <PuffyIcon name={icon} size={24} />
               )}
