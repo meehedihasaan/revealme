@@ -26,6 +26,8 @@ const Profile = () => {
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [hasStory, setHasStory] = useState(false);
+  const avatarLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const avatarDidLongPress = useRef(false);
 
   useEffect(() => {
     if (!user) return;
