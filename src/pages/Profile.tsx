@@ -144,7 +144,11 @@ const Profile = () => {
       </div>
 
       {/* Banner */}
-      <img src={profile?.cover_url || bannerImg} alt="Banner" className="h-48 w-full object-cover" />
+      {profile?.cover_url ? (
+        <img src={profile.cover_url} alt="Banner" className="h-48 w-full object-cover" />
+      ) : (
+        <div className="h-48 w-full bg-secondary" />
+      )}
 
       {/* Avatar + Info */}
       <div className="px-4">
