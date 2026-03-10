@@ -43,6 +43,7 @@ import AdminAppSettings from "./pages/admin/AdminAppSettings";
 import AdminPosts from "./pages/admin/AdminPosts";
 import PostDetail from "./pages/PostDetail";
 import VerifyCode from "./pages/VerifyCode";
+import UserMap from "./pages/UserMap";
 
 const queryClient = new QueryClient();
 
