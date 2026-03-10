@@ -28,6 +28,7 @@ const Profile = () => {
   const [hasStory, setHasStory] = useState(false);
   const avatarLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const avatarDidLongPress = useRef(false);
+  const upload = useUploadProgress();
 
   useEffect(() => {
     if (!user) return;
