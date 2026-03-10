@@ -152,6 +152,7 @@ const Notifications = () => {
       case "like": return "liked your post.";
       case "comment": return "commented on your post.";
       case "follow": return "started following you.";
+      case "story_react": return `reacted ${n.comment_text || "❤️"} to your story.`;
       default: return "";
     }
   };
