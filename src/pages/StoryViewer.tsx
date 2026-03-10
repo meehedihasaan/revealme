@@ -634,6 +634,9 @@ const StoryViewer = () => {
                           {formatDistanceToNow(new Date(v.viewed_at), { addSuffix: true })}
                         </p>
                       </div>
+                      {v.reaction && (
+                        <span className="text-lg">{v.reaction}</span>
+                      )}
                     </button>
                   ))
                 )}
