@@ -18,8 +18,10 @@ const EditProfile = () => {
   const [location, setLocation] = useState(profile?.location || "");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarDeleted, setAvatarDeleted] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>((profile as any)?.cover_url || null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverDeleted, setCoverDeleted] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
