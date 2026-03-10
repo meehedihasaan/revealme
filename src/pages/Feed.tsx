@@ -170,12 +170,12 @@ const Feed = () => {
               onClick={() => navigate(`/story?user=${su.user_id}`)}
               className="flex shrink-0 flex-col items-center gap-1"
             >
-              <div className={`rounded-full p-[3px] ${su.hasSeen ? "bg-muted-foreground/30" : "gradient-story-red"}`}>
-                <div className="rounded-full border-2 border-background">
+              <div className={`rounded-2xl p-[3px] ${su.hasSeen ? "bg-muted-foreground/30" : "gradient-story-red"}`}>
+                <div className="rounded-2xl border-2 border-background">
                   {su.avatar_url ? (
-                    <img src={su.avatar_url} alt={su.username} className="h-16 w-16 rounded-full object-cover" />
+                    <img src={su.avatar_url} alt={su.username} className="h-16 w-16 rounded-2xl object-cover" />
                   ) : (
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary">
                       <PuffyIcon name="user" size={28} />
                     </div>
                   )}
