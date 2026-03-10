@@ -251,13 +251,15 @@ const PostCard = ({
         </button>
       </div>
 
-      {/* Caption */}
-      <div className="px-4 pb-1 pt-0.5">
-        <p className="text-sm text-foreground">
-          <span className="font-semibold">{username}</span>{" "}
-          <span className="text-foreground/90">{caption}</span>
-        </p>
-      </div>
+      {/* Caption - only show if post has an image (text-only posts already display the text) */}
+      {image && caption && (
+        <div className="px-4 pb-1 pt-0.5">
+          <p className="text-sm text-foreground">
+            <span className="font-semibold">{username}</span>{" "}
+            <span className="text-foreground/90">{caption}</span>
+          </p>
+        </div>
+      )}
 
       {/* View comments */}
       <button onClick={() => setCommentOpen(true)} className="px-4 pb-1">
