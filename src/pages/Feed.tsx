@@ -31,6 +31,7 @@ const Feed = () => {
   const [userHasStory, setUserHasStory] = useState(false);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [followingLoading, setFollowingLoading] = useState(true);
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
 
   // Fetch who the current user follows
   const fetchFollowing = useCallback(async () => {
