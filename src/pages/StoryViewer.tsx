@@ -408,15 +408,16 @@ const StoryViewer = () => {
           className="flex items-center gap-2.5"
         >
           {currentGroup.avatar_url ? (
-            <img src={currentGroup.avatar_url} alt="" className="h-9 w-9 rounded-xl object-cover ring-2 ring-white/30" />
+            <img src={currentGroup.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-white/30" />
           ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 ring-2 ring-white/30">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 ring-2 ring-white/30">
               <PuffyIcon name="user" size={16} className="invert" />
             </div>
           )}
-          <div>
-            <span className="text-sm font-semibold text-white drop-shadow">{currentGroup.username}</span>
-            <span className="ml-2 text-xs text-white/60 drop-shadow">{timeAgo}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-semibold text-white drop-shadow">{currentGroup.display_name}</span>
+            {currentGroup.is_verified && <VerifiedBadge size={15} />}
+            <span className="text-xs text-white/60 drop-shadow">• {timeAgo}</span>
           </div>
         </button>
         <div className="flex-1" />
