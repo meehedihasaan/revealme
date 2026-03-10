@@ -299,24 +299,30 @@ const StoryViewer = () => {
   };
 
   const handleHeartReact = async () => {
-    if (!user || !currentGroup || hearted) return;
+    if (!user || !currentGroup || hearted || !currentStory) return;
     setHearted(true);
     setShowHeartAnim(true);
     setPaused(true);
     setTimeout(() => { setShowHeartAnim(false); setPaused(false); }, 1200);
     try {
-      const { data: convId } = await supabase.rpc("create_direct_conversation", {
-        other_user_id: currentGroup.user_id,
-      });
-      if (convId) {
-        await supabase.from("messages").insert({
-          conversation_id: convId,
-          sender_id: user.id,
-          text: "❤️ Reacted to your story",
-          mood: "Love",
+      // Insert reaction into story_reactions
+      await supabase.from("story_reactions" as any).upsert({
+        story_id: currentStory.id,
+        user_id: user.id,
+        reaction: "❤️",
+      }, { onConflict: "story_id,user_id" });
+
+      // Create notification for the story owner
+      if (currentGroup.user_id !== user.id) {
+        await supabase.from("notifications").insert({
+          user_id: currentGroup.user_id,
+          actor_id: user.id,
+          type: "story_react",
+          post_id: null,
+          comment_text: "❤️",
         });
       }
-  } catch {}
+    } catch {}
   };
 
   const handleDeleteStory = async () => {
