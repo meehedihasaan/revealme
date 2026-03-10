@@ -203,7 +203,7 @@ const Chat = () => {
 
     const insertPayload: any = {
       conversation_id: conversationId, sender_id: user.id,
-      text: text || (imageUrl ? "📷 Photo" : ""), mood: selectedMood,
+      text: text || (imageUrl ? "📷 Photo" : ""),
     };
     if (imageUrl) insertPayload.image_url = imageUrl;
 
