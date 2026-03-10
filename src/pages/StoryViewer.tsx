@@ -74,7 +74,7 @@ const StoryViewer = () => {
       const userIds = [...new Set(storiesData.map(s => s.user_id))];
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, username, avatar_url")
+        .select("user_id, username, display_name, avatar_url, is_verified")
         .in("user_id", userIds);
       const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
 
