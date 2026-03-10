@@ -18,6 +18,7 @@ interface ImageCarouselPreviewProps {
   taggedUsers: TaggedUser[];
   onImageTap: (x: number, y: number) => void;
   onRemoveImage: (idx: number) => void;
+  filterStyles?: React.CSSProperties[];
 }
 
 const ImageCarouselPreview = ({
@@ -28,6 +29,7 @@ const ImageCarouselPreview = ({
   taggedUsers,
   onImageTap,
   onRemoveImage,
+  filterStyles,
 }: ImageCarouselPreviewProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
@@ -71,7 +73,7 @@ const ImageCarouselPreview = ({
         >
           {images.map((src, i) => (
             <div key={i} className="relative min-w-full">
-              <img src={src} alt={`Photo ${i + 1}`} className="w-full object-cover" style={{ maxHeight: 400 }} />
+              <img src={src} alt={`Photo ${i + 1}`} className="w-full object-cover" style={{ maxHeight: 400, ...(filterStyles?.[i] || {}) }} />
               {/* Remove individual image button */}
               <button
                 onClick={(e) => { e.stopPropagation(); onRemoveImage(i); }}
