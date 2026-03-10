@@ -28,6 +28,7 @@ interface ViewerInfo {
   username: string;
   avatar_url: string | null;
   viewed_at: string;
+  reaction?: string | null;
 }
 
 const STORY_DURATION = 5000; // 5 seconds per story
@@ -237,14 +238,31 @@ const StoryViewer = () => {
 
     // Get all story IDs for this group
     const storyIds = currentGroup.stories.map(s => s.id);
-    const { data } = await supabase
-      .from("story_views")
-      .select("viewer_id, created_at, story_id")
-      .in("story_id", storyIds)
-      .order("created_at", { ascending: false });
+    
+    // Fetch views and reactions in parallel
+    const [viewsResult, reactionsResult] = await Promise.all([
+      supabase
+        .from("story_views")
+        .select("viewer_id, created_at, story_id")
+        .in("story_id", storyIds)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("story_reactions" as any)
+        .select("user_id, reaction, story_id")
+        .in("story_id", storyIds),
+    ]);
 
-    if (data && data.length > 0) {
-      const viewerIds = [...new Set(data.map(v => v.viewer_id))];
+    const viewsData = viewsResult.data || [];
+    const reactionsData = (reactionsResult.data || []) as any[];
+
+    // Build reaction map: user_id -> reaction
+    const reactionMap = new Map<string, string>();
+    for (const r of reactionsData) {
+      reactionMap.set(r.user_id, r.reaction);
+    }
+
+    if (viewsData.length > 0) {
+      const viewerIds = [...new Set(viewsData.map(v => v.viewer_id))];
       const { data: profiles } = await supabase
         .from("profiles")
         .select("user_id, username, avatar_url")
@@ -253,13 +271,14 @@ const StoryViewer = () => {
 
       // Deduplicate by viewer_id, keep most recent
       const seenMap = new Map<string, ViewerInfo>();
-      for (const v of data) {
+      for (const v of viewsData) {
         if (!seenMap.has(v.viewer_id)) {
           seenMap.set(v.viewer_id, {
             user_id: v.viewer_id,
             username: profileMap[v.viewer_id]?.username || "user",
             avatar_url: profileMap[v.viewer_id]?.avatar_url || null,
             viewed_at: v.created_at,
+            reaction: reactionMap.get(v.viewer_id) || null,
           });
         }
       }
@@ -298,24 +317,30 @@ const StoryViewer = () => {
   };
 
   const handleHeartReact = async () => {
-    if (!user || !currentGroup || hearted) return;
+    if (!user || !currentGroup || hearted || !currentStory) return;
     setHearted(true);
     setShowHeartAnim(true);
     setPaused(true);
     setTimeout(() => { setShowHeartAnim(false); setPaused(false); }, 1200);
     try {
-      const { data: convId } = await supabase.rpc("create_direct_conversation", {
-        other_user_id: currentGroup.user_id,
-      });
-      if (convId) {
-        await supabase.from("messages").insert({
-          conversation_id: convId,
-          sender_id: user.id,
-          text: "❤️ Reacted to your story",
-          mood: "Love",
+      // Insert reaction into story_reactions
+      await supabase.from("story_reactions" as any).upsert({
+        story_id: currentStory.id,
+        user_id: user.id,
+        reaction: "❤️",
+      }, { onConflict: "story_id,user_id" });
+
+      // Create notification for the story owner
+      if (currentGroup.user_id !== user.id) {
+        await supabase.from("notifications").insert({
+          user_id: currentGroup.user_id,
+          actor_id: user.id,
+          type: "story_react",
+          post_id: null,
+          comment_text: "❤️",
         });
       }
-  } catch {}
+    } catch {}
   };
 
   const handleDeleteStory = async () => {
@@ -609,6 +634,9 @@ const StoryViewer = () => {
                           {formatDistanceToNow(new Date(v.viewed_at), { addSuffix: true })}
                         </p>
                       </div>
+                      {v.reaction && (
+                        <span className="text-lg">{v.reaction}</span>
+                      )}
                     </button>
                   ))
                 )}

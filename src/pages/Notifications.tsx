@@ -10,7 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 
 import VerifiedBadge from "@/components/VerifiedBadge";
 
-type NotifType = "like" | "comment" | "follow";
+type NotifType = "like" | "comment" | "follow" | "story_react";
 
 interface NotifItem {
   id: string;
@@ -152,6 +152,7 @@ const Notifications = () => {
       case "like": return "liked your post.";
       case "comment": return "commented on your post.";
       case "follow": return "started following you.";
+      case "story_react": return `reacted ${n.comment_text || "❤️"} to your story.`;
       default: return "";
     }
   };
@@ -164,7 +165,7 @@ const Notifications = () => {
     }
     
     // Navigate based on notification type
-    if (n.type === "follow") {
+    if (n.type === "follow" || n.type === "story_react") {
       navigate(`/user/${n.actor_id}`);
     } else if (n.type === "comment" && n.post_id) {
       navigate(`/post/${n.post_id}?openComments=true`);
@@ -176,6 +177,7 @@ const Notifications = () => {
   const NotifIcon = ({ type }: { type: NotifType }) => {
     if (type === "like") return <PuffyIcon name="heart-filled" size={20} />;
     if (type === "comment") return <PuffyIcon name="message-circle" size={20} />;
+    if (type === "story_react") return <span className="text-base">❤️</span>;
     return null;
   };
 
