@@ -173,73 +173,82 @@ const CreatePost = () => {
       <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
 
       <div className="px-4 py-4 space-y-4">
-        {/* Add more photos button */}
+        {previews.length === 0 && (
+          <button
+            onClick={() => fileRef.current?.click()}
+            className="flex items-center gap-2 text-sm text-primary font-medium"
+          >
+            <PuffyIcon name="plus" size={16} />
+            Add photos
+          </button>
+        )}
         {previews.length > 0 && files.length < 10 && (
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="flex items-center gap-2 text-sm text-primary font-medium"
-            >
-              <PuffyIcon name="plus" size={16} />
-              Add more photos ({files.length}/10)
-            </button>
-          )}
+          <button
+            onClick={() => fileRef.current?.click()}
+            className="flex items-center gap-2 text-sm text-primary font-medium"
+          >
+            <PuffyIcon name="plus" size={16} />
+            Add more photos ({files.length}/10)
+          </button>
+        )}
 
-          <textarea
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            placeholder="Write a caption..."
-            className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none"
-            rows={3}
+        <textarea
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+          placeholder={previews.length === 0 ? "What's on your mind?" : "Write a caption..."}
+          className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none"
+          rows={previews.length === 0 ? 5 : 3}
+        />
+        <div className="flex items-center gap-3 border-t border-border pt-4">
+          <PuffyIcon name="search" size={18} className="opacity-50" />
+          <input
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Add location"
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
-          <div className="flex items-center gap-3 border-t border-border pt-4">
-            <PuffyIcon name="search" size={18} className="opacity-50" />
-            <input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Add location"
-              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-            />
-          </div>
-
-          {/* Tag people button */}
-          <button
-            onClick={() => setTagMode(!tagMode)}
-            className={`flex items-center gap-3 border-t border-border pt-4 w-full text-left ${tagMode ? "text-primary" : "text-foreground"}`}
-          >
-            <PuffyIcon name="user-plus" size={18} className={tagMode ? "" : "opacity-50"} />
-            <span className="text-sm flex-1">Tag people</span>
-            {taggedUsers.length > 0 && (
-              <span className="text-xs text-muted-foreground">{taggedUsers.length} tagged</span>
-            )}
-          </button>
-
-          {/* Tagged users list */}
-          {taggedUsers.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {taggedUsers.map(t => (
-                <div key={t.user_id} className="flex items-center gap-1.5 bg-secondary rounded-full px-3 py-1.5">
-                  {t.avatar_url ? (
-                    <img src={t.avatar_url} className="h-4 w-4 rounded-sm object-cover" />
-                  ) : (
-                    <PuffyIcon name="user" size={12} />
-                  )}
-                  <span className="text-xs font-medium text-foreground">@{t.username}</span>
-                  <button onClick={() => removeTag(t.user_id)} className="ml-1">
-                    <span className="text-muted-foreground text-xs">✕</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <button
-            onClick={() => { setPreviews([]); setFiles([]); setTaggedUsers([]); setTagMode(false); setCurrentIndex(0); }}
-            className="text-xs text-accent"
-          >
-            Remove all photos
-          </button>
         </div>
-      )}
+
+        {previews.length > 0 && (
+          <>
+            <button
+              onClick={() => setTagMode(!tagMode)}
+              className={`flex items-center gap-3 border-t border-border pt-4 w-full text-left ${tagMode ? "text-primary" : "text-foreground"}`}
+            >
+              <PuffyIcon name="user-plus" size={18} className={tagMode ? "" : "opacity-50"} />
+              <span className="text-sm flex-1">Tag people</span>
+              {taggedUsers.length > 0 && (
+                <span className="text-xs text-muted-foreground">{taggedUsers.length} tagged</span>
+              )}
+            </button>
+
+            {taggedUsers.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {taggedUsers.map(t => (
+                  <div key={t.user_id} className="flex items-center gap-1.5 bg-secondary rounded-full px-3 py-1.5">
+                    {t.avatar_url ? (
+                      <img src={t.avatar_url} className="h-4 w-4 rounded-sm object-cover" />
+                    ) : (
+                      <PuffyIcon name="user" size={12} />
+                    )}
+                    <span className="text-xs font-medium text-foreground">@{t.username}</span>
+                    <button onClick={() => removeTag(t.user_id)} className="ml-1">
+                      <span className="text-muted-foreground text-xs">✕</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              onClick={() => { setPreviews([]); setFiles([]); setTaggedUsers([]); setTagMode(false); setCurrentIndex(0); }}
+              className="text-xs text-accent"
+            >
+              Remove all photos
+            </button>
+          </>
+        )}
+      </div>
 
       <TagSearchSheet
         isOpen={searchOpen}
