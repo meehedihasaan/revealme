@@ -94,6 +94,7 @@ const AppRoutes = () => {
       <Route path="/followers" element={<ProtectedRoute><FollowersList /></ProtectedRoute>} />
       <Route path="/user/:userId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
       <Route path="/post/:postId" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />
+      <Route path="/user-map" element={<ProtectedRoute><UserMap /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path="verifications" element={<AdminVerifications />} />
