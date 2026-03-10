@@ -106,6 +106,15 @@ const PostCard = ({
   const [likesOpen, setLikesOpen] = useState(false);
   const [following, setFollowing] = useState(initialFollowing);
   const [followLoading, setFollowLoading] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
+
+  useEffect(() => {
+    supabase
+      .from("comments")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", postId)
+      .then(({ count }) => setCommentCount(count || 0));
+  }, [postId]);
 
   const handleDoubleTap = () => {
     if (!liked) toggleLike();
