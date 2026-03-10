@@ -393,11 +393,11 @@ const Chat = () => {
             >
               <div className="shrink-0">
                 {otherUser?.avatar_url ? (
-                  <img src={otherUser.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
-                ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
-                    <PuffyIcon name="user" size={14} />
-                  </div>
+                   <img src={otherUser.avatar_url} alt="" className="h-8 w-8 rounded-[70%] object-cover" />
+                 ) : (
+                   <div className="flex h-8 w-8 items-center justify-center rounded-[70%] bg-secondary">
+                     <PuffyIcon name="user" size={14} />
+                   </div>
                 )}
               </div>
               <div className="flex items-center gap-1 rounded-2xl bg-secondary px-4 py-3 rounded-bl-md">
