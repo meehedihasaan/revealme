@@ -77,11 +77,13 @@ const CreatePost = () => {
   };
 
   const handlePost = async () => {
-    if (files.length === 0 || !user) return;
+    if (!user) return;
+    if (files.length === 0 && !caption.trim()) return;
     setPosting(true);
     try {
-      // Upload all images
-      const imageUrls: string[] = [];
+      let imageUrls: string[] = [];
+      
+      // Upload images if any
       for (const file of files) {
         const ext = file.name.split(".").pop();
         const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
@@ -91,10 +93,10 @@ const CreatePost = () => {
         imageUrls.push(publicUrl);
       }
 
-      // Create post with first image as main image_url
+      // Create post
       const { data: postData, error } = await supabase.from("posts").insert({
         user_id: user.id,
-        image_url: imageUrls[0],
+        image_url: imageUrls.length > 0 ? imageUrls[0] : null,
         caption,
         location,
       }).select("id").single();
