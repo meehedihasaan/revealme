@@ -40,7 +40,7 @@ const SetUsername = () => {
     }
     setLoading(true);
 
-      const { error } = await supabase
+    const { error } = await supabase
       .from("profiles")
       .update({
         username,
@@ -62,65 +62,149 @@ const SetUsername = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background px-6 py-12">
+    <div className="flex min-h-screen flex-col bg-background px-6 py-10">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         className="flex flex-1 flex-col"
       >
-        <h1 className="mb-2 text-2xl font-bold text-foreground">Complete your profile</h1>
-        <p className="mb-8 text-sm text-muted-foreground">
-          Set up your username
-        </p>
+        {/* Hero section */}
+        <div className="mb-10">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.15, duration: 0.4 }}
+            className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10"
+          >
+            <span className="text-3xl font-black bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+              @
+            </span>
+          </motion.div>
 
-        {/* Username */}
-        <div className="mb-4">
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Username</label>
-          <div className="flex items-center gap-2 rounded-xl bg-secondary px-4 py-3">
-            <span className="text-muted-foreground">@</span>
+          <motion.h1
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.25, duration: 0.4 }}
+            className="text-3xl font-bold tracking-tight text-foreground"
+          >
+            Reserve your{" "}
+            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              username
+            </span>{" "}
+            fast
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.35, duration: 0.4 }}
+            className="mt-2 text-sm text-muted-foreground leading-relaxed"
+          >
+            The best ones go quick. Grab yours before someone else does.
+          </motion.p>
+        </div>
+
+        {/* Username input */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.4 }}
+          className="mb-5"
+        >
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Username
+          </label>
+          <div className="group relative flex items-center rounded-2xl border-2 border-transparent bg-secondary px-4 py-3.5 transition-all focus-within:border-primary/40 focus-within:bg-secondary/80">
+            <span className="mr-1 text-lg font-bold bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+              @
+            </span>
             <input
               type="text"
               value={username}
               onChange={handleChange}
-              placeholder="username"
+              placeholder="yourname"
               maxLength={30}
-              className="flex-1 bg-transparent text-lg text-foreground placeholder:text-muted-foreground focus:outline-none"
+              className="flex-1 bg-transparent text-lg font-medium text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
             />
+            {username.length >= 3 && available !== null && (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                  available
+                    ? "bg-green-500/15 text-green-500"
+                    : "bg-destructive/15 text-destructive"
+                }`}
+              >
+                {available ? "✓" : "✗"}
+              </motion.span>
+            )}
           </div>
           {username.length >= 3 && available !== null && (
-            <p className={`mt-2 text-sm ${available ? "text-success" : "text-accent"}`}>
-              {available ? "✓ Username available" : "✗ Username taken"}
-            </p>
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`mt-2 text-xs font-medium ${
+                available ? "text-green-500" : "text-destructive"
+              }`}
+            >
+              {available ? "This username is yours for the taking!" : "Already claimed — try another one"}
+            </motion.p>
           )}
           {username.length > 0 && username.length < 3 && (
-            <p className="mt-2 text-sm text-muted-foreground">
-              Username must be at least 3 characters
+            <p className="mt-2 text-xs text-muted-foreground">
+              At least 3 characters needed
             </p>
           )}
-        </div>
+        </motion.div>
 
-        {/* Location */}
-        <div className="mb-2">
-          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Location (optional)</label>
+        {/* Location input */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="mb-4"
+        >
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Location <span className="font-normal normal-case text-muted-foreground/60">(optional)</span>
+          </label>
           <input
             type="text"
             value={userLocation}
             onChange={(e) => setUserLocation(e.target.value)}
             placeholder="City, Country"
             maxLength={60}
-            className="w-full rounded-xl bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full rounded-2xl border-2 border-transparent bg-secondary px-4 py-3.5 text-foreground placeholder:text-muted-foreground/50 transition-all focus:border-primary/40 focus:bg-secondary/80 focus:outline-none"
           />
-        </div>
+        </motion.div>
 
-        <div className="mt-auto flex w-full flex-col gap-3 pt-8">
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.4 }}
+          className="mt-auto flex w-full flex-col gap-3 pt-8"
+        >
           <button
             onClick={handleSubmit}
             disabled={loading || !available || username.length < 3}
-            className="w-full rounded-xl bg-primary py-4 text-lg font-semibold text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
+            className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
           >
-            {loading ? "Setting up..." : "Get Started"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="inline-block h-5 w-5 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground"
+                />
+                Setting up...
+              </span>
+            ) : (
+              "Claim & Get Started"
+            )}
           </button>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );
