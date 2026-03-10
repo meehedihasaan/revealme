@@ -166,7 +166,7 @@ const Feed = () => {
             <div className={`rounded-[22px] p-[2px] ${userHasStory ? getStoryColor(user?.id || "") : ""}`}>
                 <div className="rounded-[20px] border-[2px] border-background">
                   {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="You" className="h-[68px] w-[68px] rounded-[18px] object-cover" />
+                    <img src={profile.avatar_url} alt="You" className="h-[68px] w-[68px] rounded-[20px] object-cover" />
                   ) : (
                     <div className="flex h-[68px] w-[68px] items-center justify-center rounded-[18px] bg-secondary">
                       <PuffyIcon name="user" size={28} />
