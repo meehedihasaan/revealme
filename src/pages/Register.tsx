@@ -28,6 +28,11 @@ const Register = () => {
       return;
     }
 
+    if (!dob || differenceInYears(new Date(), dob) < 18) {
+      toast.error("You must be at least 18 years old to create an account");
+      return;
+    }
+
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email,
