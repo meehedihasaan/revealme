@@ -457,7 +457,7 @@ const Chat = () => {
             whileTap={{ scale: 0.85 }}
             onClick={sendMessage}
             disabled={(!input.trim() && !selectedFile) || sending || uploading}
-            className="shrink-0 rounded-full bg-primary p-2.5 transition-opacity disabled:opacity-30"
+            className="shrink-0 text-primary transition-opacity disabled:opacity-30"
           >
             {uploading ? (
               <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
