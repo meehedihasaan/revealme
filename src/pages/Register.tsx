@@ -127,6 +127,42 @@ const Register = () => {
           </div>
 
           <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">Date of Birth</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(
+                    "w-full rounded-xl bg-secondary px-4 py-3 text-left text-foreground focus:outline-none focus:ring-2 focus:ring-primary",
+                    !dob && "text-muted-foreground"
+                  )}
+                >
+                  {dob ? format(dob, "PPP") : "Select your date of birth"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dob}
+                  onSelect={setDob}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1900-01-01")
+                  }
+                  defaultMonth={dob || new Date(new Date().getFullYear() - 18, 0)}
+                  captionLayout="dropdown-buttons"
+                  fromYear={1900}
+                  toYear={new Date().getFullYear()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {dob && differenceInYears(new Date(), dob) < 18 && (
+              <p className="mt-1.5 text-xs text-destructive">You must be at least 18 years old</p>
+            )}
+          </div>
+
+          <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">Gender</label>
             <div className="flex flex-wrap gap-2">
               {GENDER_OPTIONS.map((option) => (
