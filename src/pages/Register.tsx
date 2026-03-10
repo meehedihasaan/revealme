@@ -184,7 +184,7 @@ const Register = () => {
 
           <button
             type="submit"
-            disabled={loading || !gender || !fullName.trim()}
+            disabled={loading || !gender || !fullName.trim() || !dob || differenceInYears(new Date(), dob) < 18}
             className="mt-2 w-full rounded-xl bg-primary py-4 text-lg font-semibold text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
           >
             {loading ? "Creating account..." : "Create Account"}
