@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import PuffyIcon from "@/components/PuffyIcon";
@@ -14,34 +13,12 @@ interface MapUser {
   longitude: number;
 }
 
-// Create custom avatar marker icon
-const createAvatarIcon = (avatarUrl: string | null, username: string) => {
-  const html = avatarUrl
-    ? `<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
-        <img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;" />
-      </div>`
-    : `<div style="width:36px;height:36px;border-radius:50%;background:#6b7280;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:14px;">
-        ${(username || "U")[0].toUpperCase()}
-      </div>`;
-
-  return L.divIcon({
-    html,
-    className: "custom-avatar-marker",
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-    popupAnchor: [0, -22],
-  });
-};
-
-// Bangladesh center and bounds
-const BD_CENTER: [number, number] = [23.685, 90.356];
-const BD_BOUNDS: [[number, number], [number, number]] = [
-  [20.5, 87.8],
-  [26.7, 92.8],
-];
+const BD_CENTER: L.LatLngExpression = [23.685, 90.356];
 
 const UserMap = () => {
   const navigate = useNavigate();
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const [users, setUsers] = useState<MapUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -69,9 +46,74 @@ const UserMap = () => {
     fetchUsers();
   }, []);
 
+  // Initialize map
+  useEffect(() => {
+    if (loading || !mapContainerRef.current || mapRef.current) return;
+
+    const map = L.map(mapContainerRef.current, {
+      center: BD_CENTER,
+      zoom: 7,
+      minZoom: 6,
+      maxZoom: 18,
+      zoomControl: false,
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+    }).addTo(map);
+
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+
+    mapRef.current = map;
+
+    // Add markers
+    users.forEach((u) => {
+      const avatarHtml = u.avatar_url
+        ? `<img src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover;" />`
+        : `<span style="font-size:16px;font-weight:bold;color:white;">${(u.username[0] || "U").toUpperCase()}</span>`;
+
+      const icon = L.divIcon({
+        html: `<div style="width:38px;height:38px;border-radius:50%;overflow:hidden;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;background:#6b7280;">
+          ${avatarHtml}
+        </div>`,
+        className: "",
+        iconSize: [38, 38],
+        iconAnchor: [19, 19],
+        popupAnchor: [0, -22],
+      });
+
+      const marker = L.marker([u.latitude, u.longitude], { icon }).addTo(map);
+
+      const popupContent = document.createElement("div");
+      popupContent.style.cssText = "display:flex;align-items:center;gap:8px;cursor:pointer;padding:2px;";
+      popupContent.innerHTML = `
+        ${u.avatar_url
+          ? `<img src="${u.avatar_url}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;" />`
+          : `<div style="width:32px;height:32px;border-radius:8px;background:#6b7280;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;">${(u.username[0] || "U").toUpperCase()}</div>`
+        }
+        <div>
+          <p style="font-weight:600;font-size:13px;margin:0;">@${u.username}</p>
+          <p style="font-size:11px;color:#666;margin:0;">View profile →</p>
+        </div>
+      `;
+      popupContent.addEventListener("click", () => {
+        navigate(`/user/${u.user_id}`);
+      });
+
+      marker.bindPopup(popupContent, {
+        className: "custom-leaflet-popup",
+        closeButton: false,
+      });
+    });
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [loading, users, navigate]);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0 z-[1000] bg-background relative">
         <button onClick={() => navigate(-1)}>
           <PuffyIcon name="arrow-left" size={24} />
@@ -88,71 +130,12 @@ const UserMap = () => {
         </div>
       ) : (
         <div className="flex-1 relative">
-          <MapContainer
-            center={BD_CENTER}
-            zoom={7}
-            minZoom={6}
-            maxZoom={18}
-            maxBounds={BD_BOUNDS}
-            maxBoundsViscosity={0.8}
-            style={{ height: "100%", width: "100%" }}
-            className="z-0"
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {users.map((u) => (
-              <Marker
-                key={u.user_id}
-                position={[u.latitude, u.longitude]}
-                icon={createAvatarIcon(u.avatar_url, u.username)}
-              >
-                <Popup>
-                  <div
-                    className="flex items-center gap-2 cursor-pointer"
-                    onClick={() => navigate(`/user/${u.user_id}`)}
-                  >
-                    {u.avatar_url ? (
-                      <img
-                        src={u.avatar_url}
-                        alt={u.username}
-                        style={{ width: 32, height: 32, borderRadius: 8, objectFit: "cover" }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: 8,
-                          background: "#6b7280",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "white",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {(u.username || "U")[0].toUpperCase()}
-                      </div>
-                    )}
-                    <div>
-                      <p style={{ fontWeight: 600, fontSize: 13, margin: 0 }}>@{u.username}</p>
-                      <p style={{ fontSize: 11, color: "#666", margin: 0 }}>View profile →</p>
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
-
+          <div ref={mapContainerRef} className="w-full h-full" style={{ minHeight: "calc(100vh - 57px)" }} />
           {users.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[500]">
               <div className="bg-card/95 rounded-xl px-5 py-4 shadow-lg text-center">
                 <p className="text-sm font-medium text-foreground">No users on the map yet</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Go to Settings → Location to share yours!
-                </p>
+                <p className="text-xs text-muted-foreground mt-1">Go to Settings → Location to share yours!</p>
               </div>
             </div>
           )}
@@ -160,16 +143,15 @@ const UserMap = () => {
       )}
 
       <style>{`
-        .custom-avatar-marker {
-          background: none !important;
-          border: none !important;
-        }
-        .leaflet-popup-content-wrapper {
+        .custom-leaflet-popup .leaflet-popup-content-wrapper {
           border-radius: 12px !important;
           padding: 4px !important;
         }
-        .leaflet-popup-content {
+        .custom-leaflet-popup .leaflet-popup-content {
           margin: 8px 10px !important;
+        }
+        .custom-leaflet-popup .leaflet-popup-tip {
+          background: white;
         }
       `}</style>
     </div>
