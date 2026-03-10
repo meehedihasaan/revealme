@@ -17,6 +17,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [gender, setGender] = useState("");
+  const [dob, setDob] = useState<Date>();
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
