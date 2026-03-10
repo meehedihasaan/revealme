@@ -149,38 +149,27 @@ const Profile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
-          {(() => {
-            const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-            const didLongPress = useRef(false);
-
-            const onPointerDown = useCallback(() => {
-              didLongPress.current = false;
-              longPressTimer.current = setTimeout(() => {
-                didLongPress.current = true;
-                if (avatarUrl) setShowAvatarModal(true);
-              }, 500);
-            }, [avatarUrl]);
-
-            const onPointerUp = useCallback(() => {
-              if (longPressTimer.current) clearTimeout(longPressTimer.current);
-              if (!didLongPress.current) {
-                if (hasStory) {
-                  navigate(`/story?user=${user?.id}`);
-                } else if (avatarUrl) {
-                  setShowAvatarModal(true);
-                }
-              }
-            }, [hasStory, avatarUrl, user?.id]);
-
-            const onPointerCancel = useCallback(() => {
-              if (longPressTimer.current) clearTimeout(longPressTimer.current);
-            }, []);
-
-            return (
-              <button
-                onPointerDown={onPointerDown}
-                onPointerUp={onPointerUp}
-                onPointerCancel={onPointerCancel}
+          <button
+                onPointerDown={() => {
+                  avatarDidLongPress.current = false;
+                  avatarLongPressTimer.current = setTimeout(() => {
+                    avatarDidLongPress.current = true;
+                    if (avatarUrl) setShowAvatarModal(true);
+                  }, 500);
+                }}
+                onPointerUp={() => {
+                  if (avatarLongPressTimer.current) clearTimeout(avatarLongPressTimer.current);
+                  if (!avatarDidLongPress.current) {
+                    if (hasStory) {
+                      navigate(`/story?user=${user?.id}`);
+                    } else if (avatarUrl) {
+                      setShowAvatarModal(true);
+                    }
+                  }
+                }}
+                onPointerCancel={() => {
+                  if (avatarLongPressTimer.current) clearTimeout(avatarLongPressTimer.current);
+                }}
                 onContextMenu={(e) => e.preventDefault()}
                 className={`inline-block rounded-[26px] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
               >
@@ -194,8 +183,6 @@ const Profile = () => {
                   )}
                 </div>
               </button>
-            );
-          })()}
         </div>
 
         <div className="flex items-center gap-1.5">
