@@ -179,7 +179,7 @@ const Feed = () => {
               onClick={(e) => { e.stopPropagation(); navigate("/create-story"); }}
               className="absolute bottom-5 right-0 flex h-6 w-6 items-center justify-center rounded-full bg-primary border-2 border-background text-primary-foreground z-10"
             >
-              <PuffyIcon name="camera" size={11} className="brightness-0 invert" />
+              <img src="/src/assets/icons/camera.png" alt="camera" width={11} height={11} className="brightness-0 invert" draggable={false} />
             </button>
             <span className="max-w-[72px] truncate text-xs text-foreground">Your story</span>
           </div>
