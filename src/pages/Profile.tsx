@@ -132,11 +132,11 @@ const Profile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
-          <div className="inline-block rounded-2xl border-4 border-background bg-background overflow-hidden">
+          <div className="inline-block rounded-[22px] border-4 border-background bg-background overflow-hidden">
             {avatarUrl ? (
-              <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-2xl object-cover" />
+              <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover" />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-secondary">
+              <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
                 <PuffyIcon name="user" size={32} />
               </div>
             )}
