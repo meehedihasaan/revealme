@@ -44,6 +44,7 @@ import AdminPosts from "./pages/admin/AdminPosts";
 import PostDetail from "./pages/PostDetail";
 import VerifyCode from "./pages/VerifyCode";
 import UserMap from "./pages/UserMap";
+import NearbyUsers from "./pages/NearbyUsers";
 import LocationSettings from "./pages/LocationSettings";
 
 const queryClient = new QueryClient();
@@ -97,6 +98,7 @@ const AppRoutes = () => {
       <Route path="/user/:userId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
       <Route path="/post/:postId" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />
       <Route path="/user-map" element={<ProtectedRoute><UserMap /></ProtectedRoute>} />
+      <Route path="/nearby-users" element={<ProtectedRoute><NearbyUsers /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path="verifications" element={<AdminVerifications />} />
