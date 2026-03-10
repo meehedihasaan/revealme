@@ -155,14 +155,10 @@ const Profile = () => {
         </button>
       </div>
 
-      {/* Grid */}
+      {/* Posts as cards */}
       {activeTab === "grid" ? (
         loading ? (
-          <div className="grid grid-cols-3 gap-0.5 mt-1">
-            {[...Array(9)].map((_, i) => (
-              <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
-            ))}
-          </div>
+          <FeedShimmer />
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
@@ -172,20 +168,29 @@ const Profile = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-0.5">
-            {posts.map((post, idx) => (
-              <button key={post.id} onClick={() => setSelectedPostIndex(idx)}>
-                <img src={post.image_url} alt="" className="aspect-square w-full object-cover" />
-              </button>
+          <div className="mt-2">
+            {posts.map((post) => (
+              <PostCard
+                key={post.id}
+                postId={post.id}
+                postUserId={post.user_id}
+                username={post.username}
+                avatar={post.avatar_url || ""}
+                image={post.image_url}
+                caption={post.caption}
+                likesCount={post.likesCount}
+                timeAgo={post.timeAgo}
+                verified={post.is_verified}
+                location={post.location}
+                isLiked={post.isLiked}
+                isSaved={post.isSaved}
+                onDelete={refetch}
+              />
             ))}
           </div>
         )
       ) : taggedLoading ? (
-        <div className="grid grid-cols-3 gap-0.5 mt-1">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
-          ))}
-        </div>
+        <FeedShimmer />
       ) : taggedPosts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />
