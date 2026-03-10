@@ -114,6 +114,19 @@ const SetUsername = () => {
           )}
         </div>
 
+        {/* Location */}
+        <div className="mb-2">
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Location (optional)</label>
+          <input
+            type="text"
+            value={userLocation}
+            onChange={(e) => setUserLocation(e.target.value)}
+            placeholder="City, Country"
+            maxLength={60}
+            className="w-full rounded-xl bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
         <div className="mt-auto flex w-full flex-col gap-3 pt-8">
           <button
             onClick={handleSubmit}

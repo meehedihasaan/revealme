@@ -23,8 +23,8 @@ const Register = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Account created!");
-      navigate("/onboarding/avatar");
+      toast.success("Check your email for a verification code!");
+      navigate("/onboarding/verify", { state: { email } });
     }
   };
 
