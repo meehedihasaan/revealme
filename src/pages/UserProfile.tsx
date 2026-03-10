@@ -149,13 +149,12 @@ const UserProfile = () => {
       setFollowingCount(following || 0);
 
       if (user) {
-        const { data: follow } = await supabase
-          .from("follows")
-          .select("id")
-          .eq("follower_id", user.id)
-          .eq("following_id", userId)
-          .maybeSingle();
+        const [{ data: follow }, { data: followBack }] = await Promise.all([
+          supabase.from("follows").select("id").eq("follower_id", user.id).eq("following_id", userId).maybeSingle(),
+          supabase.from("follows").select("id").eq("follower_id", userId).eq("following_id", user.id).maybeSingle(),
+        ]);
         setIsFollowing(!!follow);
+        setFollowsBack(!!followBack);
       }
       setProfileLoading(false);
     };
