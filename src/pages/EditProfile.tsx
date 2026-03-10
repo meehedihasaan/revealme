@@ -130,14 +130,14 @@ const EditProfile = () => {
       <div className="flex flex-col items-center -mt-12 pb-4">
         <button onClick={() => fileRef.current?.click()} className="relative">
           {avatarPreview ? (
-            <img src={avatarPreview} alt="Avatar" className="h-24 w-24 rounded-2xl object-cover border-4 border-background" />
+            <img src={avatarPreview} alt="Avatar" className="h-24 w-24 rounded-[20px] object-cover border-4 border-background" />
           ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-secondary border-4 border-background">
+            <div className="flex h-24 w-24 items-center justify-center rounded-[20px] bg-secondary border-4 border-background">
               <PuffyIcon name="user" size={40} />
             </div>
           )}
-          <div className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary">
-            <PuffyIcon name="camera" size={14} />
+          <div className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary border-2 border-background">
+            <PuffyIcon name="camera" size={14} className="brightness-0 invert" />
           </div>
         </button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
