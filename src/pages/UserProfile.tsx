@@ -336,13 +336,13 @@ const UserProfile = () => {
         <div className="-mt-10 mb-3">
           <button
             onClick={() => hasStory ? navigate(`/story?user=${profile.user_id}`) : undefined}
-            className={`inline-block rounded-[24px] p-[2px] ${hasStory ? STORY_GRADIENT : ""}`}
+            className={`inline-block rounded-full p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
           >
-            <div className={`rounded-[22px] ${hasStory ? "border-[2px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
+            <div className={`rounded-full ${hasStory ? "border-[2px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
               {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover" />
+                <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-full object-cover" />
               ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
                   <PuffyIcon name="user" size={32} />
                 </div>
               )}

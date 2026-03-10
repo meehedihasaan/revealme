@@ -149,12 +149,12 @@ const Feed = () => {
             <button
               onClick={() => userHasStory ? navigate(`/story?user=${user?.id}`) : navigate("/create-story")}
             >
-            <div className={`rounded-[22px] p-[2px] ${userHasStory ? STORY_GRADIENT : ""}`}>
-                <div className="rounded-[20px] border-[2px] border-background">
+            <div className={`rounded-full p-[2.5px] ${userHasStory ? STORY_GRADIENT : ""}`}>
+                <div className="rounded-full border-[2px] border-background">
                   {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="You" className="h-[68px] w-[68px] rounded-[20px] object-cover" />
+                    <img src={profile.avatar_url} alt="You" className="h-[68px] w-[68px] rounded-full object-cover" />
                   ) : (
-                    <div className="flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-secondary">
+                    <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-secondary">
                       <PuffyIcon name="user" size={28} />
                     </div>
                   )}
@@ -176,12 +176,12 @@ const Feed = () => {
               onClick={() => navigate(`/story?user=${su.user_id}`)}
               className="flex shrink-0 flex-col items-center gap-1"
             >
-              <div className={`rounded-[22px] p-[2px] ${su.hasSeen ? "bg-muted-foreground/30" : STORY_GRADIENT}`}>
-                <div className="rounded-[20px] border-[2px] border-background">
+              <div className={`rounded-full p-[2.5px] ${su.hasSeen ? "bg-muted-foreground/30" : STORY_GRADIENT}`}>
+                <div className="rounded-full border-[2px] border-background">
                   {su.avatar_url ? (
-                    <img src={su.avatar_url} alt={su.username} className="h-[68px] w-[68px] rounded-[20px] object-cover" />
+                    <img src={su.avatar_url} alt={su.username} className="h-[68px] w-[68px] rounded-full object-cover" />
                   ) : (
-                    <div className="flex h-[68px] w-[68px] items-center justify-center rounded-[20px] bg-secondary">
+                    <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-secondary">
                       <PuffyIcon name="user" size={28} />
                     </div>
                   )}
