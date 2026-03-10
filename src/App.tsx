@@ -68,6 +68,7 @@ const AppRoutes = () => (
       <Route path="/" element={<PublicRoute><Welcome /></PublicRoute>} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+      <Route path="/onboarding/verify" element={<VerifyCode />} />
       <Route path="/onboarding/avatar" element={<ProtectedRoute><SetAvatar /></ProtectedRoute>} />
       <Route path="/onboarding/username" element={<ProtectedRoute><SetUsername /></ProtectedRoute>} />
       <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
