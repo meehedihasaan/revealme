@@ -150,6 +150,7 @@ const Explore = () => {
         <button className="p-1">
           <MapPin size={22} className="text-foreground" />
         </button>
+      </div>
 
       {/* Search */}
       <div className="px-4 pb-2">
