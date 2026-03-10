@@ -127,10 +127,10 @@ const NearbyUsers = () => {
                     <img
                       src={u.avatar_url}
                       alt={u.username}
-                      className="h-14 w-14 rounded-[65%] object-cover border-2 border-primary shadow-lg"
+                      className="h-14 w-14 rounded-[30%] object-cover border-2 border-primary shadow-lg"
                     />
                   ) : (
-                    <div className="flex h-14 w-14 items-center justify-center rounded-[65%] bg-secondary border-2 border-primary shadow-lg">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-[30%] bg-secondary border-2 border-primary shadow-lg">
                       <PuffyIcon name="user" size={22} />
                     </div>
                   )}
