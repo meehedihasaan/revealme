@@ -10,7 +10,7 @@ import ShareSheet from "@/components/ShareSheet";
 import PostMenu from "@/components/PostMenu";
 import LikesSheet from "@/components/LikesSheet";
 import PostImageCarousel from "@/components/PostImageCarousel";
-import heartFilledIcon from "@/assets/icons/heart-filled.png";
+import heartFilledRedIcon from "@/assets/icons/heart-filled-red.png";
 
 interface PostCardProps {
   postId: string;
