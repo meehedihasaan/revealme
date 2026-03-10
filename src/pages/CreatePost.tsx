@@ -218,7 +218,7 @@ const CreatePost = () => {
               {taggedUsers.map(t => (
                 <div key={t.user_id} className="flex items-center gap-1.5 bg-secondary rounded-full px-3 py-1.5">
                   {t.avatar_url ? (
-                    <img src={t.avatar_url} className="h-4 w-4 rounded-full object-cover" />
+                    <img src={t.avatar_url} className="h-4 w-4 rounded-sm object-cover" />
                   ) : (
                     <PuffyIcon name="user" size={12} />
                   )}

@@ -261,9 +261,9 @@ const UserProfile = () => {
               {/* User info */}
               <div className="flex items-center gap-3 px-5 pb-4 border-b border-border/50">
                 {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+                  <img src={profile.avatar_url} alt="" className="h-10 w-10 rounded-xl object-cover" />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
                     <PuffyIcon name="user" size={18} />
                   </div>
                 )}
@@ -306,11 +306,11 @@ const UserProfile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
-          <div className="inline-block rounded-full border-4 border-background bg-background overflow-hidden">
+          <div className="inline-block rounded-2xl border-4 border-background bg-background overflow-hidden">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-full object-cover" />
+              <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-2xl object-cover" />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-secondary">
                 <PuffyIcon name="user" size={32} />
               </div>
             )}

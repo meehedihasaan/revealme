@@ -204,11 +204,22 @@ const CreateStory = () => {
             style={{ filter: currentFilter }}
           />
 
-          {/* Text overlays */}
+          {/* Text overlays - draggable */}
           {texts.map((t) => (
-            <div
+            <motion.div
               key={t.id}
-              className="absolute cursor-move select-none"
+              drag
+              dragMomentum={false}
+              dragConstraints={canvasRef}
+              onDragEnd={(_, info) => {
+                const container = canvasRef.current;
+                if (!container) return;
+                const rect = container.getBoundingClientRect();
+                const newX = ((info.point.x - rect.left) / rect.width) * 100;
+                const newY = ((info.point.y - rect.top) / rect.height) * 100;
+                setTexts(prev => prev.map(item => item.id === t.id ? { ...item, x: Math.max(5, Math.min(95, newX)), y: Math.max(5, Math.min(95, newY)) } : item));
+              }}
+              className="absolute cursor-grab active:cursor-grabbing select-none z-10"
               style={{
                 left: `${t.x}%`,
                 top: `${t.y}%`,
@@ -218,27 +229,40 @@ const CreateStory = () => {
                 fontWeight: "bold",
                 textShadow: "0 2px 8px rgba(0,0,0,0.5)",
                 pointerEvents: "auto",
+                touchAction: "none",
               }}
             >
               {t.text}
-            </div>
+            </motion.div>
           ))}
 
-          {/* Emoji overlays */}
+          {/* Emoji overlays - draggable */}
           {emojis.map((e) => (
-            <div
+            <motion.div
               key={e.id}
-              className="absolute cursor-move select-none"
+              drag
+              dragMomentum={false}
+              dragConstraints={canvasRef}
+              onDragEnd={(_, info) => {
+                const container = canvasRef.current;
+                if (!container) return;
+                const rect = container.getBoundingClientRect();
+                const newX = ((info.point.x - rect.left) / rect.width) * 100;
+                const newY = ((info.point.y - rect.top) / rect.height) * 100;
+                setEmojis(prev => prev.map(item => item.id === e.id ? { ...item, x: Math.max(5, Math.min(95, newX)), y: Math.max(5, Math.min(95, newY)) } : item));
+              }}
+              className="absolute cursor-grab active:cursor-grabbing select-none z-10"
               style={{
                 left: `${e.x}%`,
                 top: `${e.y}%`,
                 transform: "translate(-50%, -50%)",
                 fontSize: e.size,
                 pointerEvents: "auto",
+                touchAction: "none",
               }}
             >
               {e.emoji}
-            </div>
+            </motion.div>
           ))}
 
           {/* Tools overlay */}

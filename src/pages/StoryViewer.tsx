@@ -52,6 +52,7 @@ const StoryViewer = () => {
   const [sendingReply, setSendingReply] = useState(false);
   const [hearted, setHearted] = useState(false);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
+  const [showStoryMenu, setShowStoryMenu] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const viewedRef = useRef<Set<string>>(new Set());
@@ -309,7 +310,28 @@ const StoryViewer = () => {
           mood: "Love",
         });
       }
-    } catch {}
+  } catch {}
+  };
+
+  const handleDeleteStory = async () => {
+    if (!currentStory || !user || !currentGroup || currentGroup.user_id !== user.id) return;
+    setShowStoryMenu(false);
+    try {
+      await supabase.from("stories").delete().eq("id", currentStory.id);
+      toast.success("Story deleted");
+      // If more stories in group, go next; otherwise go back
+      if (currentGroup.stories.length > 1) {
+        const newStories = currentGroup.stories.filter(s => s.id !== currentStory.id);
+        setGroups(prev => prev.map((g, i) => i === groupIndex ? { ...g, stories: newStories } : g));
+        setStoryIndex(Math.min(storyIndex, newStories.length - 1));
+        setImageLoaded(false);
+      } else {
+        navigate(-1);
+      }
+    } catch {
+      toast.error("Failed to delete story");
+    }
+    setPaused(false);
   };
 
   if (!loaded || !currentGroup || !currentStory) return null;
@@ -381,9 +403,9 @@ const StoryViewer = () => {
           className="flex items-center gap-2.5"
         >
           {currentGroup.avatar_url ? (
-            <img src={currentGroup.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-white/30" />
+            <img src={currentGroup.avatar_url} alt="" className="h-9 w-9 rounded-xl object-cover ring-2 ring-white/30" />
           ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 ring-2 ring-white/30">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 ring-2 ring-white/30">
               <PuffyIcon name="user" size={16} className="invert" />
             </div>
           )}
@@ -396,6 +418,47 @@ const StoryViewer = () => {
         {paused && (
           <span className="text-[10px] text-white/50 uppercase tracking-wider mr-2">Paused</span>
         )}
+        {/* 3-dot menu */}
+        <div className="relative">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowStoryMenu(!showStoryMenu); setPaused(true); }}
+            className="p-1"
+          >
+            <PuffyIcon name="more-horizontal" size={22} className="invert" />
+          </button>
+          <AnimatePresence>
+            {showStoryMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                className="absolute right-0 top-10 z-50 min-w-[160px] rounded-xl bg-card shadow-xl border border-border overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {isOwn && (
+                  <button
+                    onClick={handleDeleteStory}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-secondary/50"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                    </svg>
+                    Delete Story
+                  </button>
+                )}
+                <button
+                  onClick={() => { setShowStoryMenu(false); setPaused(false); }}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/50 border-t border-border"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                  Cancel
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         <button
           onClick={(e) => { e.stopPropagation(); navigate(-1); }}
           className="p-1"
@@ -525,9 +588,9 @@ const StoryViewer = () => {
                       className="flex w-full items-center gap-3 px-5 py-3 text-left active:bg-secondary/50"
                     >
                       {v.avatar_url ? (
-                        <img src={v.avatar_url} className="h-10 w-10 rounded-full object-cover" />
+                        <img src={v.avatar_url} className="h-10 w-10 rounded-xl object-cover" />
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
                           <PuffyIcon name="user" size={18} />
                         </div>
                       )}
