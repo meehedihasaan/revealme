@@ -72,8 +72,8 @@ const ImageCarouselPreview = ({
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
         >
           {images.map((src, i) => (
-            <div key={i} className="relative min-w-full">
-              <img src={src} alt={`Photo ${i + 1}`} className="w-full object-cover" style={{ maxHeight: 400, ...(filterStyles?.[i] || {}) }} />
+            <div key={i} className="relative min-w-full" style={{ aspectRatio: "4/5" }}>
+              <img src={src} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" style={filterStyles?.[i] || {}} />
               {/* Remove individual image button */}
               <button
                 onClick={(e) => { e.stopPropagation(); onRemoveImage(i); }}
