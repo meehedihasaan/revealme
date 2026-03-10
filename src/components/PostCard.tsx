@@ -214,7 +214,11 @@ const PostCard = ({
         <div className="flex items-center gap-4">
           <motion.button whileTap={{ scale: 0.8 }} onClick={toggleLike}>
             <motion.div animate={liked ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}>
-              <PuffyIcon name={liked ? "heart-filled" : "heart"} size={26} />
+              {liked ? (
+                <img src={heartFilledIcon} alt="liked" width={26} height={26} className="inline-block shrink-0" style={{ filter: "none" }} draggable={false} />
+              ) : (
+                <PuffyIcon name="heart" size={26} />
+              )}
             </motion.div>
           </motion.button>
           <button onClick={() => setCommentOpen(true)}>
