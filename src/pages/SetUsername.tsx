@@ -7,8 +7,10 @@ import { toast } from "sonner";
 
 const SetUsername = () => {
   const navigate = useNavigate();
-  const { user, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
+  const [fullName, setFullName] = useState(profile?.display_name || "");
   const [username, setUsername] = useState("");
+  const [userLocation, setUserLocation] = useState(profile?.location || "");
   const [loading, setLoading] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
 
