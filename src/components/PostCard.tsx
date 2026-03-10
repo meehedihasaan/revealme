@@ -177,7 +177,7 @@ const PostCard = ({
               navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`);
             }
           }}
-          className={`rounded-[14px] p-[2px] ${hasStory ? getStoryColor(postUserId || "") : ""}`}
+          className={`rounded-[14px] p-[2px] ${hasStory ? STORY_GRADIENT : ""}`}
         >
           <div className={`rounded-[12px] ${hasStory ? "border-[2px] border-background" : ""}`}>
             {avatar ? (

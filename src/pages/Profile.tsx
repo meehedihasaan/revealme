@@ -148,7 +148,7 @@ const Profile = () => {
         <div className="-mt-10 mb-3">
           <button
             onClick={() => hasStory ? navigate(`/story?user=${user?.id}`) : undefined}
-            className={`inline-block rounded-[24px] p-[2px] ${hasStory ? getStoryColor(user?.id || "") : ""}`}
+            className={`inline-block rounded-[24px] p-[2px] ${hasStory ? STORY_GRADIENT : ""}`}
           >
             <div className={`rounded-[22px] ${hasStory ? "border-[2px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
               {avatarUrl ? (
