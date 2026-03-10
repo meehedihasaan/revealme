@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LikeUser {
   user_id: string;
@@ -19,13 +20,15 @@ interface LikesSheetProps {
 }
 
 const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) => {
+  const { user } = useAuth();
   const [users, setUsers] = useState<LikeUser[]>([]);
   const [loading, setLoading] = useState(false);
+  const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !user) return;
     setLoading(true);
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data: likes } = await supabase
         .from("likes")
         .select("user_id")
@@ -38,10 +41,35 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
         .select("user_id, username, avatar_url, is_verified")
         .in("user_id", uids);
       setUsers(profiles || []);
+
+      // Check follow states for all users except current user
+      const otherUids = uids.filter(id => id !== user.id);
+      if (otherUids.length > 0) {
+        const { data: follows } = await supabase
+          .from("follows")
+          .select("following_id")
+          .eq("follower_id", user.id)
+          .in("following_id", otherUids);
+        const states: Record<string, boolean> = {};
+        otherUids.forEach(id => { states[id] = (follows || []).some(f => f.following_id === id); });
+        setFollowStates(states);
+      }
+
       setLoading(false);
     };
-    fetch();
-  }, [isOpen, postId]);
+    fetchData();
+  }, [isOpen, postId, user]);
+
+  const toggleFollow = async (targetId: string) => {
+    if (!user) return;
+    const was = followStates[targetId] || false;
+    setFollowStates(prev => ({ ...prev, [targetId]: !was }));
+    if (was) {
+      await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", targetId);
+    } else {
+      await supabase.from("follows").insert({ follower_id: user.id, following_id: targetId });
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -89,7 +117,20 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
                         <PuffyIcon name="user" size={20} />
                       </div>
                     )}
-                    <span className="font-bold text-foreground flex items-center gap-1">{u.username || "user"}{u.is_verified && <VerifiedBadge size={13} />}</span>
+                    <span className="flex-1 font-bold text-foreground flex items-center gap-1">{u.username || "user"}{u.is_verified && <VerifiedBadge size={13} />}</span>
+                    {user && u.user_id !== user.id && (
+                      <button
+                        onClick={() => toggleFollow(u.user_id)}
+                        className={`flex items-center gap-1 rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+                          followStates[u.user_id]
+                            ? "bg-secondary text-secondary-foreground"
+                            : "bg-primary text-primary-foreground"
+                        }`}
+                      >
+                        <PuffyIcon name={followStates[u.user_id] ? "check" : "plus"} size={14} className={followStates[u.user_id] ? "" : "!filter-none"} />
+                        {followStates[u.user_id] ? "Following" : "Follow"}
+                      </button>
+                    )}
                   </div>
                 ))
               )}
