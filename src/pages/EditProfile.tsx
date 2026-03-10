@@ -29,6 +29,7 @@ const EditProfile = () => {
     if (!f) return;
     setAvatarFile(f);
     setAvatarPreview(URL.createObjectURL(f));
+    setAvatarDeleted(false);
   };
 
   const handleCover = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,6 +37,19 @@ const EditProfile = () => {
     if (!f) return;
     setCoverFile(f);
     setCoverPreview(URL.createObjectURL(f));
+    setCoverDeleted(false);
+  };
+
+  const handleDeleteAvatar = () => {
+    setAvatarPreview(null);
+    setAvatarFile(null);
+    setAvatarDeleted(true);
+  };
+
+  const handleDeleteCover = () => {
+    setCoverPreview(null);
+    setCoverFile(null);
+    setCoverDeleted(true);
   };
 
   const handleSave = async () => {
