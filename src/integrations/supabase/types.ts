@@ -413,6 +413,7 @@ export type Database = {
           cover_url: string | null
           created_at: string
           display_name: string | null
+          gender: string | null
           id: string
           is_private: boolean
           is_verified: boolean
@@ -432,6 +433,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           display_name?: string | null
+          gender?: string | null
           id?: string
           is_private?: boolean
           is_verified?: boolean
@@ -451,6 +453,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           display_name?: string | null
+          gender?: string | null
           id?: string
           is_private?: boolean
           is_verified?: boolean
