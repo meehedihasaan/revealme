@@ -206,10 +206,12 @@ const PostCard = ({
         </button>
         <button onClick={() => navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`)} className="flex-1 min-w-0 text-left">
           <div className="flex items-center gap-1">
-            <span className="text-sm font-semibold text-foreground">{username}</span>
+            <span className="text-sm font-semibold text-foreground">{displayName || username}</span>
             {verified && <VerifiedBadge size={15} />}
           </div>
-          {location && <p className="text-[11px] text-muted-foreground">{location}</p>}
+          {!image && <p className="text-[11px] text-muted-foreground">@{username}</p>}
+          {image && location && <p className="text-[11px] text-muted-foreground">{location}</p>}
+          {image && !location && <p className="text-[11px] text-muted-foreground">@{username}</p>}
         </button>
         {showFollowButton && !following && (
           <motion.button
