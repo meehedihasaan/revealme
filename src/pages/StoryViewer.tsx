@@ -322,14 +322,19 @@ const StoryViewer = () => {
     setShowHeartAnim(true);
     setPaused(true);
     setTimeout(() => { setShowHeartAnim(false); setPaused(false); }, 1200);
+
     try {
-      // Insert reaction into story_reactions
-      await supabase.from("story_reactions" as any).upsert({
+      // Insert reaction into story_reactions (ignore errors if duplicate)
+      await supabase.from("story_reactions" as any).insert({
         story_id: currentStory.id,
         user_id: user.id,
         reaction: "❤️",
-      }, { onConflict: "story_id,user_id" });
+      });
+    } catch {
+      // Duplicate is fine
+    }
 
+    try {
       // Create notification for the story owner
       if (currentGroup.user_id !== user.id) {
         await supabase.from("notifications").insert({
@@ -340,7 +345,9 @@ const StoryViewer = () => {
           comment_text: "❤️",
         });
       }
-    } catch {}
+    } catch {
+      // Ignore notification errors
+    }
   };
 
   const handleDeleteStory = async () => {
