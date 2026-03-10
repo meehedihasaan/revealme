@@ -107,6 +107,7 @@ const PostCard = ({
   const [following, setFollowing] = useState(initialFollowing);
   const [followLoading, setFollowLoading] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
+  const [captionExpanded, setCaptionExpanded] = useState(false);
 
   useEffect(() => {
     supabase
@@ -268,7 +269,16 @@ const PostCard = ({
         <div className="px-4 pb-1 pt-0.5">
           <p className="text-sm text-foreground">
             <span className="font-semibold">{username}</span>{" "}
-            <span className="text-foreground/90">{caption}</span>
+            {caption.length > 100 && !captionExpanded ? (
+              <>
+                <span className="text-foreground/90">{caption.slice(0, 100)}...</span>{" "}
+                <button onClick={() => setCaptionExpanded(true)} className="text-muted-foreground text-sm">
+                  more
+                </button>
+              </>
+            ) : (
+              <span className="text-foreground/90">{caption}</span>
+            )}
           </p>
         </div>
       )}
