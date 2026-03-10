@@ -10,7 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 
 import VerifiedBadge from "@/components/VerifiedBadge";
 
-type NotifType = "like" | "comment" | "follow";
+type NotifType = "like" | "comment" | "follow" | "story_react";
 
 interface NotifItem {
   id: string;
