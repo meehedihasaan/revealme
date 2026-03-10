@@ -134,16 +134,28 @@ const EditProfile = () => {
       </div>
 
       {/* Cover Picture */}
-      <button onClick={() => coverRef.current?.click()} className="relative w-full block">
-        <img
-          src={coverPreview || bannerImg}
-          alt="Cover"
-          className="h-36 w-full object-cover"
-        />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-          <PuffyIcon name="camera" size={28} className="invert" />
-        </div>
-      </button>
+      <div className="relative w-full">
+        <button onClick={() => coverRef.current?.click()} className="relative w-full block">
+          {coverPreview ? (
+            <img src={coverPreview} alt="Cover" className="h-36 w-full object-cover" />
+          ) : (
+            <div className="h-36 w-full bg-secondary flex items-center justify-center">
+              <PuffyIcon name="camera" size={28} className="opacity-40" />
+            </div>
+          )}
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <PuffyIcon name="camera" size={28} className="invert" />
+          </div>
+        </button>
+        {coverPreview && (
+          <button
+            onClick={handleDeleteCover}
+            className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-destructive/80 text-destructive-foreground"
+          >
+            <span className="text-sm font-bold">✕</span>
+          </button>
+        )}
+      </div>
       <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={handleCover} />
 
       {/* Avatar */}
