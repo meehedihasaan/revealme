@@ -86,6 +86,7 @@ const PostCard = ({
   postId,
   postUserId,
   username,
+  displayName,
   avatar,
   image,
   caption,
