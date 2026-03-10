@@ -172,10 +172,9 @@ const CreatePost = () => {
 
       <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
 
-      {previews.length > 0 && (
-        <div className="px-4 py-4 space-y-4">
-          {/* Add more photos button */}
-          {files.length < 10 && (
+      <div className="px-4 py-4 space-y-4">
+        {/* Add more photos button */}
+        {previews.length > 0 && files.length < 10 && (
             <button
               onClick={() => fileRef.current?.click()}
               className="flex items-center gap-2 text-sm text-primary font-medium"
