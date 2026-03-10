@@ -151,8 +151,10 @@ const Profile = () => {
 
       {/* Avatar + Info */}
       <div className="px-4">
-        <div className="-mt-10 mb-3">
-          {user && <ThoughtBubble userId={user.id} isOwnProfile />}
+        <div className="-mt-10 mb-3 relative">
+          <div className="absolute bottom-full left-0 mb-1 z-10">
+            {user && <ThoughtBubble userId={user.id} isOwnProfile />}
+          </div>
           <button
                 onPointerDown={() => {
                   avatarDidLongPress.current = false;
