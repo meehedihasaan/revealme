@@ -169,18 +169,18 @@ const CreateStory = () => {
   const currentFilter = EFFECTS.find(e => e.id === activeEffect)?.filter || "";
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+    <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 z-10">
-        <button onClick={() => navigate(-1)} className="text-white">
-          <PuffyIcon name="arrow-left" size={22} className="invert" />
+        <button onClick={() => navigate(-1)} className="text-foreground">
+          <PuffyIcon name="arrow-left" size={22} className="icon-adaptive" />
         </button>
-        <h1 className="text-lg font-bold text-white">New Story</h1>
+        <h1 className="text-lg font-bold text-foreground">New Story</h1>
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={handlePost}
           disabled={!preview || posting}
-          className="text-sm font-bold text-white disabled:opacity-40"
+          className="text-sm font-bold text-primary disabled:opacity-40"
         >
           {posting ? "Sharing..." : "Share"}
         </motion.button>
@@ -189,9 +189,9 @@ const CreateStory = () => {
       {!preview ? (
         <button
           onClick={() => fileRef.current?.click()}
-          className="flex-1 flex flex-col items-center justify-center gap-4 text-white/60"
+          className="flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground"
         >
-          <PuffyIcon name="camera" size={56} className="opacity-40 invert" />
+          <PuffyIcon name="camera" size={56} className="opacity-40 icon-adaptive" />
           <p className="text-sm">Tap to add a story</p>
         </button>
       ) : (
@@ -270,23 +270,23 @@ const CreateStory = () => {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowTextInput(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/80 backdrop-blur-sm"
             >
-              <span className="text-white text-lg font-bold">Aa</span>
+              <span className="text-foreground text-lg font-bold">Aa</span>
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowEmojis(!showEmojis)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/80 backdrop-blur-sm"
             >
               <span className="text-xl">😀</span>
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowEffects(!showEffects)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/80 backdrop-blur-sm"
             >
-              <PuffyIcon name="sliders" size={18} className="invert" />
+              <PuffyIcon name="sliders" size={18} className="icon-adaptive" />
             </motion.button>
           </div>
         </div>
@@ -299,7 +299,7 @@ const CreateStory = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm"
           >
             <div className="w-[85%] flex flex-col items-center gap-4">
               <input
@@ -307,7 +307,7 @@ const CreateStory = () => {
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
                 placeholder="Type your text..."
-                className="w-full bg-transparent text-center text-2xl font-bold text-white placeholder:text-white/40 focus:outline-none"
+                className="w-full bg-transparent text-center text-2xl font-bold text-foreground placeholder:text-muted-foreground focus:outline-none"
                 style={{ color: textColor }}
               />
               <div className="flex gap-2">
@@ -315,13 +315,13 @@ const CreateStory = () => {
                   <button
                     key={c}
                     onClick={() => setTextColor(c)}
-                    className={`h-7 w-7 rounded-full border-2 ${textColor === c ? "border-white" : "border-white/30"}`}
+                    className={`h-7 w-7 rounded-full border-2 ${textColor === c ? "border-foreground" : "border-muted-foreground/30"}`}
                     style={{ backgroundColor: c }}
                   />
                 ))}
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setShowTextInput(false)} className="rounded-full bg-white/20 px-5 py-2 text-sm font-semibold text-white">
+                <button onClick={() => setShowTextInput(false)} className="rounded-full bg-secondary px-5 py-2 text-sm font-semibold text-foreground">
                   Cancel
                 </button>
                 <button onClick={addText} className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">
@@ -340,7 +340,7 @@ const CreateStory = () => {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="absolute bottom-0 left-0 right-0 z-20 bg-black/80 backdrop-blur-md rounded-t-2xl px-4 py-4"
+            className="absolute bottom-0 left-0 right-0 z-20 bg-card/95 backdrop-blur-md rounded-t-2xl px-4 py-4 border-t border-border"
           >
             <div className="grid grid-cols-8 gap-3">
               {EMOJIS.map((emoji) => (
@@ -353,7 +353,7 @@ const CreateStory = () => {
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowEmojis(false)} className="mt-3 w-full text-center text-sm text-white/60">
+            <button onClick={() => setShowEmojis(false)} className="mt-3 w-full text-center text-sm text-muted-foreground">
               Close
             </button>
           </motion.div>
@@ -367,7 +367,7 @@ const CreateStory = () => {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="absolute bottom-0 left-0 right-0 z-20 bg-black/80 backdrop-blur-md rounded-t-2xl px-4 py-4"
+            className="absolute bottom-0 left-0 right-0 z-20 bg-card/95 backdrop-blur-md rounded-t-2xl px-4 py-4 border-t border-border"
           >
             <div className="flex gap-3 overflow-x-auto pb-2">
               {EFFECTS.map((effect) => (
@@ -378,7 +378,7 @@ const CreateStory = () => {
                     activeEffect === effect.id ? "opacity-100" : "opacity-60"
                   }`}
                 >
-                  <div className="h-16 w-16 rounded-xl overflow-hidden border-2 border-white/20">
+                  <div className="h-16 w-16 rounded-xl overflow-hidden border-2 border-border">
                     <img
                       src={preview}
                       alt={effect.label}
@@ -386,11 +386,11 @@ const CreateStory = () => {
                       style={{ filter: effect.filter }}
                     />
                   </div>
-                  <span className="text-[10px] text-white font-medium">{effect.label}</span>
+                  <span className="text-[10px] text-foreground font-medium">{effect.label}</span>
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowEffects(false)} className="mt-2 w-full text-center text-sm text-white/60">
+            <button onClick={() => setShowEffects(false)} className="mt-2 w-full text-center text-sm text-muted-foreground">
               Close
             </button>
           </motion.div>
