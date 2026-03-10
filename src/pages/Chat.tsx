@@ -279,9 +279,9 @@ const Chat = () => {
         <button onClick={() => otherUser && navigate(`/user/${otherUser.user_id}`)} className="flex items-center gap-3 flex-1 min-w-0">
           <div className="relative shrink-0">
             {otherUser?.avatar_url ? (
-              <img src={otherUser.avatar_url} alt="" className="h-10 w-10 rounded-[70%] object-cover" />
+              <img src={otherUser.avatar_url} alt="" className="h-10 w-10 rounded-[22%] object-cover" />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-[70%] bg-secondary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[22%] bg-secondary">
                 <PuffyIcon name="user" size={20} />
               </div>
             )}
