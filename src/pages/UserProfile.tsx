@@ -58,7 +58,8 @@ const UserProfile = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null); // kept for compatibility
+  const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
+  const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(userId);
 
   const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
 
