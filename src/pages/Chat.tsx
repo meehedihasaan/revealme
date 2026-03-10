@@ -15,6 +15,7 @@ interface Message {
   created_at: string;
   read: boolean;
   image_url?: string | null;
+  mood?: string | null;
 }
 
 interface OtherUser {
@@ -23,6 +24,8 @@ interface OtherUser {
   avatar_url: string | null;
   is_verified: boolean;
 }
+
+const MOODS = ["Casual", "Love", "LOUD", "Secret", "Anger"] as const;
 
 const Chat = () => {
   const navigate = useNavigate();
@@ -40,6 +43,7 @@ const Chat = () => {
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedMood, setSelectedMood] = useState<string>("Casual");
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,21 +54,17 @@ const Chat = () => {
   // Fetch other user + messages
   useEffect(() => {
     if (!conversationId || !user) return;
-
     const init = async () => {
       setLoading(true);
-
       const [partnerRes, messagesRes] = await Promise.all([
         supabase.rpc("get_conversation_partner", { p_conversation_id: conversationId }),
         supabase
           .from("messages")
-          .select("id, text, sender_id, created_at, read, image_url")
+          .select("id, text, sender_id, created_at, read, image_url, mood")
           .eq("conversation_id", conversationId)
           .order("created_at", { ascending: true }),
       ]);
-
       setMessages((messagesRes.data as Message[]) || []);
-
       if (partnerRes.data && partnerRes.data.length > 0) {
         const otherUserId = partnerRes.data[0].user_id;
         const { data: prof } = await supabase
@@ -74,9 +74,7 @@ const Chat = () => {
           .single();
         if (prof) setOtherUser(prof as OtherUser);
       }
-
       setLoading(false);
-
       supabase
         .from("messages")
         .update({ read: true })
@@ -85,20 +83,16 @@ const Chat = () => {
         .eq("read", false)
         .then(() => {});
     };
-
     init();
   }, [conversationId, user]);
 
   // Chat-level presence for typing indicator
   useEffect(() => {
     if (!conversationId || !user || !otherUser) return;
-
     const presenceChannel = supabase.channel(`presence-${conversationId}`, {
       config: { presence: { key: user.id } },
     });
-
     presenceChannelRef.current = presenceChannel;
-
     presenceChannel
       .on("presence", { event: "sync" }, () => {
         const state = presenceChannel.presenceState();
@@ -114,18 +108,15 @@ const Chat = () => {
           await presenceChannel.track({ user_id: user.id, online_at: new Date().toISOString(), is_typing: false });
         }
       });
-
     return () => {
       presenceChannelRef.current = null;
       supabase.removeChannel(presenceChannel);
     };
   }, [conversationId, user, otherUser]);
 
-  // Broadcast typing status
   const broadcastTyping = () => {
     if (!presenceChannelRef.current || !user) return;
     presenceChannelRef.current.track({ user_id: user.id, online_at: new Date().toISOString(), is_typing: true });
-
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
       if (presenceChannelRef.current) {
@@ -134,16 +125,13 @@ const Chat = () => {
     }, 2000);
   };
 
-  // Realtime messages (INSERT + UPDATE for read status)
+  // Realtime messages
   useEffect(() => {
     if (!conversationId || !user) return;
-
     const channel = supabase
       .channel(`chat-${conversationId}`)
       .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "messages",
+        event: "INSERT", schema: "public", table: "messages",
         filter: `conversation_id=eq.${conversationId}`,
       }, (payload) => {
         const newMsg = payload.new as Message;
@@ -156,30 +144,23 @@ const Chat = () => {
         }
       })
       .on("postgres_changes", {
-        event: "UPDATE",
-        schema: "public",
-        table: "messages",
+        event: "UPDATE", schema: "public", table: "messages",
         filter: `conversation_id=eq.${conversationId}`,
       }, (payload) => {
         const updated = payload.new as Message;
         setMessages(prev => prev.map(m => m.id === updated.id ? { ...m, read: updated.read } : m));
       })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [conversationId, user]);
 
-  // Scroll on new messages
   useEffect(() => {
     scrollToBottom(loading ? "instant" : "smooth");
   }, [messages, loading]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) return;
-    if (file.size > 10 * 1024 * 1024) return; // 10MB limit
-
+    if (!file || !file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) return;
     setSelectedFile(file);
     const reader = new FileReader();
     reader.onload = () => setImagePreview(reader.result as string);
@@ -196,16 +177,8 @@ const Chat = () => {
     if (!user) return null;
     const ext = file.name.split(".").pop() || "jpg";
     const path = `${user.id}/${Date.now()}.${ext}`;
-
-    const { error } = await supabase.storage
-      .from("chat-images")
-      .upload(path, file, { contentType: file.type });
-
-    if (error) {
-      console.error("Upload error:", error);
-      return null;
-    }
-
+    const { error } = await supabase.storage.from("chat-images").upload(path, file, { contentType: file.type });
+    if (error) { console.error("Upload error:", error); return null; }
     const { data: urlData } = supabase.storage.from("chat-images").getPublicUrl(path);
     return urlData.publicUrl;
   };
@@ -213,12 +186,10 @@ const Chat = () => {
   const sendMessage = async () => {
     if ((!input.trim() && !selectedFile) || !user || !conversationId || sending) return;
     const text = input.trim();
-
     setSending(true);
     setInput("");
 
     let imageUrl: string | null = null;
-
     if (selectedFile) {
       setUploading(true);
       imageUrl = await uploadImage(selectedFile);
@@ -227,28 +198,19 @@ const Chat = () => {
     }
 
     const optimisticMsg: Message = {
-      id: `temp-${Date.now()}`,
-      text: text || "",
-      sender_id: user.id,
-      created_at: new Date().toISOString(),
-      read: false,
-      image_url: imageUrl,
+      id: `temp-${Date.now()}`, text: text || "", sender_id: user.id,
+      created_at: new Date().toISOString(), read: false, image_url: imageUrl, mood: selectedMood,
     };
-
     setMessages(prev => [...prev, optimisticMsg]);
 
     const insertPayload: any = {
-      conversation_id: conversationId,
-      sender_id: user.id,
-      text: text || (imageUrl ? "📷 Photo" : ""),
+      conversation_id: conversationId, sender_id: user.id,
+      text: text || (imageUrl ? "📷 Photo" : ""), mood: selectedMood,
     };
     if (imageUrl) insertPayload.image_url = imageUrl;
 
-    const { data, error } = await supabase
-      .from("messages")
-      .insert(insertPayload)
-      .select("id, text, sender_id, created_at, read, image_url")
-      .single();
+    const { data, error } = await supabase.from("messages").insert(insertPayload)
+      .select("id, text, sender_id, created_at, read, image_url, mood").single();
 
     if (data) {
       setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? (data as Message) : m));
@@ -266,11 +228,7 @@ const Chat = () => {
   const groupedMessages = messages.reduce<{ date: string; msgs: Message[] }[]>((acc, msg) => {
     const date = new Date(msg.created_at).toLocaleDateString();
     const last = acc[acc.length - 1];
-    if (last && last.date === date) {
-      last.msgs.push(msg);
-    } else {
-      acc.push({ date, msgs: [msg] });
-    }
+    if (last && last.date === date) { last.msgs.push(msg); } else { acc.push({ date, msgs: [msg] }); }
     return acc;
   }, []);
 
@@ -305,13 +263,11 @@ const Chat = () => {
       <AnimatePresence>
         {fullscreenImage && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/95"
             onClick={() => setFullscreenImage(null)}
           >
-            <button className="absolute top-4 right-4 text-white/80 text-2xl font-bold z-10" onClick={() => setFullscreenImage(null)}>✕</button>
+            <button className="absolute top-4 right-4 text-foreground/80 text-2xl font-bold z-10" onClick={() => setFullscreenImage(null)}>✕</button>
             <img src={fullscreenImage} alt="" className="max-h-[90vh] max-w-[95vw] object-contain rounded-lg" />
           </motion.div>
         )}
@@ -325,21 +281,23 @@ const Chat = () => {
         <button onClick={() => otherUser && navigate(`/user/${otherUser.user_id}`)} className="flex items-center gap-3 flex-1 min-w-0">
           <div className="relative shrink-0">
             {otherUser?.avatar_url ? (
-              <img src={otherUser.avatar_url} alt="" className="h-10 w-10 rounded-xl object-cover" />
+              <img src={otherUser.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
                 <PuffyIcon name="user" size={20} />
               </div>
             )}
             <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${isOnline ? "bg-green-500" : "bg-muted-foreground/40"}`} />
           </div>
           <div className="min-w-0">
-            <p className="font-bold text-foreground truncate flex items-center gap-1">{otherUser?.username || "User"}{otherUser?.is_verified && <VerifiedBadge size={14} />}</p>
+            <p className="font-semibold text-foreground truncate flex items-center gap-1 text-[15px]">
+              {otherUser?.username || "User"}{otherUser?.is_verified && <VerifiedBadge size={14} />}
+            </p>
             <p className="text-[11px] text-muted-foreground">
               {isTyping ? (
                 <span className="text-primary font-medium">typing...</span>
               ) : isOnline ? (
-                <span className="text-success font-medium">Online</span>
+                <span className="text-green-500 font-medium">Online</span>
               ) : (
                 `Last seen ${formatLastOnline(lastOnline)}`
               )}
@@ -363,7 +321,7 @@ const Chat = () => {
                   {formatDateLabel(group.date)}
                 </span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <AnimatePresence initial={false}>
                   {group.msgs.map((msg) => {
                     const isMine = msg.sender_id === user?.id;
@@ -377,39 +335,47 @@ const Chat = () => {
                         initial={{ opacity: 0, y: 8, scale: 0.95 }}
                         animate={{ opacity: isOptimistic ? 0.7 : 1, y: 0, scale: 1 }}
                         transition={{ duration: 0.2 }}
-                        className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                        className={`flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"}`}
                       >
+                        {/* Avatar for other user */}
+                        {!isMine && (
+                          <div className="shrink-0 mb-5">
+                            {otherUser?.avatar_url ? (
+                              <img src={otherUser.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                            ) : (
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
+                                <PuffyIcon name="user" size={14} />
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         <div className={`flex flex-col gap-0.5 ${isMine ? "items-end" : "items-start"}`}>
                           {hasImage && (
                             <button
                               onClick={() => setFullscreenImage(msg.image_url!)}
                               className="overflow-hidden rounded-2xl max-w-[75vw]"
                             >
-                              <img
-                                src={msg.image_url!}
-                                alt=""
-                                className="max-w-[260px] max-h-[320px] object-cover rounded-2xl"
-                                loading="lazy"
-                              />
+                              <img src={msg.image_url!} alt="" className="max-w-[240px] max-h-[300px] object-cover rounded-2xl" loading="lazy" />
                             </button>
                           )}
                           {hasText && (
-                            <div className={`max-w-[75vw] rounded-2xl px-4 py-2.5 text-sm break-words ${
-                              isMine ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
+                            <div className={`max-w-[75vw] rounded-2xl px-4 py-2.5 text-[15px] break-words ${
+                              isMine
+                                ? "bg-primary text-primary-foreground rounded-br-md"
+                                : "bg-secondary text-secondary-foreground rounded-bl-md"
                             }`}>
                               {msg.text}
                             </div>
                           )}
-                          <div className="flex items-center gap-1 px-1">
-                            <span className="text-[10px] text-muted-foreground">
-                              {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                            </span>
+                          <span className="text-[10px] text-muted-foreground px-1">
+                            {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             {isMine && (
-                              <span className={`text-[10px] font-medium ${msg.read ? "text-primary" : "text-muted-foreground"}`}>
-                                {isOptimistic ? "Sending..." : msg.read ? "Seen" : "Delivered"}
+                              <span className={`ml-1 font-medium ${msg.read ? "text-primary" : ""}`}>
+                                {isOptimistic ? " Sending..." : msg.read ? " Seen" : " Delivered"}
                               </span>
                             )}
-                          </div>
+                          </span>
                         </div>
                       </motion.div>
                     );
@@ -419,16 +385,24 @@ const Chat = () => {
             </div>
           ))
         )}
+
         {/* Typing indicator */}
         <AnimatePresence>
           {isTyping && (
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              className="flex justify-start mb-2"
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+              className="flex items-end gap-2 justify-start mt-2"
             >
-              <div className="flex items-center gap-1 rounded-2xl bg-secondary px-4 py-3">
+              <div className="shrink-0">
+                {otherUser?.avatar_url ? (
+                  <img src={otherUser.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
+                    <PuffyIcon name="user" size={14} />
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-1 rounded-2xl bg-secondary px-4 py-3 rounded-bl-md">
                 <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
                 <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
                 <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -443,62 +417,96 @@ const Chat = () => {
       <AnimatePresence>
         {imagePreview && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             className="border-t border-border bg-secondary/50 px-4 py-2 shrink-0"
           >
             <div className="relative inline-block">
               <img src={imagePreview} alt="Preview" className="h-20 w-20 rounded-xl object-cover" />
-              <button
-                onClick={clearImagePreview}
+              <button onClick={clearImagePreview}
                 className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs font-bold"
-              >
-                ✕
-              </button>
+              >✕</button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Input */}
-      <div className="border-t border-border bg-background px-4 py-3 shrink-0">
-        <div className="flex items-center gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileSelect}
-          />
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => fileInputRef.current?.click()}
-            className="rounded-full bg-secondary p-2.5 transition-colors"
-            disabled={uploading}
-          >
-            <PuffyIcon name="camera" size={18} />
-          </motion.button>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => { setInput(e.target.value); broadcastTyping(); }}
-            onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
-            className="flex-1 rounded-full bg-secondary px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
-          />
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={sendMessage}
-            disabled={(!input.trim() && !selectedFile) || sending || uploading}
-            className="rounded-full bg-primary p-2.5 transition-opacity disabled:opacity-30"
-          >
-            {uploading ? (
-              <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
-            ) : (
-              <PuffyIcon name="send" size={18} />
-            )}
-          </motion.button>
+      {/* Mood selector */}
+      <div className="shrink-0 border-t border-border bg-background px-3 pt-2.5 pb-1">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <span className="text-primary text-lg shrink-0">☺</span>
+          {MOODS.map((mood) => (
+            <button
+              key={mood}
+              onClick={() => setSelectedMood(mood)}
+              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
+                selectedMood === mood
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {mood}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Input bar */}
+      <div className="bg-background px-3 pb-4 pt-2 shrink-0">
+        <div className="flex items-center gap-3">
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+
+          <div className="flex-1 rounded-full bg-secondary px-4 py-3">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => { setInput(e.target.value); broadcastTyping(); }}
+              onKeyDown={handleKeyDown}
+              placeholder="Message..."
+              className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+            />
+          </div>
+
+          {/* Action icons */}
+          <div className="flex items-center gap-2.5">
+            <motion.button whileTap={{ scale: 0.85 }} className="text-primary" disabled={uploading}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+                <line x1="8" y1="23" x2="16" y2="23" />
+              </svg>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={() => fileInputRef.current?.click()}
+              className="text-primary"
+              disabled={uploading}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="3" />
+                <line x1="12" y1="2" x2="12" y2="5" />
+                <line x1="12" y1="19" x2="12" y2="22" />
+                <line x1="2" y1="12" x2="5" y2="12" />
+                <line x1="19" y1="12" x2="22" y2="12" />
+              </svg>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={sendMessage}
+              disabled={(!input.trim() && !selectedFile) || sending || uploading}
+              className="text-primary disabled:opacity-30"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                <line x1="9" y1="9" x2="9.01" y2="9" />
+                <line x1="15" y1="9" x2="15.01" y2="9" />
+              </svg>
+            </motion.button>
+          </div>
         </div>
       </div>
     </div>
