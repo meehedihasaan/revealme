@@ -3,6 +3,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { format, differenceInYears } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const GENDER_OPTIONS = ["Male", "Female", "Non-binary", "Prefer not to say"];
 
@@ -13,6 +17,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [gender, setGender] = useState("");
+  const [dob, setDob] = useState<Date>();
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -20,6 +25,11 @@ const Register = () => {
 
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
+      return;
+    }
+
+    if (!dob || differenceInYears(new Date(), dob) < 18) {
+      toast.error("You must be at least 18 years old to create an account");
       return;
     }
 
@@ -117,6 +127,42 @@ const Register = () => {
           </div>
 
           <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">Date of Birth</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(
+                    "w-full rounded-xl bg-secondary px-4 py-3 text-left text-foreground focus:outline-none focus:ring-2 focus:ring-primary",
+                    !dob && "text-muted-foreground"
+                  )}
+                >
+                  {dob ? format(dob, "PPP") : "Select your date of birth"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dob}
+                  onSelect={setDob}
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1900-01-01")
+                  }
+                  defaultMonth={dob || new Date(new Date().getFullYear() - 18, 0)}
+                  captionLayout="dropdown-buttons"
+                  fromYear={1900}
+                  toYear={new Date().getFullYear()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {dob && differenceInYears(new Date(), dob) < 18 && (
+              <p className="mt-1.5 text-xs text-destructive">You must be at least 18 years old</p>
+            )}
+          </div>
+
+          <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">Gender</label>
             <div className="flex flex-wrap gap-2">
               {GENDER_OPTIONS.map((option) => (
@@ -138,7 +184,7 @@ const Register = () => {
 
           <button
             type="submit"
-            disabled={loading || !gender || !fullName.trim()}
+            disabled={loading || !gender || !fullName.trim() || !dob || differenceInYears(new Date(), dob) < 18}
             className="mt-2 w-full rounded-xl bg-primary py-4 text-lg font-semibold text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
           >
             {loading ? "Creating account..." : "Create Account"}
