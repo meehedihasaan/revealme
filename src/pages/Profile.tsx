@@ -32,7 +32,19 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
-  
+  const [hasStory, setHasStory] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    supabase
+      .from("stories")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", since)
+      .then(({ count }) => setHasStory((count || 0) > 0));
+  }, [user]);
+
   const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(user?.id);
   const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
 
