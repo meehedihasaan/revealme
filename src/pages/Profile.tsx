@@ -154,15 +154,20 @@ const Profile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
-          <div className="inline-block rounded-[22px] border-4 border-background bg-background overflow-hidden">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover" />
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
-                <PuffyIcon name="user" size={32} />
-              </div>
-            )}
-          </div>
+          <button
+            onClick={() => hasStory ? navigate(`/story?user=${user?.id}`) : undefined}
+            className={`inline-block rounded-[24px] p-[2px] ${hasStory ? getStoryColor(user?.id || "") : ""}`}
+          >
+            <div className={`rounded-[22px] ${hasStory ? "border-[2px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover" />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
+                  <PuffyIcon name="user" size={32} />
+                </div>
+              )}
+            </div>
+          </button>
         </div>
 
         <div className="flex items-center gap-1.5">
