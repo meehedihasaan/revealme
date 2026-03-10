@@ -59,7 +59,9 @@ const EditProfile = () => {
       let avatar_url = profile?.avatar_url || null;
       let cover_url = (profile as any)?.cover_url || null;
 
-      if (avatarFile) {
+      if (avatarDeleted) {
+        avatar_url = null;
+      } else if (avatarFile) {
         const ext = avatarFile.name.split(".").pop();
         const path = `${user.id}/avatar.${ext}`;
         await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
@@ -67,7 +69,9 @@ const EditProfile = () => {
         avatar_url = publicUrl;
       }
 
-      if (coverFile) {
+      if (coverDeleted) {
+        cover_url = null;
+      } else if (coverFile) {
         const ext = coverFile.name.split(".").pop();
         const path = `${user.id}/cover.${ext}`;
         await supabase.storage.from("avatars").upload(path, coverFile, { upsert: true });
