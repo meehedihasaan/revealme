@@ -12,22 +12,7 @@ import LikesSheet from "@/components/LikesSheet";
 import PostImageCarousel from "@/components/PostImageCarousel";
 import heartFilledRedIcon from "@/assets/icons/heart-filled-red.png";
 
-const STORY_RING_COLORS = [
-  "gradient-story-red",
-  "gradient-story-yellow",
-  "gradient-story-green",
-  "gradient-story-blue",
-  "gradient-story-purple",
-  "gradient-story-orange",
-  "gradient-story-pink",
-  "gradient-story-cyan",
-];
-
-const getStoryColor = (userId: string) => {
-  let hash = 0;
-  for (let i = 0; i < userId.length; i++) hash = ((hash << 5) - hash + userId.charCodeAt(i)) | 0;
-  return STORY_RING_COLORS[Math.abs(hash) % STORY_RING_COLORS.length];
-};
+const STORY_GRADIENT = "gradient-story-ring";
 
 interface PostCardProps {
   postId: string;
@@ -192,7 +177,7 @@ const PostCard = ({
               navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`);
             }
           }}
-          className={`rounded-[14px] p-[2px] ${hasStory ? getStoryColor(postUserId || "") : ""}`}
+          className={`rounded-[14px] p-[2px] ${hasStory ? STORY_GRADIENT : ""}`}
         >
           <div className={`rounded-[12px] ${hasStory ? "border-[2px] border-background" : ""}`}>
             {avatar ? (
