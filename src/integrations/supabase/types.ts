@@ -598,6 +598,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_thoughts: {
+        Row: {
+          created_at: string
+          id: string
+          thought: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          thought: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          thought?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       verification_requests: {
         Row: {
           category: string
