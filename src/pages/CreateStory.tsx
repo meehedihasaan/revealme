@@ -147,18 +147,7 @@ const CreateStory = () => {
       if (error) throw error;
 
       toast.success("Story shared!");
-      // Ask if they want to add another
-      setPreview(null);
-      setFile(null);
-      setTexts([]);
-      setEmojis([]);
-      setActiveEffect("none");
-      // Show option to add another or go back
-      if (window.confirm("Story posted! Add another?")) {
-        fileRef.current?.click();
-      } else {
-        navigate("/feed");
-      }
+      navigate("/feed");
     } catch (err: any) {
       toast.error(err.message || "Failed to post story");
     } finally {
