@@ -310,7 +310,28 @@ const StoryViewer = () => {
           mood: "Love",
         });
       }
-    } catch {}
+  } catch {}
+  };
+
+  const handleDeleteStory = async () => {
+    if (!currentStory || !user || !currentGroup || currentGroup.user_id !== user.id) return;
+    setShowStoryMenu(false);
+    try {
+      await supabase.from("stories").delete().eq("id", currentStory.id);
+      toast.success("Story deleted");
+      // If more stories in group, go next; otherwise go back
+      if (currentGroup.stories.length > 1) {
+        const newStories = currentGroup.stories.filter(s => s.id !== currentStory.id);
+        setGroups(prev => prev.map((g, i) => i === groupIndex ? { ...g, stories: newStories } : g));
+        setStoryIndex(Math.min(storyIndex, newStories.length - 1));
+        setImageLoaded(false);
+      } else {
+        navigate(-1);
+      }
+    } catch {
+      toast.error("Failed to delete story");
+    }
+    setPaused(false);
   };
 
   if (!loaded || !currentGroup || !currentStory) return null;
