@@ -247,7 +247,7 @@ const Chat = () => {
       <div className="flex min-h-screen flex-col bg-background">
         <div className="flex items-center gap-3 border-b border-border px-4 py-3">
           <button onClick={() => navigate("/messages")}><PuffyIcon name="arrow-left" size={22} /></button>
-          <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+          <div className="h-10 w-10 rounded-[70%] bg-muted animate-pulse" />
           <div className="h-4 w-24 rounded bg-muted animate-pulse" />
         </div>
         <ChatShimmer />
@@ -279,9 +279,9 @@ const Chat = () => {
         <button onClick={() => otherUser && navigate(`/user/${otherUser.user_id}`)} className="flex items-center gap-3 flex-1 min-w-0">
           <div className="relative shrink-0">
             {otherUser?.avatar_url ? (
-              <img src={otherUser.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+              <img src={otherUser.avatar_url} alt="" className="h-10 w-10 rounded-[70%] object-cover" />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[70%] bg-secondary">
                 <PuffyIcon name="user" size={20} />
               </div>
             )}
@@ -339,9 +339,9 @@ const Chat = () => {
                         {!isMine && (
                           <div className="shrink-0 mb-5">
                             {otherUser?.avatar_url ? (
-                              <img src={otherUser.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+                              <img src={otherUser.avatar_url} alt="" className="h-8 w-8 rounded-[70%] object-cover" />
                             ) : (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-[70%] bg-secondary">
                                 <PuffyIcon name="user" size={14} />
                               </div>
                             )}
@@ -393,11 +393,11 @@ const Chat = () => {
             >
               <div className="shrink-0">
                 {otherUser?.avatar_url ? (
-                  <img src={otherUser.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
-                ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
-                    <PuffyIcon name="user" size={14} />
-                  </div>
+                   <img src={otherUser.avatar_url} alt="" className="h-8 w-8 rounded-[70%] object-cover" />
+                 ) : (
+                   <div className="flex h-8 w-8 items-center justify-center rounded-[70%] bg-secondary">
+                     <PuffyIcon name="user" size={14} />
+                   </div>
                 )}
               </div>
               <div className="flex items-center gap-1 rounded-2xl bg-secondary px-4 py-3 rounded-bl-md">

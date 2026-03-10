@@ -150,3 +150,9 @@
     filter: none;
   }
 }
+
+@layer utilities {
+  .avatar-squircle {
+    border-radius: 70%;
+  }
+}
