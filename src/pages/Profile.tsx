@@ -15,6 +15,16 @@ import { format } from "date-fns";
 
 import bannerImg from "@/assets/profile-banner.jpg";
 
+const STORY_RING_COLORS = [
+  "gradient-story-red", "gradient-story-yellow", "gradient-story-green", "gradient-story-blue",
+  "gradient-story-purple", "gradient-story-orange", "gradient-story-pink", "gradient-story-cyan",
+];
+const getStoryColor = (userId: string) => {
+  let hash = 0;
+  for (let i = 0; i < userId.length; i++) hash = ((hash << 5) - hash + userId.charCodeAt(i)) | 0;
+  return STORY_RING_COLORS[Math.abs(hash) % STORY_RING_COLORS.length];
+};
+
 const Profile = () => {
   const navigate = useNavigate();
   const { profile, user } = useAuth();
@@ -22,7 +32,19 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
-  
+  const [hasStory, setHasStory] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    supabase
+      .from("stories")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", since)
+      .then(({ count }) => setHasStory((count || 0) > 0));
+  }, [user]);
+
   const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(user?.id);
   const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
 
@@ -132,15 +154,20 @@ const Profile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
-          <div className="inline-block rounded-[22px] border-4 border-background bg-background overflow-hidden">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover" />
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
-                <PuffyIcon name="user" size={32} />
-              </div>
-            )}
-          </div>
+          <button
+            onClick={() => hasStory ? navigate(`/story?user=${user?.id}`) : undefined}
+            className={`inline-block rounded-[24px] p-[2px] ${hasStory ? getStoryColor(user?.id || "") : ""}`}
+          >
+            <div className={`rounded-[22px] ${hasStory ? "border-[2px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover" />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
+                  <PuffyIcon name="user" size={32} />
+                </div>
+              )}
+            </div>
+          </button>
         </div>
 
         <div className="flex items-center gap-1.5">
