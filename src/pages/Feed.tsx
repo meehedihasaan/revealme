@@ -100,7 +100,8 @@ const Feed = () => {
       const uniqueIds = [...new Set(data.map(s => s.user_id))];
       if (user && uniqueIds.includes(user.id)) setUserHasStory(true);
 
-      const otherIds = uniqueIds.filter(id => id !== user?.id);
+      // Only show stories from users the current user follows
+      const otherIds = uniqueIds.filter(id => id !== user?.id && followingIds.has(id));
       if (otherIds.length > 0) {
         const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", otherIds);
 
@@ -118,7 +119,7 @@ const Feed = () => {
       }
     };
     fetchStories();
-  }, [user]);
+  }, [user, followingIds]);
 
   // Derived post lists
   const followingPosts = posts.filter(p => followingIds.has(p.user_id));
