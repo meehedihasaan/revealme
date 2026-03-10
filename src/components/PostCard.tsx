@@ -33,6 +33,7 @@ interface PostCardProps {
   postId: string;
   postUserId?: string;
   username: string;
+  displayName?: string;
   avatar: string;
   image: string;
   caption: string;
@@ -85,6 +86,7 @@ const PostCard = ({
   postId,
   postUserId,
   username,
+  displayName,
   avatar,
   image,
   caption,
@@ -204,10 +206,12 @@ const PostCard = ({
         </button>
         <button onClick={() => navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`)} className="flex-1 min-w-0 text-left">
           <div className="flex items-center gap-1">
-            <span className="text-sm font-semibold text-foreground">{username}</span>
+            <span className="text-sm font-semibold text-foreground">{displayName || username}</span>
             {verified && <VerifiedBadge size={15} />}
           </div>
-          {location && <p className="text-[11px] text-muted-foreground">{location}</p>}
+          {!image && <p className="text-[11px] text-muted-foreground">@{username}</p>}
+          {image && location && <p className="text-[11px] text-muted-foreground">{location}</p>}
+          {image && !location && <p className="text-[11px] text-muted-foreground">@{username}</p>}
         </button>
         {showFollowButton && !following && (
           <motion.button
@@ -285,7 +289,7 @@ const PostCard = ({
       {image && caption && (
         <div className="px-4 pb-1 pt-0.5">
           <p className="text-sm text-foreground">
-            <span className="font-semibold">{username}</span>{" "}
+            <span className="font-semibold">@{username}</span>{" "}
             {caption.length > 100 && !captionExpanded ? (
               <>
                 <span className="text-foreground/90">{caption.slice(0, 100)}...</span>{" "}

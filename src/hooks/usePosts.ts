@@ -12,6 +12,7 @@ export interface PostWithDetails {
   created_at: string;
   user_id: string;
   username: string;
+  display_name: string;
   avatar_url: string | null;
   is_verified: boolean;
   is_private: boolean;
@@ -39,7 +40,7 @@ export const usePosts = (filterUserId?: string) => {
     if (filteredPosts.length === 0) { setPosts([]); setLoading(false); return; }
 
     const userIds = [...new Set(filteredPosts.map(p => p.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url, is_verified, is_private").in("user_id", userIds);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, username, display_name, avatar_url, is_verified, is_private").in("user_id", userIds);
     const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
 
     const postIds = filteredPosts.map(p => p.id);
@@ -71,6 +72,7 @@ export const usePosts = (filterUserId?: string) => {
       created_at: p.created_at,
       user_id: p.user_id,
       username: profileMap[p.user_id]?.username || "user",
+      display_name: profileMap[p.user_id]?.display_name || profileMap[p.user_id]?.username || "User",
       avatar_url: profileMap[p.user_id]?.avatar_url || null,
       is_verified: profileMap[p.user_id]?.is_verified || false,
       is_private: profileMap[p.user_id]?.is_private || false,
