@@ -203,7 +203,7 @@ const Feed = () => {
               </div>
               <span className="max-w-[72px] truncate text-xs text-foreground">{su.username}</span>
             </button>
-        </div>
+          ))}
         </div>
 
         {/* Posts */}
