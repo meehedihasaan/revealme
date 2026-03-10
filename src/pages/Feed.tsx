@@ -148,6 +148,11 @@ const Feed = () => {
         <div className="flex items-center gap-3">
           <button className="relative text-foreground" onClick={() => navigate("/messages")}>
             <PuffyIcon name="message-circle" size={24} />
+            {unreadMsgCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                {unreadMsgCount > 99 ? "99+" : unreadMsgCount}
+              </span>
+            )}
           </button>
         </div>
       </div>
