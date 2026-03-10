@@ -153,6 +153,6 @@
 
 @layer utilities {
   .avatar-squircle {
-    border-radius: 65%;
+    border-radius: 30%;
   }
 }
