@@ -432,13 +432,15 @@ const StoryViewer = () => {
                 initial={{ opacity: 0, scale: 0.9, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                className="absolute right-0 top-10 z-50 min-w-[160px] rounded-xl bg-card shadow-xl border border-border overflow-hidden"
+                className="absolute right-0 top-10 z-50 min-w-[160px] rounded-xl shadow-xl overflow-hidden"
+                style={{ backgroundColor: "rgba(30,30,30,0.95)", borderColor: "rgba(255,255,255,0.15)", borderWidth: 1 }}
                 onClick={(e) => e.stopPropagation()}
               >
                 {isOwn && (
                   <button
                     onClick={handleDeleteStory}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-secondary/50"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium hover:bg-white/10"
+                    style={{ color: "#ef4444" }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
@@ -448,7 +450,8 @@ const StoryViewer = () => {
                 )}
                 <button
                   onClick={() => { setShowStoryMenu(false); setPaused(false); }}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/50 border-t border-border"
+                  className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-white hover:bg-white/10"
+                  style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />

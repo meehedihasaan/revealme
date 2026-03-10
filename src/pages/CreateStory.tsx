@@ -367,7 +367,7 @@ const CreateStory = () => {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="absolute bottom-0 left-0 right-0 z-20 bg-black/80 backdrop-blur-md rounded-t-2xl px-4 py-4"
+            className="absolute bottom-0 left-0 right-0 z-20 bg-card/95 backdrop-blur-md rounded-t-2xl px-4 py-4 border-t border-border"
           >
             <div className="flex gap-3 overflow-x-auto pb-2">
               {EFFECTS.map((effect) => (
@@ -378,7 +378,7 @@ const CreateStory = () => {
                     activeEffect === effect.id ? "opacity-100" : "opacity-60"
                   }`}
                 >
-                  <div className="h-16 w-16 rounded-xl overflow-hidden border-2 border-white/20">
+                  <div className="h-16 w-16 rounded-xl overflow-hidden border-2 border-border">
                     <img
                       src={preview}
                       alt={effect.label}
@@ -386,11 +386,11 @@ const CreateStory = () => {
                       style={{ filter: effect.filter }}
                     />
                   </div>
-                  <span className="text-[10px] text-white font-medium">{effect.label}</span>
+                  <span className="text-[10px] text-foreground font-medium">{effect.label}</span>
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowEffects(false)} className="mt-2 w-full text-center text-sm text-white/60">
+            <button onClick={() => setShowEffects(false)} className="mt-2 w-full text-center text-sm text-muted-foreground">
               Close
             </button>
           </motion.div>
