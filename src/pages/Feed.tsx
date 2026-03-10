@@ -119,7 +119,7 @@ const Feed = () => {
       }
     };
     fetchStories();
-  }, [user]);
+  }, [user, followingIds]);
 
   // Derived post lists
   const followingPosts = posts.filter(p => followingIds.has(p.user_id));
