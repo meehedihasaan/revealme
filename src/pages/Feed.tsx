@@ -260,6 +260,7 @@ const Feed = () => {
                   postId={post.id}
                   postUserId={post.user_id}
                   username={post.username}
+                  displayName={post.display_name}
                   avatar={post.avatar_url || ""}
                   verified={post.is_verified}
                   image={post.image_url}
