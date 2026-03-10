@@ -300,7 +300,7 @@ const UserProfile = () => {
       </AnimatePresence>
 
       {/* Banner */}
-      <img src={bannerImg} alt="Banner" className="h-48 w-full object-cover" />
+      <img src={profile.cover_url || bannerImg} alt="Banner" className="h-48 w-full object-cover" />
 
       {/* Avatar + Info */}
       <div className="px-4">
