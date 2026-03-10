@@ -64,6 +64,20 @@ const Profile = () => {
 
   const joinDate = profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "";
 
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (headerRef.current) {
+        const bottom = headerRef.current.getBoundingClientRect().bottom;
+        setShowStickyHeader(bottom < 0);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   if (!profile || loading) {
     return (
       <div className="min-h-screen bg-background pb-20">
