@@ -10,6 +10,7 @@ import ShareSheet from "@/components/ShareSheet";
 import PostMenu from "@/components/PostMenu";
 import LikesSheet from "@/components/LikesSheet";
 import PostImageCarousel from "@/components/PostImageCarousel";
+import heartFilledRedIcon from "@/assets/icons/heart-filled-red.png";
 
 interface PostCardProps {
   postId: string;
@@ -206,15 +207,29 @@ const PostCard = ({
         <PostMenu postId={postId} postUserId={postUserId || ""} caption={caption} location={location} onDelete={onDelete} />
       </div>
 
-      {/* Image Carousel */}
-      <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
+      {/* Image Carousel or Text-only post */}
+      {image ? (
+        <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
+      ) : (
+        <div
+          className="relative px-5 py-8 min-h-[120px] flex items-center"
+          onDoubleClick={handleDoubleTap}
+        >
+          <p className="text-base text-foreground leading-relaxed">{caption}</p>
+          <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex items-center justify-between px-4 py-2.5">
         <div className="flex items-center gap-4">
           <motion.button whileTap={{ scale: 0.8 }} onClick={toggleLike}>
             <motion.div animate={liked ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}>
-              <PuffyIcon name={liked ? "heart-filled" : "heart"} size={26} />
+              {liked ? (
+                <img src={heartFilledRedIcon} alt="liked" width={26} height={26} className="inline-block shrink-0" draggable={false} />
+              ) : (
+                <PuffyIcon name="heart" size={26} />
+              )}
             </motion.div>
           </motion.button>
           <button onClick={() => setCommentOpen(true)}>
@@ -236,13 +251,15 @@ const PostCard = ({
         </button>
       </div>
 
-      {/* Caption */}
-      <div className="px-4 pb-1 pt-0.5">
-        <p className="text-sm text-foreground">
-          <span className="font-semibold">{username}</span>{" "}
-          <span className="text-foreground/90">{caption}</span>
-        </p>
-      </div>
+      {/* Caption - only show if post has an image (text-only posts already display the text) */}
+      {image && caption && (
+        <div className="px-4 pb-1 pt-0.5">
+          <p className="text-sm text-foreground">
+            <span className="font-semibold">{username}</span>{" "}
+            <span className="text-foreground/90">{caption}</span>
+          </p>
+        </div>
+      )}
 
       {/* View comments */}
       <button onClick={() => setCommentOpen(true)} className="px-4 pb-1">

@@ -1,0 +1,2 @@
+ALTER TABLE public.posts ALTER COLUMN image_url DROP NOT NULL;
+ALTER TABLE public.posts ALTER COLUMN image_url SET DEFAULT NULL;
