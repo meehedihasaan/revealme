@@ -24,16 +24,7 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/feed",
-    });
-    if (result.error) {
-      toast.error(result.error.message);
-      setLoading(false);
-    }
-  };
+
 
   return (
     <div className="flex min-h-screen flex-col bg-background px-6 py-8">
