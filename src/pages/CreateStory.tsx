@@ -340,7 +340,7 @@ const CreateStory = () => {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="absolute bottom-0 left-0 right-0 z-20 bg-black/80 backdrop-blur-md rounded-t-2xl px-4 py-4"
+            className="absolute bottom-0 left-0 right-0 z-20 bg-card/95 backdrop-blur-md rounded-t-2xl px-4 py-4 border-t border-border"
           >
             <div className="grid grid-cols-8 gap-3">
               {EMOJIS.map((emoji) => (
@@ -353,7 +353,7 @@ const CreateStory = () => {
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowEmojis(false)} className="mt-3 w-full text-center text-sm text-white/60">
+            <button onClick={() => setShowEmojis(false)} className="mt-3 w-full text-center text-sm text-muted-foreground">
               Close
             </button>
           </motion.div>
