@@ -192,7 +192,7 @@ const PostCard = ({
           }}
           className={`rounded-[14px] p-[2px] ${hasStory ? getStoryColor(postUserId || "") : ""}`}
         >
-          <div className={`rounded-[12px] ${hasStory ? "border-[2px] border-background" : ""}`}>
+          <div className={`rounded-[12px] ${hasStory ? "border-[1.5px] border-background" : ""}`}>
             {avatar ? (
               <img src={avatar} alt={username} className="h-9 w-9 rounded-[10px] object-cover" />
             ) : (

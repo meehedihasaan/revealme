@@ -191,7 +191,7 @@ const Feed = () => {
               className="flex shrink-0 flex-col items-center gap-1"
             >
               <div className={`rounded-[24px] p-[2px] ${su.hasSeen ? "bg-muted-foreground/30" : getStoryColor(su.user_id)}`}>
-                <div className="rounded-[22px] border-[2px] border-background">
+                <div className="rounded-[22px] border-[1.5px] border-background">
                   {su.avatar_url ? (
                     <img src={su.avatar_url} alt={su.username} className="h-[68px] w-[68px] rounded-[18px] object-cover" />
                   ) : (
