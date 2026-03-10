@@ -34,7 +34,7 @@ const locationCoords: Record<string, { x: number; y: number }> = {
   jessore: { x: 30, y: 56 },
   jashore: { x: 30, y: 56 },
   "cox's bazar": { x: 78, y: 78 },
-  coxs bazar: { x: 78, y: 78 },
+  "coxs bazar": { x: 78, y: 78 },
   "cox'sbazar": { x: 78, y: 78 },
   tangail: { x: 48, y: 38 },
   noakhali: { x: 68, y: 58 },
