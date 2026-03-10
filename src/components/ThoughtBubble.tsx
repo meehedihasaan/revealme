@@ -81,10 +81,10 @@ const ThoughtBubble = ({ userId, isOwnProfile = false }: ThoughtBubbleProps) => 
                 </p>
                 <span className="absolute -bottom-2.5 -right-0.5 text-primary text-xl font-bold leading-none font-bangla rotate-180">"</span>
               </div>
-              {/* Bubble tail - two circles like Facebook */}
-              <div className="flex flex-col items-start ml-4 -mt-0.5">
+              {/* Bubble tail - points to bottom-left toward avatar */}
+              <div className="absolute -bottom-3 left-2 flex items-end gap-0.5">
                 <div className="h-2 w-2 rounded-full bg-foreground/90" />
-                <div className="h-1.5 w-1.5 rounded-full bg-foreground/90 ml-0.5 mt-0.5" />
+                <div className="h-1.5 w-1.5 rounded-full bg-foreground/90 -ml-1 mb-1" />
               </div>
             </button>
           </motion.div>
@@ -101,9 +101,9 @@ const ThoughtBubble = ({ userId, isOwnProfile = false }: ThoughtBubbleProps) => 
               <div className="relative rounded-2xl bg-foreground/80 backdrop-blur-sm px-3 py-1.5 shadow-lg">
                 <p className="text-background/70 text-xs font-medium font-bangla">Drop a thought...</p>
               </div>
-              <div className="flex flex-col items-start ml-4 -mt-0.5">
+              <div className="absolute -bottom-3 left-2 flex items-end gap-0.5">
                 <div className="h-2 w-2 rounded-full bg-foreground/80" />
-                <div className="h-1.5 w-1.5 rounded-full bg-foreground/80 ml-0.5 mt-0.5" />
+                <div className="h-1.5 w-1.5 rounded-full bg-foreground/80 -ml-1 mb-1" />
               </div>
             </button>
           </motion.div>

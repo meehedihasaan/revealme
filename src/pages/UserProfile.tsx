@@ -350,8 +350,8 @@ const UserProfile = () => {
 
       {/* Avatar + Info */}
       <div className="px-4">
-        <div className="-mt-10 mb-3 relative">
-          <div className="absolute bottom-full left-0 mb-1 z-10">
+        <div className="-mt-10 mb-3 relative inline-block">
+          <div className="absolute -top-12 left-16 z-10">
             {userId && <ThoughtBubble userId={userId} />}
           </div>
           <button
