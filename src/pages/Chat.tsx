@@ -430,30 +430,19 @@ const Chat = () => {
         )}
       </AnimatePresence>
 
-      {/* Mood selector */}
-      <div className="shrink-0 border-t border-border bg-background px-3 pt-2.5 pb-1">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <span className="text-primary text-lg shrink-0">☺</span>
-          {MOODS.map((mood) => (
-            <button
-              key={mood}
-              onClick={() => setSelectedMood(mood)}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
-                selectedMood === mood
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {mood}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Input bar */}
-      <div className="bg-background px-3 pb-4 pt-2 shrink-0">
+      <div className="border-t border-border bg-background px-3 pb-4 pt-3 shrink-0">
         <div className="flex items-center gap-3">
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            onClick={() => fileInputRef.current?.click()}
+            className="text-primary shrink-0"
+            disabled={uploading}
+          >
+            <PuffyIcon name="camera" size={22} />
+          </motion.button>
 
           <div className="flex-1 rounded-full bg-secondary px-4 py-3">
             <input
@@ -466,47 +455,18 @@ const Chat = () => {
             />
           </div>
 
-          {/* Action icons */}
-          <div className="flex items-center gap-2.5">
-            <motion.button whileTap={{ scale: 0.85 }} className="text-primary" disabled={uploading}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                <line x1="12" y1="19" x2="12" y2="23" />
-                <line x1="8" y1="23" x2="16" y2="23" />
-              </svg>
-            </motion.button>
-
-            <motion.button
-              whileTap={{ scale: 0.85 }}
-              onClick={() => fileInputRef.current?.click()}
-              className="text-primary"
-              disabled={uploading}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <circle cx="12" cy="12" r="3" />
-                <line x1="12" y1="2" x2="12" y2="5" />
-                <line x1="12" y1="19" x2="12" y2="22" />
-                <line x1="2" y1="12" x2="5" y2="12" />
-                <line x1="19" y1="12" x2="22" y2="12" />
-              </svg>
-            </motion.button>
-
-            <motion.button
-              whileTap={{ scale: 0.85 }}
-              onClick={sendMessage}
-              disabled={(!input.trim() && !selectedFile) || sending || uploading}
-              className="text-primary disabled:opacity-30"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                <line x1="9" y1="9" x2="9.01" y2="9" />
-                <line x1="15" y1="9" x2="15.01" y2="9" />
-              </svg>
-            </motion.button>
-          </div>
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            onClick={sendMessage}
+            disabled={(!input.trim() && !selectedFile) || sending || uploading}
+            className="shrink-0 rounded-full bg-primary p-2.5 transition-opacity disabled:opacity-30"
+          >
+            {uploading ? (
+              <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
+            ) : (
+              <PuffyIcon name="send" size={18} />
+            )}
+          </motion.button>
         </div>
       </div>
     </div>
