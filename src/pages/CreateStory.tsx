@@ -270,23 +270,23 @@ const CreateStory = () => {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowTextInput(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/80 backdrop-blur-sm"
             >
-              <span className="text-white text-lg font-bold">Aa</span>
+              <span className="text-foreground text-lg font-bold">Aa</span>
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowEmojis(!showEmojis)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/80 backdrop-blur-sm"
             >
               <span className="text-xl">😀</span>
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowEffects(!showEffects)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/80 backdrop-blur-sm"
             >
-              <PuffyIcon name="sliders" size={18} className="invert" />
+              <PuffyIcon name="sliders" size={18} className="icon-adaptive" />
             </motion.button>
           </div>
         </div>
