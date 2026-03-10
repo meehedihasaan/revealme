@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MapPin, CalendarDays } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -62,6 +62,9 @@ const UserProfile = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
   const [hasStory, setHasStory] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const avatarLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const avatarDidLongPress = useRef(false);
   const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(userId);
 
   const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
@@ -335,19 +338,39 @@ const UserProfile = () => {
       <div className="px-4">
         <div className="-mt-10 mb-3">
           <button
-            onClick={() => hasStory ? navigate(`/story?user=${profile.user_id}`) : undefined}
-            className={`inline-block rounded-[26px] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
-          >
-            <div className={`rounded-[23px] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
-              {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover block" />
-              ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
-                  <PuffyIcon name="user" size={32} />
+                onPointerDown={() => {
+                  avatarDidLongPress.current = false;
+                  avatarLongPressTimer.current = setTimeout(() => {
+                    avatarDidLongPress.current = true;
+                    if (profile.avatar_url) setShowAvatarModal(true);
+                  }, 500);
+                }}
+                onPointerUp={() => {
+                  if (avatarLongPressTimer.current) clearTimeout(avatarLongPressTimer.current);
+                  if (!avatarDidLongPress.current) {
+                    if (hasStory) {
+                      navigate(`/story?user=${profile.user_id}`);
+                    } else if (profile.avatar_url) {
+                      setShowAvatarModal(true);
+                    }
+                  }
+                }}
+                onPointerCancel={() => {
+                  if (avatarLongPressTimer.current) clearTimeout(avatarLongPressTimer.current);
+                }}
+                onContextMenu={(e) => e.preventDefault()}
+                className={`inline-block rounded-[26px] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
+              >
+                <div className={`rounded-[23px] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover block" draggable={false} />
+                  ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
+                      <PuffyIcon name="user" size={32} />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </button>
+              </button>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -504,6 +527,42 @@ const UserProfile = () => {
         </>
       )}
 
+
+      {/* Avatar full-screen viewer */}
+      <AnimatePresence>
+        {showAvatarModal && profile.avatar_url && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+            onClick={() => setShowAvatarModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={profile.avatar_url}
+                alt={displayName}
+                className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain"
+              />
+              <button
+                onClick={() => setShowAvatarModal(false)}
+                className="absolute -top-10 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white"
+              >
+                <span className="text-lg font-bold">✕</span>
+              </button>
+              <p className="mt-3 text-center text-sm font-semibold text-white">{displayName}</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <BottomNav />
     </div>
