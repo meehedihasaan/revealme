@@ -70,15 +70,26 @@ const UserProfile = () => {
   const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!userId) return;
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    supabase
-      .from("stories")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .gte("created_at", since)
-      .then(({ count }) => setHasStory((count || 0) > 0));
-  }, [userId]);
+    if (!userId || !user) return;
+    const checkStory = async () => {
+      // Only show story ring if current user follows this user
+      const { data: followData } = await supabase
+        .from("follows")
+        .select("id")
+        .eq("follower_id", user.id)
+        .eq("following_id", userId)
+        .maybeSingle();
+      if (!followData) { setHasStory(false); return; }
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { count } = await supabase
+        .from("stories")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .gte("created_at", since);
+      setHasStory((count || 0) > 0);
+    };
+    checkStory();
+  }, [userId, user, isFollowing]);
 
   useEffect(() => {
     if (taggedPostIds.length === 0) { setTaggedPosts([]); return; }
