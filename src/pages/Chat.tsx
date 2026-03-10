@@ -393,9 +393,9 @@ const Chat = () => {
             >
               <div className="shrink-0">
                 {otherUser?.avatar_url ? (
-                   <img src={otherUser.avatar_url} alt="" className="h-8 w-8 rounded-[35%] object-cover" />
+                   <img src={otherUser.avatar_url} alt="" className="h-8 w-8 rounded-[65%] object-cover" />
                  ) : (
-                   <div className="flex h-8 w-8 items-center justify-center rounded-[35%] bg-secondary">
+                   <div className="flex h-8 w-8 items-center justify-center rounded-[65%] bg-secondary">
                      <PuffyIcon name="user" size={14} />
                    </div>
                 )}
