@@ -77,7 +77,7 @@ const PuffyIcon = ({ name, size = 24, className = "", style }: PuffyIconProps) =
       width={size}
       height={size}
       className={`inline-block shrink-0 icon-adaptive ${className}`}
-      style={style}
+      style={{ ...style, ...(["feed"].includes(name) ? {} : {}) }}
       draggable={false}
     />
   );
