@@ -95,7 +95,9 @@ const StoryViewer = () => {
           groupMap[s.user_id] = {
             user_id: s.user_id,
             username: profileMap[s.user_id]?.username || "user",
+            display_name: profileMap[s.user_id]?.display_name || profileMap[s.user_id]?.username || "User",
             avatar_url: profileMap[s.user_id]?.avatar_url || null,
+            is_verified: profileMap[s.user_id]?.is_verified || false,
             stories: [],
           };
         }
