@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import Lottie from "lottie-react";
 import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +12,7 @@ import PostMenu from "@/components/PostMenu";
 import LikesSheet from "@/components/LikesSheet";
 import PostImageCarousel from "@/components/PostImageCarousel";
 import heartFilledRedIcon from "@/assets/icons/heart-filled-red.png";
+import heartAnimation from "@/assets/heart-animation.json";
 
 const STORY_GRADIENT = "gradient-story-ring";
 
