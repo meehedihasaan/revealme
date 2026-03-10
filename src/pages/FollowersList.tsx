@@ -161,7 +161,7 @@ const FollowersList = () => {
                     u.isFollowing ? "bg-secondary text-secondary-foreground" : "bg-primary text-primary-foreground"
                   }`}
                 >
-                  <PuffyIcon name={u.isFollowing ? "check" : "plus"} size={14} />
+                  <PuffyIcon name={u.isFollowing ? "check" : "plus"} size={14} className={u.isFollowing ? "" : "!filter-none"} />
                   {u.isFollowing ? "Following" : "Follow"}
                 </button>
               )}
