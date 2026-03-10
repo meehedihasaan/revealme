@@ -8,6 +8,7 @@ import { FeedShimmer } from "@/components/ShimmerLoader";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
+import cameraIcon from "@/assets/icons/camera.png";
 
 
 const STORY_RING_COLORS = [
