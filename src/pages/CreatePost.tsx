@@ -5,6 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { uploadProgress } from "@/hooks/useUploadProgress";
 import ImageCarouselPreview from "@/components/ImageCarouselPreview";
 import TagSearchSheet from "@/components/TagSearchSheet";
 import ImageEffectsEditor from "@/components/ImageEffectsEditor";
