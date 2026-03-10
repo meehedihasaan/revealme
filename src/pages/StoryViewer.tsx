@@ -396,6 +396,47 @@ const StoryViewer = () => {
         {paused && (
           <span className="text-[10px] text-white/50 uppercase tracking-wider mr-2">Paused</span>
         )}
+        {/* 3-dot menu */}
+        <div className="relative">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowStoryMenu(!showStoryMenu); setPaused(true); }}
+            className="p-1"
+          >
+            <PuffyIcon name="more-horizontal" size={22} className="invert" />
+          </button>
+          <AnimatePresence>
+            {showStoryMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                className="absolute right-0 top-10 z-50 min-w-[160px] rounded-xl bg-card shadow-xl border border-border overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {isOwn && (
+                  <button
+                    onClick={handleDeleteStory}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-secondary/50"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                    </svg>
+                    Delete Story
+                  </button>
+                )}
+                <button
+                  onClick={() => { setShowStoryMenu(false); setPaused(false); }}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/50 border-t border-border"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                  Cancel
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         <button
           onClick={(e) => { e.stopPropagation(); navigate(-1); }}
           className="p-1"
