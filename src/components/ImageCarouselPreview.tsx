@@ -29,6 +29,7 @@ const ImageCarouselPreview = ({
   taggedUsers,
   onImageTap,
   onRemoveImage,
+  filterStyles,
 }: ImageCarouselPreviewProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
