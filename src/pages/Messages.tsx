@@ -18,6 +18,7 @@ interface ConversationItem {
   lastMessage: string;
   lastMessageTime: string;
   unread: number;
+  is_online: boolean;
 }
 
 const Messages = () => {
