@@ -66,6 +66,13 @@ const Profile = () => {
     fetchTagged();
   }, [taggedPostIds]);
 
+  // Refetch posts when upload finishes
+  useEffect(() => {
+    if (!upload.isUploading && upload.progress === 100) {
+      refetch();
+    }
+  }, [upload.isUploading, upload.progress]);
+
   const displayName = profile?.display_name || profile?.username || user?.email?.split("@")[0] || "User";
   const avatarUrl = profile?.avatar_url;
 
