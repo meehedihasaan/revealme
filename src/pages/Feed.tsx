@@ -120,9 +120,6 @@ const Feed = () => {
           <button className="relative text-foreground" onClick={() => navigate("/messages")}>
             <PuffyIcon name="message-circle" size={24} />
           </button>
-          <button className="rounded-full border border-border p-1 text-foreground" onClick={() => navigate("/create-post")}>
-            <PuffyIcon name="plus" size={20} />
-          </button>
         </div>
       </div>
 
