@@ -55,6 +55,7 @@ const UserProfile = () => {
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followsBack, setFollowsBack] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
   const [menuOpen, setMenuOpen] = useState(false);
