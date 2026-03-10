@@ -103,7 +103,7 @@ const CreatePost = () => {
       if (error) throw error;
 
       // Insert additional images into post_images table
-      if (postData) {
+      if (postData && imageUrls.length > 0) {
         const imageRows = imageUrls.map((url, i) => ({
           post_id: postData.id,
           image_url: url,
