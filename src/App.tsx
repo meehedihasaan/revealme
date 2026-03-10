@@ -44,6 +44,7 @@ import AdminPosts from "./pages/admin/AdminPosts";
 import PostDetail from "./pages/PostDetail";
 import VerifyCode from "./pages/VerifyCode";
 import UserMap from "./pages/UserMap";
+import LocationSettings from "./pages/LocationSettings";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +88,7 @@ const AppRoutes = () => {
       <Route path="/settings/preference" element={<ProtectedRoute><PreferenceSettings /></ProtectedRoute>} />
       <Route path="/settings/privacy" element={<ProtectedRoute><PrivacySettings /></ProtectedRoute>} />
       <Route path="/settings/verification" element={<ProtectedRoute><RequestVerification /></ProtectedRoute>} />
+      <Route path="/settings/location" element={<ProtectedRoute><LocationSettings /></ProtectedRoute>} />
       <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
       <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
       <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />

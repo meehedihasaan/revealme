@@ -417,8 +417,11 @@ export type Database = {
           is_private: boolean
           is_verified: boolean
           last_online: string | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           onboarding_completed: boolean
+          show_on_map: boolean
           updated_at: string
           user_id: string
           username: string | null
@@ -433,8 +436,11 @@ export type Database = {
           is_private?: boolean
           is_verified?: boolean
           last_online?: string | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           onboarding_completed?: boolean
+          show_on_map?: boolean
           updated_at?: string
           user_id: string
           username?: string | null
@@ -449,8 +455,11 @@ export type Database = {
           is_private?: boolean
           is_verified?: boolean
           last_online?: string | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           onboarding_completed?: boolean
+          show_on_map?: boolean
           updated_at?: string
           user_id?: string
           username?: string | null
