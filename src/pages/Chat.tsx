@@ -6,6 +6,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatShimmer } from "@/components/ShimmerLoader";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserOnlineStatus, formatLastOnline } from "@/hooks/usePresence";
 
 interface Message {
   id: string;
