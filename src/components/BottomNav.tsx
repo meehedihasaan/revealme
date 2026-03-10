@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const tabs = [
   { icon: "camera", path: "/feed", label: "Feed" },
   { icon: "search", path: "/explore", label: "Explore" },
-  { icon: "message-circle", path: "/messages", label: "Messages", badgeKey: "messages" },
+  { icon: "plus", path: "/create-post", label: "Create", isCreate: true },
   { icon: "bell", path: "/notifications", label: "Alerts", badgeKey: "notifications" },
   { icon: "user", path: "/profile", label: "Profile" },
 ];
