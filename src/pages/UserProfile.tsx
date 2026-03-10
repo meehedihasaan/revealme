@@ -13,8 +13,7 @@ import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
-
-
+import ThoughtBubble from "@/components/ThoughtBubble";
 
 const STORY_GRADIENT = "gradient-story-ring";
 
