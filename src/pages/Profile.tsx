@@ -148,7 +148,13 @@ const Profile = () => {
       <div className="px-4">
         <div className="-mt-10 mb-3">
           <button
-            onClick={() => hasStory ? navigate(`/story?user=${user?.id}`) : undefined}
+            onClick={() => {
+              if (hasStory) {
+                navigate(`/story?user=${user?.id}`);
+              } else if (avatarUrl) {
+                setShowAvatarModal(true);
+              }
+            }}
             className={`inline-block rounded-[26px] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
           >
             <div className={`rounded-[23px] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
