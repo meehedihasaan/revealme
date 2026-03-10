@@ -462,7 +462,7 @@ const Chat = () => {
             {uploading ? (
               <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
             ) : (
-              <PuffyIcon name="send" size={18} />
+              <PuffyIcon name="send" size={22} />
             )}
           </motion.button>
         </div>
