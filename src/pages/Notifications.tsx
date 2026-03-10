@@ -177,6 +177,7 @@ const Notifications = () => {
   const NotifIcon = ({ type }: { type: NotifType }) => {
     if (type === "like") return <PuffyIcon name="heart-filled" size={20} />;
     if (type === "comment") return <PuffyIcon name="message-circle" size={20} />;
+    if (type === "story_react") return <span className="text-base">❤️</span>;
     return null;
   };
 
