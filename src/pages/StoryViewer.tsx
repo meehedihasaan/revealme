@@ -28,6 +28,7 @@ interface ViewerInfo {
   username: string;
   avatar_url: string | null;
   viewed_at: string;
+  reaction?: string | null;
 }
 
 const STORY_DURATION = 5000; // 5 seconds per story
