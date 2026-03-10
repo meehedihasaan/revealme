@@ -164,7 +164,7 @@ const Following = () => {
                     isFollowing ? "bg-secondary text-secondary-foreground" : "bg-primary text-primary-foreground"
                   }`}
                 >
-                  <PuffyIcon name={isFollowing ? "check" : "plus"} size={14} />
+                  <PuffyIcon name={isFollowing ? "check" : "plus"} size={14} className={isFollowing ? "" : "!filter-none"} />
                   {isFollowing ? "Following" : "Follow"}
                 </button>
               </motion.div>
