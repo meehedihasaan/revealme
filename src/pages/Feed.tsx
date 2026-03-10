@@ -11,22 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import cameraIcon from "@/assets/icons/camera.png";
 
 
-const STORY_RING_COLORS = [
-  "gradient-story-red",
-  "gradient-story-yellow",
-  "gradient-story-green",
-  "gradient-story-blue",
-  "gradient-story-purple",
-  "gradient-story-orange",
-  "gradient-story-pink",
-  "gradient-story-cyan",
-];
-
-const getStoryColor = (userId: string) => {
-  let hash = 0;
-  for (let i = 0; i < userId.length; i++) hash = ((hash << 5) - hash + userId.charCodeAt(i)) | 0;
-  return STORY_RING_COLORS[Math.abs(hash) % STORY_RING_COLORS.length];
-};
+const STORY_GRADIENT = "gradient-story-ring";
 
 interface StoryUser {
   user_id: string;
