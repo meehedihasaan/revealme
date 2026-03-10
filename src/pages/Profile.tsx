@@ -18,7 +18,7 @@ import bannerImg from "@/assets/profile-banner.jpg";
 const Profile = () => {
   const navigate = useNavigate();
   const { profile, user } = useAuth();
-  const { posts, loading } = usePosts(user?.id);
+  const { posts, loading, refetch } = usePosts(user?.id);
   const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
