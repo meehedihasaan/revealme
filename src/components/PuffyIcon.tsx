@@ -51,6 +51,7 @@ const iconMap: Record<string, string> = {
   "chevron-right": chevronRight,
   "chevron-down": chevronDown,
   check,
+  feed,
 };
 
 export type PuffyIconName = keyof typeof iconMap;
