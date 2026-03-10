@@ -205,7 +205,7 @@ const PostCard = ({
             disabled={followLoading}
             className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground transition-opacity disabled:opacity-50"
           >
-            <PuffyIcon name="plus" size={12} />
+            <PuffyIcon name="plus" size={12} className="!filter-none" />
             Follow
           </motion.button>
         )}
