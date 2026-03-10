@@ -78,24 +78,29 @@ export const useUserOnlineStatus = (userId: string | undefined) => {
         if (data) setLastOnline((data as any).last_online);
       });
 
-    // Subscribe to global presence to detect real-time online status
-    const channel = supabase.channel("global-presence-check-" + userId);
-    
-    // Also listen to global presence channel
-    const globalChannel = supabase.channel("global-presence");
-    
+    // Create a dedicated presence channel to watch the target user
+    const channel = supabase.channel("presence-watch-" + userId, {
+      config: { presence: { key: user.id } },
+    });
+
     const checkPresence = () => {
-      const state = globalChannel.presenceState();
+      const state = channel.presenceState();
+      // Check if the target userId has any presence entries
       setIsOnline(!!state[userId]);
     };
 
-    globalChannel.on("presence", { event: "sync" }, checkPresence);
-    
-    // Check immediately
-    const timer = setTimeout(checkPresence, 500);
+    channel
+      .on("presence", { event: "sync" }, checkPresence)
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({ user_id: user.id, online_at: new Date().toISOString() });
+          // Check after a short delay to allow other presences to sync
+          setTimeout(checkPresence, 1000);
+        }
+      });
 
     return () => {
-      clearTimeout(timer);
+      supabase.removeChannel(channel);
     };
   }, [userId, user]);
 
