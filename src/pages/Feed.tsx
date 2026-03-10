@@ -46,7 +46,32 @@ const Feed = () => {
 
   useEffect(() => { fetchFollowing(); }, [fetchFollowing]);
 
-  // Listen for double-tap home refresh event
+  // Fetch unread message count
+  useEffect(() => {
+    if (!user) return;
+    const fetchUnread = async () => {
+      const { data: participations } = await supabase
+        .from("conversation_participants")
+        .select("conversation_id")
+        .eq("user_id", user.id);
+      if (!participations || participations.length === 0) { setUnreadMsgCount(0); return; }
+      const convIds = participations.map(p => p.conversation_id);
+      const { count } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .in("conversation_id", convIds)
+        .neq("sender_id", user.id)
+        .eq("read", false);
+      setUnreadMsgCount(count || 0);
+    };
+    fetchUnread();
+    const channel = supabase
+      .channel("unread-messages")
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => fetchUnread())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
   useEffect(() => {
     const handler = () => refetch();
     window.addEventListener("pull-to-refresh", handler);
