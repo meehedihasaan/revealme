@@ -190,13 +190,13 @@ const PostCard = ({
               navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`);
             }
           }}
-          className={`rounded-[16px] p-[2px] ${hasStory ? getStoryColor(postUserId || "") : ""}`}
+          className={`rounded-[14px] p-[2px] ${hasStory ? getStoryColor(postUserId || "") : ""}`}
         >
-          <div className={`rounded-[14px] ${hasStory ? "border-[2px] border-background" : ""}`}>
+          <div className={`rounded-[12px] ${hasStory ? "border-[2px] border-background" : ""}`}>
             {avatar ? (
-              <img src={avatar} alt={username} className="h-9 w-9 rounded-[10px] object-cover" />
+              <img src={avatar} alt={username} className="h-9 w-9 rounded-[12px] object-cover" />
             ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-secondary">
+              <div className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-secondary">
                 <PuffyIcon name="user" size={16} />
               </div>
             )}
