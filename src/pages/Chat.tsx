@@ -89,7 +89,7 @@ const Chat = () => {
     init();
   }, [conversationId, user]);
 
-  // Online/offline presence
+  // Chat-level presence for typing indicator
   useEffect(() => {
     if (!conversationId || !user || !otherUser) return;
 
@@ -102,10 +102,6 @@ const Chat = () => {
     presenceChannel
       .on("presence", { event: "sync" }, () => {
         const state = presenceChannel.presenceState();
-        const onlineIds = Object.keys(state);
-        setIsOnline(onlineIds.includes(otherUser.user_id));
-
-        // Check if other user is typing
         const otherState = state[otherUser.user_id];
         if (otherState && Array.isArray(otherState) && otherState.length > 0) {
           setIsTyping(!!(otherState[0] as any).is_typing);
