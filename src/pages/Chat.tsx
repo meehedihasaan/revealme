@@ -197,7 +197,7 @@ const Chat = () => {
 
     const optimisticMsg: Message = {
       id: `temp-${Date.now()}`, text: text || "", sender_id: user.id,
-      created_at: new Date().toISOString(), read: false, image_url: imageUrl, mood: selectedMood,
+      created_at: new Date().toISOString(), read: false, image_url: imageUrl,
     };
     setMessages(prev => [...prev, optimisticMsg]);
 
