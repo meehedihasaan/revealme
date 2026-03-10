@@ -95,8 +95,7 @@ const UserProfile = () => {
       setProfileLoading(true);
       const { data: prof } = await supabase
         .from("profiles")
-        .select("user_id, username, display_name, avatar_url, bio, location, is_private, is_verified, created_at")
-        .eq("user_id", userId)
+        .select("user_id, username, display_name, avatar_url, cover_url, bio, location, is_private, is_verified, created_at")
         .single();
       setProfile(prof);
 
