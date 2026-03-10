@@ -228,7 +228,7 @@ const PostCard = ({
         <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
       ) : (
         <div
-          className="relative px-5 py-4"
+          className="relative px-4 py-3"
           onDoubleClick={handleDoubleTap}
         >
           <p className="text-[15px] text-foreground leading-relaxed">{caption}</p>
@@ -237,7 +237,7 @@ const PostCard = ({
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-between px-4 py-2.5">
+      <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-4">
           <motion.button whileTap={{ scale: 0.8 }} onClick={toggleLike}>
             <motion.div animate={liked ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}>
@@ -261,7 +261,7 @@ const PostCard = ({
       </div>
 
       {/* Likes & Comments count */}
-      <div className="px-4 flex items-center gap-3">
+      <div className="px-4 pt-0.5 flex items-center gap-3">
         <button onClick={() => setLikesOpen(true)} className="text-sm font-semibold text-foreground">
           {likeCount.toLocaleString()} likes
         </button>
@@ -272,7 +272,7 @@ const PostCard = ({
 
       {/* Caption - only show if post has an image */}
       {image && caption && (
-        <div className="px-4 pb-1 pt-0.5">
+        <div className="px-4 pt-1">
           <p className="text-sm text-foreground">
             <span className="font-semibold">@{username}</span>{" "}
             {caption.length > 100 && !captionExpanded ? (
@@ -290,7 +290,7 @@ const PostCard = ({
       )}
 
       {/* Time */}
-      <div className="px-4 pb-3">
+      <div className="px-4 pt-1 pb-3">
         <p className="text-[10px] uppercase text-muted-foreground">{timeAgo}</p>
       </div>
 
