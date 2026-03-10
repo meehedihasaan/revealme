@@ -384,7 +384,7 @@ export type Database = {
           caption: string | null
           created_at: string
           id: string
-          image_url: string
+          image_url: string | null
           location: string | null
           user_id: string
         }
@@ -392,7 +392,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           id?: string
-          image_url: string
+          image_url?: string | null
           location?: string | null
           user_id: string
         }
@@ -400,7 +400,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           id?: string
-          image_url?: string
+          image_url?: string | null
           location?: string | null
           user_id?: string
         }
