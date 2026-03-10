@@ -149,4 +149,12 @@
   .light-theme .icon-adaptive {
     filter: invert(1);
   }
+
+  /* Invert black PNG icons in dark theme (default) */
+  .icon-adaptive-inverted {
+    filter: invert(1);
+  }
+  .light-theme .icon-adaptive-inverted {
+    filter: none;
+  }
 }
