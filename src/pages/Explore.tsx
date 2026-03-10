@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPin } from "lucide-react";
+import compassIcon from "@/assets/icons/compass.png";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
@@ -148,7 +148,7 @@ const Explore = () => {
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-xl font-bold text-foreground">Explore</h1>
         <button onClick={() => navigate("/user-map")} className="p-1">
-          <MapPin size={22} className="text-foreground" />
+          <img src={compassIcon} alt="Map" className="h-[22px] w-[22px] dark:invert" />
         </button>
       </div>
 
