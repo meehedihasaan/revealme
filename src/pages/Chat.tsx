@@ -25,8 +25,6 @@ interface OtherUser {
   is_verified: boolean;
 }
 
-const MOODS = ["Casual", "Love", "LOUD", "Secret", "Anger"] as const;
-
 const Chat = () => {
   const navigate = useNavigate();
   const { conversationId } = useParams<{ conversationId: string }>();
