@@ -16,7 +16,9 @@ interface StoryItem {
 interface StoryGroup {
   user_id: string;
   username: string;
+  display_name: string;
   avatar_url: string | null;
+  is_verified: boolean;
   stories: StoryItem[];
 }
 
