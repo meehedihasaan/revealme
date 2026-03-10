@@ -13,6 +13,7 @@ import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import ThoughtBubble from "@/components/ThoughtBubble";
+import { useUploadProgress } from "@/hooks/useUploadProgress";
 
 const STORY_GRADIENT = "gradient-story-ring";
 
@@ -27,6 +28,7 @@ const Profile = () => {
   const [hasStory, setHasStory] = useState(false);
   const avatarLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const avatarDidLongPress = useRef(false);
+  const upload = useUploadProgress();
 
   useEffect(() => {
     if (!user) return;
@@ -255,6 +257,42 @@ const Profile = () => {
           <PuffyIcon name="user" size={22} />
         </button>
       </div>
+
+      {/* Upload progress indicator */}
+      <AnimatePresence>
+        {upload.isUploading && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="flex items-center gap-3 px-4 py-3 bg-secondary/50">
+              {upload.thumbnail ? (
+                <img src={upload.thumbnail} alt="" className="h-10 w-10 rounded-lg object-cover" />
+              ) : (
+                <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center">
+                  <PuffyIcon name="edit" size={16} />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-foreground truncate">
+                  {upload.progress < 100 ? "Sharing..." : "Finishing up..."}
+                </p>
+                <div className="mt-1 h-1 w-full rounded-full bg-secondary overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full bg-primary"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${upload.progress}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+              </div>
+              <span className="text-[10px] text-muted-foreground font-medium">{Math.round(upload.progress)}%</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Posts as cards */}
       {activeTab === "grid" ? (
