@@ -52,6 +52,7 @@ const StoryViewer = () => {
   const [sendingReply, setSendingReply] = useState(false);
   const [hearted, setHearted] = useState(false);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
+  const [showStoryMenu, setShowStoryMenu] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const viewedRef = useRef<Set<string>>(new Set());
