@@ -153,10 +153,10 @@ const CreatePost = () => {
       {previews.length === 0 ? (
         <button
           onClick={() => fileRef.current?.click()}
-          className="flex flex-col items-center justify-center gap-4 w-full py-32 text-muted-foreground"
+          className="flex flex-col items-center justify-center gap-4 w-full py-16 text-muted-foreground border-b border-border"
         >
           <PuffyIcon name="camera" size={48} className="opacity-40" />
-          <p className="text-sm">Tap to select photos</p>
+          <p className="text-sm">Tap to add photos (optional)</p>
         </button>
       ) : (
         <ImageCarouselPreview
