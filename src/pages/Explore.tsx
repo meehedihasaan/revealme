@@ -47,9 +47,10 @@ const Explore = () => {
       const { data } = await supabase
         .from("posts")
         .select("id, image_url, user_id")
+        .not("image_url", "is", null)
         .order("created_at", { ascending: false })
         .limit(30);
-      setPosts((data || []).filter(p => !blockedIds.has(p.user_id)));
+      setPosts((data || []).filter(p => !blockedIds.has(p.user_id)) as PostResult[]);
       setLoading(false);
     };
     fetchPosts();
