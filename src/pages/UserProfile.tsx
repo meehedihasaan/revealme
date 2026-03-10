@@ -501,6 +501,16 @@ const UserProfile = () => {
         </>
       )}
 
+  useEffect(() => {
+    if (!userId) return;
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    supabase
+      .from("stories")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("created_at", since)
+      .then(({ count }) => setHasStory((count || 0) > 0));
+  }, [userId]);
 
       <BottomNav />
     </div>
