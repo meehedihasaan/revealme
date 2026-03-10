@@ -143,7 +143,7 @@ const CreatePost = () => {
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={handlePost}
-          disabled={previews.length === 0 || posting}
+          disabled={(previews.length === 0 && !caption.trim()) || posting}
           className="text-sm font-bold text-primary disabled:opacity-40"
         >
           {posting ? "Posting..." : "Share"}
