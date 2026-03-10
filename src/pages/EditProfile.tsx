@@ -18,8 +18,10 @@ const EditProfile = () => {
   const [location, setLocation] = useState(profile?.location || "");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarDeleted, setAvatarDeleted] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>((profile as any)?.cover_url || null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverDeleted, setCoverDeleted] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,6 +29,7 @@ const EditProfile = () => {
     if (!f) return;
     setAvatarFile(f);
     setAvatarPreview(URL.createObjectURL(f));
+    setAvatarDeleted(false);
   };
 
   const handleCover = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,6 +37,19 @@ const EditProfile = () => {
     if (!f) return;
     setCoverFile(f);
     setCoverPreview(URL.createObjectURL(f));
+    setCoverDeleted(false);
+  };
+
+  const handleDeleteAvatar = () => {
+    setAvatarPreview(null);
+    setAvatarFile(null);
+    setAvatarDeleted(true);
+  };
+
+  const handleDeleteCover = () => {
+    setCoverPreview(null);
+    setCoverFile(null);
+    setCoverDeleted(true);
   };
 
   const handleSave = async () => {
@@ -43,7 +59,9 @@ const EditProfile = () => {
       let avatar_url = profile?.avatar_url || null;
       let cover_url = (profile as any)?.cover_url || null;
 
-      if (avatarFile) {
+      if (avatarDeleted) {
+        avatar_url = null;
+      } else if (avatarFile) {
         const ext = avatarFile.name.split(".").pop();
         const path = `${user.id}/avatar.${ext}`;
         await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
@@ -51,7 +69,9 @@ const EditProfile = () => {
         avatar_url = publicUrl;
       }
 
-      if (coverFile) {
+      if (coverDeleted) {
+        cover_url = null;
+      } else if (coverFile) {
         const ext = coverFile.name.split(".").pop();
         const path = `${user.id}/cover.${ext}`;
         await supabase.storage.from("avatars").upload(path, coverFile, { upsert: true });
@@ -114,32 +134,54 @@ const EditProfile = () => {
       </div>
 
       {/* Cover Picture */}
-      <button onClick={() => coverRef.current?.click()} className="relative w-full block">
-        <img
-          src={coverPreview || bannerImg}
-          alt="Cover"
-          className="h-36 w-full object-cover"
-        />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-          <PuffyIcon name="camera" size={28} className="invert" />
-        </div>
-      </button>
+      <div className="relative w-full">
+        <button onClick={() => coverRef.current?.click()} className="relative w-full block">
+          {coverPreview ? (
+            <img src={coverPreview} alt="Cover" className="h-36 w-full object-cover" />
+          ) : (
+            <div className="h-36 w-full bg-secondary flex items-center justify-center">
+              <PuffyIcon name="camera" size={28} className="opacity-40" />
+            </div>
+          )}
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <PuffyIcon name="camera" size={28} className="invert" />
+          </div>
+        </button>
+        {coverPreview && (
+          <button
+            onClick={handleDeleteCover}
+            className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-destructive/80 text-destructive-foreground"
+          >
+            <span className="text-sm font-bold">✕</span>
+          </button>
+        )}
+      </div>
       <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={handleCover} />
 
       {/* Avatar */}
       <div className="flex flex-col items-center -mt-12 pb-4">
-        <button onClick={() => fileRef.current?.click()} className="relative">
-          {avatarPreview ? (
-            <img src={avatarPreview} alt="Avatar" className="h-24 w-24 rounded-[20px] object-cover border-4 border-background" />
-          ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-[20px] bg-secondary border-4 border-background">
-              <PuffyIcon name="user" size={40} />
+        <div className="relative">
+          <button onClick={() => fileRef.current?.click()}>
+            {avatarPreview ? (
+              <img src={avatarPreview} alt="Avatar" className="h-24 w-24 rounded-[20px] object-cover border-4 border-background" />
+            ) : (
+              <div className="flex h-24 w-24 items-center justify-center rounded-[20px] bg-secondary border-4 border-background">
+                <PuffyIcon name="user" size={40} />
+              </div>
+            )}
+            <div className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary border-2 border-background">
+              <PuffyIcon name="camera" size={14} className="brightness-0 invert" />
             </div>
+          </button>
+          {avatarPreview && (
+            <button
+              onClick={handleDeleteAvatar}
+              className="absolute -top-1 -right-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground border-2 border-background"
+            >
+              <span className="text-xs font-bold">✕</span>
+            </button>
           )}
-          <div className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-primary border-2 border-background">
-            <PuffyIcon name="camera" size={14} className="brightness-0 invert" />
-          </div>
-        </button>
+        </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
       </div>
 
