@@ -23,6 +23,7 @@ import logOut from "@/assets/icons/log-out.png";
 import chevronRight from "@/assets/icons/chevron-right.png";
 import chevronDown from "@/assets/icons/chevron-down.png";
 import check from "@/assets/icons/check.png";
+import feed from "@/assets/icons/feed.png";
 
 const iconMap: Record<string, string> = {
   "arrow-left": arrowLeft,
@@ -50,6 +51,7 @@ const iconMap: Record<string, string> = {
   "chevron-right": chevronRight,
   "chevron-down": chevronDown,
   check,
+  feed,
 };
 
 export type PuffyIconName = keyof typeof iconMap;
