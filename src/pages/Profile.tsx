@@ -148,13 +148,13 @@ const Profile = () => {
         <div className="-mt-10 mb-3">
           <button
             onClick={() => hasStory ? navigate(`/story?user=${user?.id}`) : undefined}
-            className={`inline-block rounded-full p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
+            className={`inline-block rounded-[26px] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
           >
-            <div className={`rounded-full ${hasStory ? "border-[2px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
+            <div className={`rounded-[23px] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
               {avatarUrl ? (
-                <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-full object-cover" />
+                <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover block" />
               ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
+                <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
                   <PuffyIcon name="user" size={32} />
                 </div>
               )}
