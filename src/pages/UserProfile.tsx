@@ -338,19 +338,39 @@ const UserProfile = () => {
       <div className="px-4">
         <div className="-mt-10 mb-3">
           <button
-            onClick={() => hasStory ? navigate(`/story?user=${profile.user_id}`) : undefined}
-            className={`inline-block rounded-[26px] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
-          >
-            <div className={`rounded-[23px] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
-              {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover block" />
-              ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
-                  <PuffyIcon name="user" size={32} />
+                onPointerDown={() => {
+                  avatarDidLongPress.current = false;
+                  avatarLongPressTimer.current = setTimeout(() => {
+                    avatarDidLongPress.current = true;
+                    if (profile.avatar_url) setShowAvatarModal(true);
+                  }, 500);
+                }}
+                onPointerUp={() => {
+                  if (avatarLongPressTimer.current) clearTimeout(avatarLongPressTimer.current);
+                  if (!avatarDidLongPress.current) {
+                    if (hasStory) {
+                      navigate(`/story?user=${profile.user_id}`);
+                    } else if (profile.avatar_url) {
+                      setShowAvatarModal(true);
+                    }
+                  }
+                }}
+                onPointerCancel={() => {
+                  if (avatarLongPressTimer.current) clearTimeout(avatarLongPressTimer.current);
+                }}
+                onContextMenu={(e) => e.preventDefault()}
+                className={`inline-block rounded-[26px] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
+              >
+                <div className={`rounded-[23px] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-[20px] object-cover block" draggable={false} />
+                  ) : (
+                    <div className="flex h-20 w-20 items-center justify-center rounded-[20px] bg-secondary">
+                      <PuffyIcon name="user" size={32} />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </button>
+              </button>
         </div>
 
         <div className="flex items-center gap-1.5">
