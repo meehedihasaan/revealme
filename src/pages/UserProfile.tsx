@@ -305,11 +305,11 @@ const UserProfile = () => {
       {/* Avatar + Info */}
       <div className="px-4">
         <div className="-mt-10 mb-3">
-          <div className="inline-block rounded-2xl border-4 border-background bg-background overflow-hidden">
+          <div className="inline-block rounded-full border-4 border-background bg-background overflow-hidden">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-xl object-cover" />
+              <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-full object-cover" />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-secondary">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
                 <PuffyIcon name="user" size={32} />
               </div>
             )}
