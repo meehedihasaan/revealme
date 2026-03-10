@@ -338,7 +338,11 @@ const Chat = () => {
             <p className="text-[11px] text-muted-foreground">
               {isTyping ? (
                 <span className="text-primary font-medium">typing...</span>
-              ) : isOnline ? "Online" : "Offline"}
+              ) : isOnline ? (
+                <span className="text-success font-medium">Online</span>
+              ) : (
+                `Last seen ${formatLastOnline(lastOnline)}`
+              )}
             </p>
           </div>
         </button>
