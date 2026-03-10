@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import PageLoader from "@/components/PageLoader";
 import PageLoadWrapper from "@/components/PageLoadWrapper";
+import { usePresence } from "@/hooks/usePresence";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
