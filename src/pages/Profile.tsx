@@ -29,8 +29,21 @@ const Profile = () => {
   useEffect(() => {
     if (taggedPostIds.length === 0) { setTaggedPosts([]); return; }
     const fetchTagged = async () => {
-      const { data } = await supabase.from("posts").select("id, image_url").in("id", taggedPostIds);
-      setTaggedPosts(data || []);
+      const { data } = await supabase.from("posts").select("*").in("id", taggedPostIds);
+      if (!data) { setTaggedPosts([]); return; }
+      const userIds = [...new Set(data.map(p => p.user_id))];
+      const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url, is_verified").in("user_id", userIds);
+      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+      setTaggedPosts(data.map(p => ({
+        ...p,
+        username: profileMap[p.user_id]?.username || "user",
+        avatar_url: profileMap[p.user_id]?.avatar_url,
+        is_verified: profileMap[p.user_id]?.is_verified || false,
+        likesCount: 0,
+        timeAgo: "",
+        isLiked: false,
+        isSaved: false,
+      })));
     };
     fetchTagged();
   }, [taggedPostIds]);
@@ -197,9 +210,23 @@ const Profile = () => {
           <p className="text-sm">No tagged posts yet</p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-0.5">
-          {taggedPosts.map((post) => (
-            <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
+        <div className="mt-2">
+          {taggedPosts.map((post: any) => (
+            <PostCard
+              key={post.id}
+              postId={post.id}
+              postUserId={post.user_id}
+              username={post.username}
+              avatar={post.avatar_url || ""}
+              image={post.image_url}
+              caption={post.caption}
+              likesCount={post.likesCount || 0}
+              timeAgo={post.timeAgo || ""}
+              verified={post.is_verified || false}
+              location={post.location}
+              isLiked={post.isLiked || false}
+              isSaved={post.isSaved || false}
+            />
           ))}
         </div>
       )}

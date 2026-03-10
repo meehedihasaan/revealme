@@ -60,13 +60,27 @@ const UserProfile = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
   const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(userId);
+
   const [taggedPosts, setTaggedPosts] = useState<any[]>([]);
 
   useEffect(() => {
     if (taggedPostIds.length === 0) { setTaggedPosts([]); return; }
     const fetchTagged = async () => {
-      const { data } = await supabase.from("posts").select("id, image_url").in("id", taggedPostIds);
-      setTaggedPosts(data || []);
+      const { data } = await supabase.from("posts").select("*").in("id", taggedPostIds);
+      if (!data) { setTaggedPosts([]); return; }
+      const userIds = [...new Set(data.map(p => p.user_id))];
+      const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url, is_verified").in("user_id", userIds);
+      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+      setTaggedPosts(data.map(p => ({
+        ...p,
+        username: profileMap[p.user_id]?.username || "user",
+        avatar_url: profileMap[p.user_id]?.avatar_url,
+        is_verified: profileMap[p.user_id]?.is_verified || false,
+        likesCount: 0,
+        timeAgo: "",
+        isLiked: false,
+        isSaved: false,
+      })));
     };
     fetchTagged();
   }, [taggedPostIds]);
@@ -402,12 +416,12 @@ const UserProfile = () => {
             </button>
           </div>
 
-          {/* Grid */}
+          {/* Posts */}
           {activeTab === "grid" ? (
             loading ? (
-              <div className="grid grid-cols-3 gap-0.5 mt-1">
-                {[...Array(9)].map((_, i) => (
-                  <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
+              <div className="mt-2">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="aspect-square w-full bg-muted animate-pulse mb-2" />
                 ))}
               </div>
             ) : posts.length === 0 ? (
@@ -416,18 +430,30 @@ const UserProfile = () => {
                 <p className="text-sm">No posts yet</p>
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-0.5">
-                {posts.map((post, idx) => (
-                  <button key={post.id} onClick={() => setSelectedPostIndex(idx)}>
-                    <img src={post.image_url} alt="" className="aspect-square w-full object-cover" />
-                  </button>
+              <div className="mt-2">
+                {posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    postId={post.id}
+                    postUserId={post.user_id}
+                    username={post.username}
+                    avatar={post.avatar_url || ""}
+                    image={post.image_url}
+                    caption={post.caption}
+                    likesCount={post.likesCount}
+                    timeAgo={post.timeAgo}
+                    verified={post.is_verified}
+                    location={post.location}
+                    isLiked={post.isLiked}
+                    isSaved={post.isSaved}
+                  />
                 ))}
               </div>
             )
           ) : taggedLoading ? (
-            <div className="grid grid-cols-3 gap-0.5 mt-1">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="aspect-square w-full bg-muted animate-pulse" />
+            <div className="mt-2">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="aspect-square w-full bg-muted animate-pulse mb-2" />
               ))}
             </div>
           ) : taggedPosts.length === 0 ? (
@@ -436,32 +462,8 @@ const UserProfile = () => {
               <p className="text-sm">No tagged posts yet</p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-0.5">
-              {taggedPosts.map((post) => (
-                <img key={post.id} src={post.image_url} alt="" className="aspect-square w-full object-cover" />
-              ))}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Full-screen post viewer */}
-      <AnimatePresence>
-        {selectedPostIndex !== null && posts[selectedPostIndex] && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background overflow-y-auto"
-          >
-            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border sticky top-0 bg-background z-10">
-              <button onClick={() => setSelectedPostIndex(null)}>
-                <PuffyIcon name="arrow-left" size={22} />
-              </button>
-              <span className="text-lg font-bold text-foreground">Posts</span>
-            </div>
-            <div className="pb-16">
-              {posts.slice(selectedPostIndex).map((post) => (
+            <div className="mt-2">
+              {taggedPosts.map((post: any) => (
                 <PostCard
                   key={post.id}
                   postId={post.id}
@@ -470,19 +472,19 @@ const UserProfile = () => {
                   avatar={post.avatar_url || ""}
                   image={post.image_url}
                   caption={post.caption}
-                  likesCount={post.likesCount}
-                  timeAgo={post.timeAgo}
-                  verified={post.is_verified}
+                  likesCount={post.likesCount || 0}
+                  timeAgo={post.timeAgo || ""}
+                  verified={post.is_verified || false}
                   location={post.location}
-                  isLiked={post.isLiked}
-                  isSaved={post.isSaved}
-                  onDelete={() => setSelectedPostIndex(null)}
+                  isLiked={post.isLiked || false}
+                  isSaved={post.isSaved || false}
                 />
               ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </>
+      )}
+
 
       <BottomNav />
     </div>
