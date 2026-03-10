@@ -169,18 +169,18 @@ const CreateStory = () => {
   const currentFilter = EFFECTS.find(e => e.id === activeEffect)?.filter || "";
 
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+    <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 z-10">
-        <button onClick={() => navigate(-1)} className="text-white">
-          <PuffyIcon name="arrow-left" size={22} className="invert" />
+        <button onClick={() => navigate(-1)} className="text-foreground">
+          <PuffyIcon name="arrow-left" size={22} className="icon-adaptive" />
         </button>
-        <h1 className="text-lg font-bold text-white">New Story</h1>
+        <h1 className="text-lg font-bold text-foreground">New Story</h1>
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={handlePost}
           disabled={!preview || posting}
-          className="text-sm font-bold text-white disabled:opacity-40"
+          className="text-sm font-bold text-primary disabled:opacity-40"
         >
           {posting ? "Sharing..." : "Share"}
         </motion.button>
@@ -189,9 +189,9 @@ const CreateStory = () => {
       {!preview ? (
         <button
           onClick={() => fileRef.current?.click()}
-          className="flex-1 flex flex-col items-center justify-center gap-4 text-white/60"
+          className="flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground"
         >
-          <PuffyIcon name="camera" size={56} className="opacity-40 invert" />
+          <PuffyIcon name="camera" size={56} className="opacity-40 icon-adaptive" />
           <p className="text-sm">Tap to add a story</p>
         </button>
       ) : (
