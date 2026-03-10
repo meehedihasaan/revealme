@@ -61,50 +61,53 @@ const ThoughtBubble = ({ userId, isOwnProfile = false }: ThoughtBubbleProps) => 
   return (
     <>
       <div className="relative">
-        {/* The bubble */}
         {thought ? (
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative mb-1"
+            className="relative mb-2"
           >
             <button
               onClick={isOwnProfile ? () => { setInputValue(thought || ""); setIsEditing(true); } : undefined}
-              className="relative max-w-[200px]"
+              className="relative max-w-[220px]"
             >
-              {/* Bubble body */}
-              <div className="relative rounded-2xl bg-foreground/90 backdrop-blur-sm px-3 py-1.5 shadow-lg">
-                {/* Quote marks */}
-                <span className="absolute -top-2 -left-1 text-primary text-xl font-bold leading-none font-bangla">"</span>
-                <p className="text-background text-xs font-medium leading-snug font-bangla line-clamp-2 pr-2 pl-2">
+              <div className="relative rounded-full bg-foreground/90 px-4 py-2 shadow-lg">
+                <p className="text-background text-[13px] font-medium leading-snug font-bangla line-clamp-1">
                   {thought}
                 </p>
-                <span className="absolute -bottom-2.5 -right-0.5 text-primary text-xl font-bold leading-none font-bangla rotate-180">"</span>
               </div>
-              {/* Bubble tail - points to bottom-left toward avatar */}
-              <div className="absolute -bottom-3 left-2 flex items-end gap-0.5">
-                <div className="h-2 w-2 rounded-full bg-foreground/90" />
-                <div className="h-1.5 w-1.5 rounded-full bg-foreground/90 -ml-1 mb-1" />
-              </div>
+              {/* Triangle tail pointing down-left */}
+              <div
+                className="absolute -bottom-[6px] left-5 w-0 h-0"
+                style={{
+                  borderLeft: '6px solid transparent',
+                  borderRight: '6px solid transparent',
+                  borderTop: '8px solid hsl(var(--foreground) / 0.9)',
+                }}
+              />
             </button>
           </motion.div>
         ) : isOwnProfile ? (
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative mb-1"
+            className="relative mb-2"
           >
             <button
               onClick={() => { setInputValue(""); setIsEditing(true); }}
-              className="relative max-w-[180px]"
+              className="relative max-w-[200px]"
             >
-              <div className="relative rounded-2xl bg-foreground/80 backdrop-blur-sm px-3 py-1.5 shadow-lg">
-                <p className="text-background/70 text-xs font-medium font-bangla">Drop a thought...</p>
+              <div className="relative rounded-full bg-foreground/80 px-4 py-2 shadow-lg">
+                <p className="text-background/70 text-[13px] font-medium font-bangla">Thinking about...</p>
               </div>
-              <div className="absolute -bottom-3 left-2 flex items-end gap-0.5">
-                <div className="h-2 w-2 rounded-full bg-foreground/80" />
-                <div className="h-1.5 w-1.5 rounded-full bg-foreground/80 -ml-1 mb-1" />
-              </div>
+              <div
+                className="absolute -bottom-[6px] left-5 w-0 h-0"
+                style={{
+                  borderLeft: '6px solid transparent',
+                  borderRight: '6px solid transparent',
+                  borderTop: '8px solid hsl(var(--foreground) / 0.8)',
+                }}
+              />
             </button>
           </motion.div>
         ) : null}
