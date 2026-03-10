@@ -164,7 +164,7 @@ const Feed = () => {
               onClick={() => userHasStory ? navigate(`/story?user=${user?.id}`) : navigate("/create-story")}
             >
             <div className={`rounded-[24px] p-[2px] ${userHasStory ? getStoryColor(user?.id || "") : ""}`}>
-                <div className="rounded-[22px] border-[2px] border-background">
+                <div className="rounded-[22px] border-[1.5px] border-background">
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt="You" className="h-[68px] w-[68px] rounded-[18px] object-cover" />
                   ) : (
