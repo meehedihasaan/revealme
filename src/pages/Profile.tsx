@@ -13,6 +13,7 @@ import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import ThoughtBubble from "@/components/ThoughtBubble";
+import { useUploadProgress } from "@/hooks/useUploadProgress";
 
 const STORY_GRADIENT = "gradient-story-ring";
 
