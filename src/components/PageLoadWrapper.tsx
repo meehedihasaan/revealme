@@ -2,7 +2,7 @@ import { usePageLoader } from "@/hooks/usePageLoader";
 import PageLoader from "@/components/PageLoader";
 
 const PageLoadWrapper = ({ children }: { children: React.ReactNode }) => {
-  const loading = usePageLoader(2000);
+  const loading = usePageLoader(600);
   if (loading) return <PageLoader />;
   return <>{children}</>;
 };
