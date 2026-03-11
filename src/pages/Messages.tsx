@@ -246,6 +246,7 @@ const Messages = () => {
 
       <BottomNav />
     </div>
+    </PullToRefresh>
   );
 };
 

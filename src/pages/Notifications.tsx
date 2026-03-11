@@ -261,6 +261,7 @@ const Notifications = () => {
 
       <BottomNav />
     </div>
+    </PullToRefresh>
   );
 };
 

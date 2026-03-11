@@ -425,6 +425,7 @@ const Profile = () => {
 
       <BottomNav />
     </div>
+    </PullToRefresh>
   );
 };
 
