@@ -146,6 +146,15 @@ const Messages = () => {
   );
   const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
 
+  const handleDeleteConversation = async (convId: string) => {
+    // Delete all messages then remove participants
+    await supabase.from("messages").delete().eq("conversation_id", convId);
+    await supabase.from("conversation_participants").delete().eq("conversation_id", convId);
+    await supabase.from("conversations").delete().eq("id", convId);
+    setConversations((prev) => prev.filter((c) => c.conversation_id !== convId));
+    toast.success("Chat deleted");
+  };
+
   const formatTime = (t: string) => {
     if (!t) return "";
     const diff = Date.now() - new Date(t).getTime();
