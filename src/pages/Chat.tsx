@@ -746,6 +746,7 @@ const Chat = () => {
 
             <div className="flex-1 rounded-full bg-secondary px-4 py-3">
               <input
+                ref={chatInputRef}
                 type="text"
                 value={editingId ? editText : input}
                 onChange={(e) => {
