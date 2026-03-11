@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChatShimmer } from "@/components/ShimmerLoader";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserOnlineStatus, formatLastOnline } from "@/hooks/usePresence";
+import ChatMessageMenu from "@/components/ChatMessageMenu";
+import ChatHeaderMenu from "@/components/ChatHeaderMenu";
 
 interface Message {
   id: string;
@@ -42,9 +44,23 @@ const Chat = () => {
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  
+  // Message menu state
+  const [menuMessageId, setMenuMessageId] = useState<string | null>(null);
+  const [menuMessageText, setMenuMessageText] = useState("");
+  const [menuIsMine, setMenuIsMine] = useState(false);
+  
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+  
+  // Header menu
+  const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
   
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     bottomRef.current?.scrollIntoView({ behavior });
@@ -147,7 +163,7 @@ const Chat = () => {
         filter: `conversation_id=eq.${conversationId}`,
       }, (payload) => {
         const updated = payload.new as Message;
-        setMessages(prev => prev.map(m => m.id === updated.id ? { ...m, read: updated.read } : m));
+        setMessages(prev => prev.map(m => m.id === updated.id ? { ...m, ...updated } : m));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -182,11 +198,11 @@ const Chat = () => {
     return urlData.publicUrl;
   };
 
-  const sendMessage = async () => {
-    if ((!input.trim() && !selectedFile) || !user || !conversationId || sending) return;
-    const text = input.trim();
+  const sendMessage = async (overrideText?: string) => {
+    const textToSend = overrideText ?? input.trim();
+    if ((!textToSend && !selectedFile) || !user || !conversationId || sending) return;
     setSending(true);
-    setInput("");
+    if (!overrideText) setInput("");
 
     let imageUrl: string | null = null;
     if (selectedFile) {
@@ -197,14 +213,14 @@ const Chat = () => {
     }
 
     const optimisticMsg: Message = {
-      id: `temp-${Date.now()}`, text: text || "", sender_id: user.id,
+      id: `temp-${Date.now()}`, text: textToSend || "", sender_id: user.id,
       created_at: new Date().toISOString(), read: false, image_url: imageUrl,
     };
     setMessages(prev => [...prev, optimisticMsg]);
 
     const insertPayload: any = {
       conversation_id: conversationId, sender_id: user.id,
-      text: text || (imageUrl ? "📷 Photo" : ""),
+      text: textToSend || (imageUrl ? "📷 Photo" : ""),
     };
     if (imageUrl) insertPayload.image_url = imageUrl;
 
@@ -221,6 +237,53 @@ const Chat = () => {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  // Long press handlers
+  const handleLongPressStart = (msg: Message) => {
+    longPressTimerRef.current = setTimeout(() => {
+      setMenuMessageId(msg.id);
+      setMenuMessageText(msg.text);
+      setMenuIsMine(msg.sender_id === user?.id);
+    }, 500);
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  // Edit message
+  const handleStartEdit = (messageId: string, text: string) => {
+    setEditingId(messageId);
+    setEditText(text);
+    setInput(text);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !editText.trim()) return;
+    await supabase.from("messages").update({ text: editText.trim() }).eq("id", editingId);
+    setMessages(prev => prev.map(m => m.id === editingId ? { ...m, text: editText.trim() } : m));
+    setEditingId(null);
+    setEditText("");
+    setInput("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditText("");
+    setInput("");
+  };
+
+  const handleMessageDeleted = (messageId: string) => {
+    setMessages(prev => prev.map(m => m.id === messageId ? { ...m, text: "🚫 This message was deleted", image_url: null } : m));
+  };
+
+  // Send wave/hi
+  const handleSendWave = () => {
+    sendMessage("Hi 👋");
   };
 
   // Group messages by date
@@ -241,8 +304,6 @@ const Chat = () => {
     return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
   };
 
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
-
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
@@ -258,6 +319,27 @@ const Chat = () => {
 
   return (
     <div className="flex h-screen flex-col bg-background">
+      {/* Message long-press menu */}
+      <ChatMessageMenu
+        messageId={menuMessageId || ""}
+        messageText={menuMessageText}
+        isMine={menuIsMine}
+        isOpen={!!menuMessageId}
+        onClose={() => setMenuMessageId(null)}
+        onEdit={handleStartEdit}
+        onDeleted={handleMessageDeleted}
+      />
+
+      {/* Header three-dot menu */}
+      {otherUser && (
+        <ChatHeaderMenu
+          otherUserId={otherUser.user_id}
+          otherUsername={otherUser.username}
+          isOpen={headerMenuOpen}
+          onClose={() => setHeaderMenuOpen(false)}
+        />
+      )}
+
       {/* Fullscreen image viewer */}
       <AnimatePresence>
         {fullscreenImage && (
@@ -303,6 +385,10 @@ const Chat = () => {
             </p>
           </div>
         </button>
+        {/* Three dot menu button */}
+        <button onClick={() => setHeaderMenuOpen(true)} className="shrink-0 p-1">
+          <PuffyIcon name="more-horizontal" size={22} />
+        </button>
       </div>
 
       {/* Messages */}
@@ -310,7 +396,16 @@ const Chat = () => {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             <PuffyIcon name="message-circle" size={48} className="opacity-20 mb-3" />
-            <p className="text-sm">Send a message to start the conversation</p>
+            <p className="text-sm mb-4">Send a message to start the conversation</p>
+            {/* Wave button */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={handleSendWave}
+              className="flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-5 py-2.5 transition-colors hover:bg-primary/20"
+            >
+              <img src="/src/assets/icons/wave.png" alt="wave" className="h-5 w-5" />
+              <span className="text-sm font-semibold text-primary">Hey!</span>
+            </motion.button>
           </div>
         ) : (
           groupedMessages.map((group) => (
@@ -328,6 +423,7 @@ const Chat = () => {
                     const hasImage = !!msg.image_url;
                     const sharedPostId = parseSharedPost(msg.text);
                     const hasText = !sharedPostId && msg.text && msg.text !== "📷 Photo";
+                    const isDeleted = msg.text === "🚫 This message was deleted";
 
                     return (
                       <motion.div
@@ -336,6 +432,16 @@ const Chat = () => {
                         animate={{ opacity: isOptimistic ? 0.7 : 1, y: 0, scale: 1 }}
                         transition={{ duration: 0.2 }}
                         className={`flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"}`}
+                        onTouchStart={() => !isDeleted && handleLongPressStart(msg)}
+                        onTouchEnd={handleLongPressEnd}
+                        onTouchCancel={handleLongPressEnd}
+                        onContextMenu={(e) => {
+                          if (isDeleted) return;
+                          e.preventDefault();
+                          setMenuMessageId(msg.id);
+                          setMenuMessageText(msg.text);
+                          setMenuIsMine(isMine);
+                        }}
                       >
                         {/* Avatar for other user */}
                         {!isMine && (
@@ -364,9 +470,11 @@ const Chat = () => {
                           )}
                           {hasText && (
                             <div className={`max-w-[75vw] rounded-2xl px-4 py-2.5 text-[15px] break-words ${
-                              isMine
-                                ? "bg-primary text-primary-foreground rounded-br-md"
-                                : "bg-secondary text-secondary-foreground rounded-bl-md"
+                              isDeleted
+                                ? "bg-muted text-muted-foreground italic"
+                                : isMine
+                                  ? "bg-primary text-primary-foreground rounded-br-md"
+                                  : "bg-secondary text-secondary-foreground rounded-bl-md"
                             }`}>
                               {msg.text}
                             </div>
@@ -416,6 +524,22 @@ const Chat = () => {
         <div ref={bottomRef} />
       </div>
 
+      {/* Edit banner */}
+      <AnimatePresence>
+        {editingId && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            className="border-t border-border bg-primary/5 px-4 py-2 shrink-0 flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2 text-sm text-primary">
+              <span>✏️</span>
+              <span className="font-medium">Editing message</span>
+            </div>
+            <button onClick={handleCancelEdit} className="text-xs text-muted-foreground font-medium">Cancel</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Image preview */}
       <AnimatePresence>
         {imagePreview && (
@@ -450,26 +574,52 @@ const Chat = () => {
           <div className="flex-1 rounded-full bg-secondary px-4 py-3">
             <input
               type="text"
-              value={input}
-              onChange={(e) => { setInput(e.target.value); broadcastTyping(); }}
-              onKeyDown={handleKeyDown}
-              placeholder="Message..."
+              value={editingId ? editText : input}
+              onChange={(e) => {
+                if (editingId) {
+                  setEditText(e.target.value);
+                } else {
+                  setInput(e.target.value);
+                  broadcastTyping();
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (editingId) handleSaveEdit();
+                  else sendMessage();
+                }
+              }}
+              placeholder={editingId ? "Edit message..." : "Message..."}
               className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
           </div>
 
-          <motion.button
-            whileTap={{ scale: 0.85 }}
-            onClick={sendMessage}
-            disabled={(!input.trim() && !selectedFile) || sending || uploading}
-            className="shrink-0 text-primary transition-opacity disabled:opacity-30"
-          >
-            {uploading ? (
-              <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
-            ) : (
-              <PuffyIcon name="send" size={22} />
-            )}
-          </motion.button>
+          {/* Wave button when input is empty and not editing */}
+          {!editingId && !input.trim() && !selectedFile ? (
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={handleSendWave}
+              className="shrink-0"
+            >
+              <img src="/src/assets/icons/wave.png" alt="wave" className="h-[22px] w-[22px] opacity-80" />
+            </motion.button>
+          ) : (
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={() => editingId ? handleSaveEdit() : sendMessage()}
+              disabled={editingId ? !editText.trim() : ((!input.trim() && !selectedFile) || sending || uploading)}
+              className="shrink-0 text-primary transition-opacity disabled:opacity-30"
+            >
+              {uploading ? (
+                <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
+              ) : editingId ? (
+                <PuffyIcon name="check" size={22} />
+              ) : (
+                <PuffyIcon name="send" size={22} />
+              )}
+            </motion.button>
+          )}
         </div>
       </div>
     </div>

@@ -88,7 +88,7 @@ const Messages = () => {
         avatar_url: prof?.avatar_url || null,
         is_verified: prof?.is_verified || false,
         lastMessage: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "Shared a post" : latestMsg?.image_url ? "Sent a photo" : (latestMsg?.text || ""),
-        lastMessageIcon: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "📸" : latestMsg?.image_url ? "📷" : null,
+        lastMessageIcon: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? null : latestMsg?.image_url ? "camera" : null,
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
         is_online: isRecentlyOnline,
@@ -232,7 +232,7 @@ const Messages = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <p className={`truncate text-sm flex items-center gap-1 ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                    {conv.lastMessageIcon && <span>{conv.lastMessageIcon}</span>}
+                    {conv.lastMessageIcon === "camera" && <img src="/src/assets/icons/camera-filled.png" alt="" className="h-4 w-4 opacity-60" />}
                     {conv.lastMessage || "Start a conversation"}
                   </p>
                   {conv.unread > 0 && (
