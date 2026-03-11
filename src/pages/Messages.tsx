@@ -17,6 +17,7 @@ interface ConversationItem {
   avatar_url: string | null;
   is_verified: boolean;
   lastMessage: string;
+  lastMessageIcon: string | null;
   lastMessageTime: string;
   unread: number;
   is_online: boolean;
