@@ -326,7 +326,8 @@ const Chat = () => {
                     const isMine = msg.sender_id === user?.id;
                     const isOptimistic = msg.id.startsWith("temp-");
                     const hasImage = !!msg.image_url;
-                    const hasText = msg.text && msg.text !== "📷 Photo";
+                    const sharedPostId = parseSharedPost(msg.text);
+                    const hasText = !sharedPostId && msg.text && msg.text !== "📷 Photo";
 
                     return (
                       <motion.div
@@ -350,7 +351,10 @@ const Chat = () => {
                         )}
 
                         <div className={`flex flex-col gap-0.5 ${isMine ? "items-end" : "items-start"}`}>
-                          {hasImage && (
+                          {sharedPostId && (
+                            <SharedPostCard postId={sharedPostId} isMine={isMine} />
+                          )}
+                          {hasImage && !sharedPostId && (
                             <button
                               onClick={() => setFullscreenImage(msg.image_url!)}
                               className="overflow-hidden rounded-2xl max-w-[75vw]"
