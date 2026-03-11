@@ -783,6 +783,7 @@ const Chat = () => {
             {!editingId && !input.trim() && !selectedFile ? (
               <motion.button
                 whileTap={{ scale: 0.85 }}
+                onPointerDown={(e) => e.preventDefault()}
                 onClick={handleSendWave}
                 className="shrink-0"
               >
@@ -791,6 +792,7 @@ const Chat = () => {
             ) : (
               <motion.button
                 whileTap={{ scale: 0.85 }}
+                onPointerDown={(e) => e.preventDefault()}
                 onClick={() => editingId ? handleSaveEdit() : sendMessage()}
                 disabled={editingId ? !editText.trim() : ((!input.trim() && !selectedFile) || sending || uploading)}
                 className="shrink-0 text-primary transition-opacity disabled:opacity-30"
