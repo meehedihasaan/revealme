@@ -268,6 +268,8 @@ const Chat = () => {
       setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
     }
     setSending(false);
+    // Keep focus on input so user can type next message
+    setTimeout(() => chatInputRef.current?.focus(), 50);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
