@@ -9,6 +9,7 @@ import { NotificationsShimmer } from "@/components/ShimmerLoader";
 import { formatDistanceToNow } from "date-fns";
 
 import VerifiedBadge from "@/components/VerifiedBadge";
+import PullToRefresh from "@/components/PullToRefresh";
 
 type NotifType = "like" | "comment" | "follow" | "story_react";
 
