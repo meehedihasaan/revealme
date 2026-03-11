@@ -446,7 +446,7 @@ const Chat = () => {
                 animate={{ rotate: [0, 20, -20, 15, -15, 0], y: [0, -6, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
               >
-                <img src={waveIcon} alt="wave" className="h-16 w-16 mb-4" draggable={false} />
+                <img src={waveIcon} alt="wave" className="h-16 w-16 mb-4 icon-adaptive-inverted" draggable={false} />
               </motion.div>
               <p className="text-lg font-semibold text-foreground mb-1">Say hello!</p>
               <p className="text-sm text-muted-foreground mb-5">Start the conversation with a wave</p>
