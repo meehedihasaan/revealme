@@ -58,6 +58,9 @@ const Chat = () => {
   // Header menu
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
   
+  // Restrict state
+  const [isRestricted, setIsRestricted] = useState(false);
+  
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
