@@ -184,6 +184,7 @@ const Messages = () => {
 
       <div className="h-px bg-border" />
 
+      <PullToRefresh onRefresh={async () => { setLoading(true); await fetchConversations(); }}>
       <div>
         {loading ? (
           <MessagesShimmer />
