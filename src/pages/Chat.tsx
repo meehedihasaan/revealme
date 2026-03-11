@@ -21,6 +21,7 @@ interface Message {
   read: boolean;
   image_url?: string | null;
   mood?: string | null;
+  hasReaction?: boolean;
 }
 
 interface OtherUser {
@@ -70,6 +71,8 @@ const Chat = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const doubleTapRef = useRef<{ id: string; time: number }>({ id: "", time: 0 });
+  const [heartAnimId, setHeartAnimId] = useState<string | null>(null);
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     bottomRef.current?.scrollIntoView({ behavior });
@@ -88,7 +91,20 @@ const Chat = () => {
           .eq("conversation_id", conversationId)
           .order("created_at", { ascending: true }),
       ]);
-      setMessages((messagesRes.data as Message[]) || []);
+      const msgs = (messagesRes.data as Message[]) || [];
+      
+      // Fetch reactions for these messages
+      if (msgs.length > 0) {
+        const msgIds = msgs.map(m => m.id);
+        const { data: reactions } = await supabase
+          .from("message_reactions")
+          .select("message_id")
+          .in("message_id", msgIds);
+        const reactedIds = new Set((reactions || []).map((r: any) => r.message_id));
+        msgs.forEach(m => { m.hasReaction = reactedIds.has(m.id); });
+      }
+      
+      setMessages(msgs);
       if (partnerRes.data && partnerRes.data.length > 0) {
         const otherUserId = partnerRes.data[0].user_id;
         const { data: prof } = await supabase
@@ -302,6 +318,35 @@ const Chat = () => {
   // Send wave/hi
   const handleSendWave = () => {
     sendMessage("Hi 👋");
+  };
+
+  // Double-tap to love react
+  const handleDoubleTap = async (msg: Message) => {
+    if (!user || msg.text === "🚫 This message was deleted") return;
+    const now = Date.now();
+    if (doubleTapRef.current.id === msg.id && now - doubleTapRef.current.time < 300) {
+      // Double tap detected
+      doubleTapRef.current = { id: "", time: 0 };
+      
+      if (msg.hasReaction) {
+        // Remove reaction
+        await supabase.from("message_reactions").delete()
+          .eq("message_id", msg.id).eq("user_id", user.id);
+        setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, hasReaction: false } : m));
+      } else {
+        // Add reaction with heart animation
+        setHeartAnimId(msg.id);
+        setTimeout(() => setHeartAnimId(null), 800);
+        setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, hasReaction: true } : m));
+        await supabase.from("message_reactions").insert({
+          message_id: msg.id,
+          user_id: user.id,
+          reaction: "❤️",
+        });
+      }
+    } else {
+      doubleTapRef.current = { id: msg.id, time: now };
+    }
   };
 
   // Group messages by date
@@ -532,6 +577,7 @@ const Chat = () => {
                         onTouchStart={() => !isDeleted && handleLongPressStart(msg)}
                         onTouchEnd={handleLongPressEnd}
                         onTouchCancel={handleLongPressEnd}
+                        onClick={() => handleDoubleTap(msg)}
                         onContextMenu={(e) => {
                           if (isDeleted) return;
                           e.preventDefault();
@@ -559,24 +605,46 @@ const Chat = () => {
                           )}
                           {hasImage && !sharedPostId && (
                             <button
-                              onClick={() => setFullscreenImage(msg.image_url!)}
+                              onClick={(e) => { e.stopPropagation(); setFullscreenImage(msg.image_url!); }}
                               className="overflow-hidden rounded-2xl max-w-[75vw]"
                             >
                               <img src={msg.image_url!} alt="" className="max-w-[240px] max-h-[300px] object-cover rounded-2xl" loading="lazy" />
                             </button>
                           )}
                           {hasText && (
-                            <div className={`max-w-[75vw] rounded-2xl px-4 py-2.5 text-[15px] break-words ${
-                              isDeleted
-                                ? "bg-muted text-muted-foreground italic"
-                                : isMine
-                                  ? "bg-primary text-primary-foreground rounded-br-md"
-                                  : "bg-secondary text-secondary-foreground rounded-bl-md"
-                            }`}>
-                              {msg.text}
+                            <div className="relative">
+                              <div className={`max-w-[75vw] rounded-2xl px-4 py-2.5 text-[15px] break-words ${
+                                isDeleted
+                                  ? "bg-muted text-muted-foreground italic"
+                                  : isMine
+                                    ? "bg-primary text-primary-foreground rounded-br-md"
+                                    : "bg-secondary text-secondary-foreground rounded-bl-md"
+                              }`}>
+                                {msg.text}
+                              </div>
+                              {/* Heart animation on double tap */}
+                              <AnimatePresence>
+                                {heartAnimId === msg.id && (
+                                  <motion.span
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1.3, opacity: 1 }}
+                                    exit={{ scale: 0, opacity: 0 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                                    className="absolute inset-0 flex items-center justify-center pointer-events-none text-3xl"
+                                  >
+                                    ❤️
+                                  </motion.span>
+                                )}
+                              </AnimatePresence>
+                              {/* Reaction indicator */}
+                              {msg.hasReaction && (
+                                <span className={`absolute -bottom-2.5 ${isMine ? "left-1" : "right-1"} text-sm`}>
+                                  ❤️
+                                </span>
+                              )}
                             </div>
                           )}
-                          <span className="text-[10px] text-muted-foreground px-1">
+                          <span className={`text-[10px] text-muted-foreground px-1 ${msg.hasReaction && hasText ? "mt-1.5" : ""}`}>
                             {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             {isMine && (
                               <span className={`ml-1 font-medium ${msg.read ? "text-primary" : ""}`}>
