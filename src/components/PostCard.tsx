@@ -45,9 +45,7 @@ const DoubleTapHeart = () => (
     animate={{ opacity: 1 }}
     exit={{ opacity: 0, transition: { duration: 0.15, delay: 0.6 } }}
   >
-    <Suspense fallback={null}>
-      <LottieHeart />
-    </Suspense>
+    <Lottie animationData={heartAnimation} loop={false} autoplay style={{ width: 200, height: 200 }} />
   </motion.div>
 );
 
