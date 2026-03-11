@@ -114,6 +114,12 @@ const PrivacySettings = () => {
     toast.success("User unblocked");
   };
 
+  const handleUnrestrict = async (restrictId: string) => {
+    await supabase.from("restricted_users" as any).delete().eq("id", restrictId);
+    setRestrictedUsers(prev => prev.filter(r => r.id !== restrictId));
+    toast.success("User unrestricted");
+  };
+
   if (activeSection === "password") {
     return (
       <div className="min-h-screen bg-background">
