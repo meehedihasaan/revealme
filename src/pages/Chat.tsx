@@ -73,7 +73,7 @@ const Chat = () => {
   const chatInputRef = useRef<HTMLInputElement>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const doubleTapRef = useRef<{ id: string; time: number }>({ id: "", time: 0 });
-  const [heartAnimId, setHeartAnimId] = useState<string | null>(null);
+  
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     bottomRef.current?.scrollIntoView({ behavior });
