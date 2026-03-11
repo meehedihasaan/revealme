@@ -81,19 +81,21 @@ const SharedPostCard = ({ postId, isMine }: SharedPostCardProps) => {
     <motion.button
       whileTap={{ scale: 0.97 }}
       onClick={() => navigate(`/post/${post.id}`)}
-      className={`w-[240px] rounded-2xl overflow-hidden border text-left transition-all active:scale-[0.97] ${
+      className={`w-[240px] rounded-2xl overflow-hidden border text-left transition-all active:scale-[0.97] shadow-md ${
         isMine
-          ? "bg-primary/10 border-primary/20"
-          : "bg-secondary/80 border-border/50"
+          ? "bg-primary/10 border-primary/20 shadow-primary/10"
+          : "bg-secondary/80 border-border/50 shadow-black/5"
       }`}
     >
       {post.image_url && (
-        <img
-          src={post.image_url}
-          alt=""
-          className="w-full h-[180px] object-cover"
-          loading="lazy"
-        />
+        <div className="m-2 overflow-hidden rounded-xl">
+          <img
+            src={post.image_url}
+            alt=""
+            className="w-full h-[170px] object-cover"
+            loading="lazy"
+          />
+        </div>
       )}
       <div className="p-3">
         <div className="flex items-center gap-2 mb-1">
