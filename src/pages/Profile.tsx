@@ -423,9 +423,9 @@ const Profile = () => {
         )}
       </AnimatePresence>
 
+      </PullToRefresh>
       <BottomNav />
     </div>
-    </PullToRefresh>
   );
 };
 

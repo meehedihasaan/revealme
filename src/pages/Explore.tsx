@@ -297,9 +297,9 @@ const Explore = () => {
       )}
 
 
+      </PullToRefresh>
       <BottomNav />
     </div>
-    </PullToRefresh>
   );
 };
 

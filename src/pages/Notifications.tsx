@@ -259,9 +259,9 @@ const Notifications = () => {
         </div>
       )}
 
+      </PullToRefresh>
       <BottomNav />
     </div>
-    </PullToRefresh>
   );
 };
 

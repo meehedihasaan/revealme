@@ -244,9 +244,9 @@ const Messages = () => {
         )}
       </div>
 
+      </PullToRefresh>
       <BottomNav />
     </div>
-    </PullToRefresh>
   );
 };
 
