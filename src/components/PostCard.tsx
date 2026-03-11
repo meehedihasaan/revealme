@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Lottie from "lottie-react";
 import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +11,8 @@ import PostMenu from "@/components/PostMenu";
 import LikesSheet from "@/components/LikesSheet";
 import PostImageCarousel from "@/components/PostImageCarousel";
 import heartFilledRedIcon from "@/assets/icons/heart-filled-red.png";
-import heartAnimation from "@/assets/heart-animation.json";
+
+const LottieHeart = lazy(() => import("@/components/LottieHeart"));
 
 const STORY_GRADIENT = "gradient-story-ring";
 
@@ -34,6 +34,8 @@ interface PostCardProps {
   showFollowButton?: boolean;
   isFollowing?: boolean;
   onFollowChange?: (userId: string, isNowFollowing: boolean) => void;
+  commentCount?: number;
+  hasStory?: boolean;
 }
 
 const DoubleTapHeart = () => (
@@ -43,18 +45,13 @@ const DoubleTapHeart = () => (
     animate={{ opacity: 1 }}
     exit={{ opacity: 0, transition: { duration: 0.15, delay: 0.6 } }}
   >
-    <Lottie
-      animationData={heartAnimation}
-      loop={false}
-      autoplay
-      style={{ width: 200, height: 200 }}
-    />
+    <Suspense fallback={null}>
+      <LottieHeart />
+    </Suspense>
   </motion.div>
 );
 
-
-
-const PostCard = ({
+const PostCard = memo(({
   postId,
   postUserId,
   username,
@@ -72,62 +69,40 @@ const PostCard = ({
   showFollowButton = false,
   isFollowing: initialFollowing = false,
   onFollowChange,
+  commentCount: initialCommentCount = 0,
+  hasStory: hasStoryProp = false,
 }: PostCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [liked, setLiked] = useState(initialLiked);
   const [saved, setSaved] = useState(initialSaved);
   const [likeCount, setLikeCount] = useState(likesCount);
-  const [hasStory, setHasStory] = useState(false);
-
-  // Check if post user has active stories AND current user follows them
-  useEffect(() => {
-    if (!postUserId) return;
-    const checkStory = async () => {
-      // Only show story ring for own posts or followed users
-      if (user && postUserId !== user.id) {
-        const { data: followData } = await supabase
-          .from("follows")
-          .select("id")
-          .eq("follower_id", user.id)
-          .eq("following_id", postUserId)
-          .maybeSingle();
-        if (!followData) { setHasStory(false); return; }
-      }
-      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { count } = await supabase
-        .from("stories")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", postUserId)
-        .gte("created_at", since);
-      setHasStory((count || 0) > 0);
-    };
-    checkStory();
-  }, [postUserId, user]);
   const [showHeart, setShowHeart] = useState(false);
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [likesOpen, setLikesOpen] = useState(false);
   const [following, setFollowing] = useState(initialFollowing);
   const [followLoading, setFollowLoading] = useState(false);
-  const [commentCount, setCommentCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(initialCommentCount);
   const [captionExpanded, setCaptionExpanded] = useState(false);
 
+  // Only fetch comment count if not provided
   useEffect(() => {
+    if (initialCommentCount > 0) return;
     supabase
       .from("comments")
       .select("*", { count: "exact", head: true })
       .eq("post_id", postId)
       .then(({ count }) => setCommentCount(count || 0));
-  }, [postId]);
+  }, [postId, initialCommentCount]);
 
-  const handleDoubleTap = () => {
+  const handleDoubleTap = useCallback(() => {
     if (!liked) toggleLike();
     setShowHeart(true);
     setTimeout(() => setShowHeart(false), 1100);
-  };
+  }, [liked]);
 
-  const toggleFollow = async () => {
+  const toggleFollow = useCallback(async () => {
     if (!user || !postUserId || followLoading) return;
     setFollowLoading(true);
     const wasFollowing = following;
@@ -140,48 +115,63 @@ const PostCard = ({
       await supabase.from("follows").insert({ follower_id: user.id, following_id: postUserId });
     }
     setFollowLoading(false);
-  };
+  }, [user, postUserId, followLoading, following, onFollowChange]);
 
-  const toggleLike = async () => {
+  const toggleLike = useCallback(async () => {
     if (!user) return;
-    const wasLiked = liked;
-    setLiked(!wasLiked);
-    setLikeCount((c) => (wasLiked ? c - 1 : c + 1));
-    if (wasLiked) {
-      await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", postId);
-    } else {
-      await supabase.from("likes").insert({ user_id: user.id, post_id: postId });
-    }
-  };
+    setLiked(prev => {
+      const wasLiked = prev;
+      setLikeCount(c => wasLiked ? c - 1 : c + 1);
+      // Fire and forget DB call
+      if (wasLiked) {
+        supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", postId).then(() => {});
+      } else {
+        supabase.from("likes").insert({ user_id: user.id, post_id: postId }).then(() => {});
+      }
+      return !wasLiked;
+    });
+  }, [user, postId]);
 
-  const toggleSave = async () => {
+  const toggleSave = useCallback(async () => {
     if (!user) return;
-    const wasSaved = saved;
-    setSaved(!wasSaved);
-    if (wasSaved) {
-      await supabase.from("saved_posts").delete().eq("user_id", user.id).eq("post_id", postId);
+    setSaved(prev => {
+      const wasSaved = prev;
+      if (wasSaved) {
+        supabase.from("saved_posts").delete().eq("user_id", user.id).eq("post_id", postId).then(() => {});
+      } else {
+        supabase.from("saved_posts").insert({ user_id: user.id, post_id: postId }).then(() => {});
+      }
+      return !wasSaved;
+    });
+  }, [user, postId]);
+
+  const openComment = useCallback(() => setCommentOpen(true), []);
+  const closeComment = useCallback(() => setCommentOpen(false), []);
+  const openShare = useCallback(() => setShareOpen(true), []);
+  const closeShare = useCallback(() => setShareOpen(false), []);
+  const openLikes = useCallback(() => setLikesOpen(true), []);
+  const closeLikes = useCallback(() => setLikesOpen(false), []);
+
+  const navigateToUser = useCallback(() => {
+    navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`);
+  }, [navigate, postUserId, user?.id]);
+
+  const navigateToStoryOrUser = useCallback(() => {
+    if (hasStoryProp) {
+      navigate(`/story?user=${postUserId}`);
     } else {
-      await supabase.from("saved_posts").insert({ user_id: user.id, post_id: postId });
+      navigateToUser();
     }
-  };
+  }, [hasStoryProp, navigate, postUserId, navigateToUser]);
 
   return (
     <div className="border-b border-border">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-2.5">
-        <button
-          onClick={() => {
-            if (hasStory) {
-              navigate(`/story?user=${postUserId}`);
-            } else {
-              navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`);
-            }
-          }}
-          className={`rounded-[40%] p-[2px] ${hasStory ? STORY_GRADIENT : ""}`}
-        >
-          <div className={`rounded-[40%] overflow-hidden ${hasStory ? "border-[2px] border-background" : ""}`}>
+        <button onClick={navigateToStoryOrUser} className={`rounded-[40%] p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
+          <div className={`rounded-[40%] overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
             {avatar ? (
-              <img src={avatar} alt={username} className="h-9 w-9 rounded-[40%] object-cover block" />
+              <img src={avatar} alt={username} className="h-9 w-9 rounded-[40%] object-cover block" loading="lazy" />
             ) : (
               <div className="flex h-9 w-9 items-center justify-center rounded-[40%] bg-secondary">
                 <PuffyIcon name="user" size={16} />
@@ -189,7 +179,7 @@ const PostCard = ({
             )}
           </div>
         </button>
-        <button onClick={() => navigate(postUserId === user?.id ? "/profile" : `/user/${postUserId}`)} className="flex-1 min-w-0 text-left">
+        <button onClick={navigateToUser} className="flex-1 min-w-0 text-left">
           <div className="flex items-center gap-1">
             <span className="text-sm font-semibold text-foreground">{displayName || username}</span>
             {verified && <VerifiedBadge size={15} />}
@@ -227,10 +217,7 @@ const PostCard = ({
       {image ? (
         <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
       ) : (
-        <div
-          className="relative px-4 py-1.5"
-          onDoubleClick={handleDoubleTap}
-        >
+        <div className="relative px-4 py-1.5" onDoubleClick={handleDoubleTap}>
           <p className="text-[15px] text-foreground leading-snug whitespace-pre-line">{caption}</p>
           <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
         </div>
@@ -239,33 +226,31 @@ const PostCard = ({
       {/* Actions */}
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-4">
-          <motion.button whileTap={{ scale: 0.8 }} onClick={toggleLike}>
-            <motion.div animate={liked ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }}>
-              {liked ? (
-                <img src={heartFilledRedIcon} alt="liked" width={26} height={26} className="inline-block shrink-0" draggable={false} />
-              ) : (
-                <PuffyIcon name="heart" size={26} />
-              )}
-            </motion.div>
-          </motion.button>
-          <button onClick={() => setCommentOpen(true)}>
+          <button className="active:scale-90 transition-transform duration-100" onClick={toggleLike}>
+            {liked ? (
+              <img src={heartFilledRedIcon} alt="liked" width={26} height={26} className="inline-block shrink-0" draggable={false} />
+            ) : (
+              <PuffyIcon name="heart" size={26} />
+            )}
+          </button>
+          <button onClick={openComment}>
             <PuffyIcon name="message-circle" size={24} />
           </button>
-          <button onClick={() => setShareOpen(true)}>
+          <button onClick={openShare}>
             <PuffyIcon name="send" size={22} />
           </button>
         </div>
-        <motion.button whileTap={{ scale: 0.8 }} onClick={toggleSave}>
+        <button className="active:scale-90 transition-transform duration-100" onClick={toggleSave}>
           <PuffyIcon name="bookmark" size={24} className={saved ? "opacity-100" : "opacity-70"} />
-        </motion.button>
+        </button>
       </div>
 
       {/* Likes & Comments count */}
       <div className="px-4 pt-0.5 flex items-center gap-3">
-        <button onClick={() => setLikesOpen(true)} className="text-sm font-semibold text-foreground">
+        <button onClick={openLikes} className="text-sm font-semibold text-foreground">
           {likeCount.toLocaleString()} likes
         </button>
-        <button onClick={() => setCommentOpen(true)} className="text-sm font-semibold text-foreground">
+        <button onClick={openComment} className="text-sm font-semibold text-foreground">
           {commentCount.toLocaleString()} comments
         </button>
       </div>
@@ -294,11 +279,13 @@ const PostCard = ({
         <p className="text-[10px] uppercase text-muted-foreground">{timeAgo}</p>
       </div>
 
-      <CommentSheet postId={postId} isOpen={commentOpen} onClose={() => setCommentOpen(false)} />
-      <ShareSheet postId={postId} image={image} caption={caption} username={username} isOpen={shareOpen} onClose={() => setShareOpen(false)} />
-      <LikesSheet postId={postId} isOpen={likesOpen} onClose={() => setLikesOpen(false)} likesCount={likeCount} />
+      {commentOpen && <CommentSheet postId={postId} isOpen={commentOpen} onClose={closeComment} />}
+      {shareOpen && <ShareSheet postId={postId} image={image} caption={caption} username={username} isOpen={shareOpen} onClose={closeShare} />}
+      {likesOpen && <LikesSheet postId={postId} isOpen={likesOpen} onClose={closeLikes} likesCount={likeCount} />}
     </div>
   );
-};
+});
+
+PostCard.displayName = "PostCard";
 
 export default PostCard;

@@ -255,6 +255,7 @@ const Feed = () => {
                   showFollowButton={post.user_id !== user?.id && !followingIds.has(post.user_id)}
                   isFollowing={followingIds.has(post.user_id)}
                   onFollowChange={handleFollowChange}
+                  hasStory={storyUsers.some(su => su.user_id === post.user_id) || (post.user_id === user?.id && userHasStory)}
                 />
               ))
             )
