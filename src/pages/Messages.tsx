@@ -10,6 +10,7 @@ import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { MessagesShimmer } from "@/components/ShimmerLoader";
 import PullToRefresh from "@/components/PullToRefresh";
 import { toast } from "sonner";
+import cameraFilledIcon from "@/assets/icons/camera-filled.png";
 
 interface ConversationItem {
   conversation_id: string;
