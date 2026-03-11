@@ -469,6 +469,27 @@ export type Database = {
         }
         Relationships: []
       }
+      restricted_users: {
+        Row: {
+          created_at: string
+          id: string
+          restricted_id: string
+          restrictor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          restricted_id: string
+          restrictor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          restricted_id?: string
+          restrictor_id?: string
+        }
+        Relationships: []
+      }
       saved_posts: {
         Row: {
           created_at: string
