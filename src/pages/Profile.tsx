@@ -162,6 +162,7 @@ const Profile = () => {
         </button>
       </div>
 
+      <PullToRefresh onRefresh={handleRefresh}>
       {/* Banner */}
       {profile?.cover_url ? (
         <img src={profile.cover_url} alt="Banner" className="h-48 w-full object-cover" />
