@@ -186,13 +186,13 @@ const Profile = () => {
                   if (avatarLongPressTimer.current) clearTimeout(avatarLongPressTimer.current);
                 }}
                 onContextMenu={(e) => e.preventDefault()}
-                className={`inline-block rounded-[30%] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
+                className={`inline-block rounded-[40%] p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
               >
-                <div className={`rounded-[30%] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
+                <div className={`rounded-[40%] ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-[30%] object-cover block" draggable={false} />
+                    <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-[40%] object-cover block" draggable={false} />
                   ) : (
-                    <div className="flex h-20 w-20 items-center justify-center rounded-[30%] bg-secondary">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-[40%] bg-secondary">
                       <PuffyIcon name="user" size={32} />
                     </div>
                   )}

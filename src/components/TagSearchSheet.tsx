@@ -77,9 +77,9 @@ const TagSearchSheet = ({ isOpen, onClose, onSelect, taggedUserIds }: TagSearchS
                   className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-secondary/50"
                 >
                   {p.avatar_url ? (
-                    <img src={p.avatar_url} className="h-10 w-10 rounded-[30%] object-cover" />
+                    <img src={p.avatar_url} className="h-10 w-10 rounded-[40%] object-cover" />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[30%] bg-secondary">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-[40%] bg-secondary">
                       <PuffyIcon name="user" size={18} />
                     </div>
                   )}
