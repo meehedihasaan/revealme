@@ -33,7 +33,7 @@ const Login = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-1 flex-col"
       >
-        <h1 className="text-reveal mb-2 text-3xl text-foreground">Reveal.</h1>
+        <h1 className="text-reveal mb-2 text-3xl text-foreground">Revealme.</h1>
         <p className="mb-10 text-muted-foreground">Welcome back</p>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
