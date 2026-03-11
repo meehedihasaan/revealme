@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,12 +11,21 @@ interface ChatHeaderMenuProps {
   otherUsername: string;
   isOpen: boolean;
   onClose: () => void;
+  onRestricted?: () => void;
 }
 
-const ChatHeaderMenu = ({ otherUserId, otherUsername, isOpen, onClose }: ChatHeaderMenuProps) => {
+const ChatHeaderMenu = ({ otherUserId, otherUsername, isOpen, onClose, onRestricted }: ChatHeaderMenuProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [blocking, setBlocking] = useState(false);
+  const [isRestricted, setIsRestricted] = useState(false);
+  const [restrictLoading, setRestrictLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user || !isOpen) return;
+    supabase.from("restricted_users" as any).select("id").eq("restrictor_id", user.id).eq("restricted_id", otherUserId).maybeSingle()
+      .then(({ data }) => setIsRestricted(!!data));
+  }, [user, otherUserId, isOpen]);
 
   const handleBlock = async () => {
     if (!user) return;
@@ -37,11 +46,22 @@ const ChatHeaderMenu = ({ otherUserId, otherUsername, isOpen, onClose }: ChatHea
     onClose();
   };
 
-  const handleRestrict = () => {
-    toast.success(`@${otherUsername} has been restricted`);
+  const handleRestrict = async () => {
+    if (!user) return;
+    setRestrictLoading(true);
+    if (isRestricted) {
+      await supabase.from("restricted_users" as any).delete().eq("restrictor_id", user.id).eq("restricted_id", otherUserId);
+      toast.success(`@${otherUsername} unrestricted`);
+      setIsRestricted(false);
+    } else {
+      await (supabase.from("restricted_users" as any) as any).insert({ restrictor_id: user.id, restricted_id: otherUserId });
+      toast.success(`@${otherUsername} has been restricted`);
+      setIsRestricted(true);
+      onRestricted?.();
+    }
+    setRestrictLoading(false);
     onClose();
   };
-
   const handleDeleteChat = async () => {
     toast.success("Chat cleared");
     onClose();
