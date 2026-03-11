@@ -231,8 +231,10 @@ const Messages = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className={`truncate text-sm ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                  <p className={`truncate text-sm flex items-center gap-1 ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                    {conv.lastMessageIcon && <span>{conv.lastMessageIcon}</span>}
                     {conv.lastMessage || "Start a conversation"}
+                  </p>
                   </p>
                   {conv.unread > 0 && (
                     <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground shrink-0">
