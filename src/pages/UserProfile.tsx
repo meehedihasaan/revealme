@@ -302,9 +302,9 @@ const UserProfile = () => {
               {/* User info */}
               <div className="flex items-center gap-3 px-5 pb-4 border-b border-border/50">
                 {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt="" className="h-10 w-10 rounded-xl object-cover" />
+                  <img src={profile.avatar_url} alt="" className="h-10 w-10 rounded-[40%] object-cover" />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[40%] bg-secondary">
                     <PuffyIcon name="user" size={18} />
                   </div>
                 )}

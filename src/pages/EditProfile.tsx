@@ -163,9 +163,9 @@ const EditProfile = () => {
         <div className="relative">
           <button onClick={() => fileRef.current?.click()}>
             {avatarPreview ? (
-              <img src={avatarPreview} alt="Avatar" className="h-24 w-24 rounded-[20px] object-cover border-4 border-background" />
+              <img src={avatarPreview} alt="Avatar" className="h-24 w-24 rounded-[40%] object-cover border-4 border-background" />
             ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-[20px] bg-secondary border-4 border-background">
+              <div className="flex h-24 w-24 items-center justify-center rounded-[40%] bg-secondary border-4 border-background">
                 <PuffyIcon name="user" size={40} />
               </div>
             )}
