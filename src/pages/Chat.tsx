@@ -455,7 +455,7 @@ const Chat = () => {
                 onClick={handleSendWave}
                 className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 transition-colors shadow-lg"
               >
-                <img src="/src/assets/icons/wave.png" alt="wave" className="h-5 w-5 brightness-0 invert" />
+                <PuffyIcon name="wave" size={20} className="brightness-0 invert" />
                 <span className="text-sm font-bold text-primary-foreground">Hey!</span>
               </motion.button>
             </motion.div>
