@@ -73,7 +73,7 @@ const SetAvatar = () => {
           className="relative mb-8 flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-border bg-secondary transition-colors hover:border-primary"
         >
           {avatarPreview ? (
-            <img src={avatarPreview} alt="Avatar" className="h-full w-full object-cover" />
+            <img src={avatarPreview} alt="Avatar" className="h-full w-full object-contain" />
           ) : (
             <div className="flex flex-col items-center gap-2">
               <PuffyIcon name="camera" size={32} className="opacity-50" />
