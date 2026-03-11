@@ -66,7 +66,7 @@ const EditProfile = () => {
         const path = `${user.id}/avatar.${ext}`;
         await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
         const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
-        avatar_url = publicUrl;
+        avatar_url = `${publicUrl}?t=${Date.now()}`;
       }
 
       if (coverDeleted) {
