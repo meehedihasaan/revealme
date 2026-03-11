@@ -24,6 +24,113 @@ interface ConversationItem {
   is_online: boolean;
 }
 
+const DELETE_THRESHOLD = -80;
+
+const SwipeableConversationRow = ({
+  conv,
+  index,
+  onTap,
+  onDelete,
+  formatTime,
+}: {
+  conv: ConversationItem;
+  index: number;
+  onTap: () => void;
+  onDelete: () => void;
+  formatTime: (t: string) => string;
+}) => {
+  const x = useMotionValue(0);
+  const deleteOpacity = useTransform(x, [-80, -40, 0], [1, 0.6, 0]);
+  const deleteScale = useTransform(x, [-80, -40, 0], [1, 0.8, 0.5]);
+  const [swiped, setSwiped] = useState(false);
+
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    if (info.offset.x < DELETE_THRESHOLD) {
+      animate(x, -80, { type: "spring", stiffness: 300, damping: 30 });
+      setSwiped(true);
+    } else {
+      animate(x, 0, { type: "spring", stiffness: 300, damping: 30 });
+      setSwiped(false);
+    }
+  };
+
+  const handleTap = () => {
+    if (swiped) {
+      animate(x, 0, { type: "spring", stiffness: 300, damping: 30 });
+      setSwiped(false);
+    } else {
+      onTap();
+    }
+  };
+
+  return (
+    <div className="relative overflow-hidden">
+      {/* Delete action behind */}
+      <motion.div
+        style={{ opacity: deleteOpacity, scale: deleteScale }}
+        className="absolute right-0 top-0 bottom-0 flex items-center justify-center w-20 bg-destructive"
+      >
+        <button onClick={onDelete} className="flex flex-col items-center gap-1 text-destructive-foreground">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+          </svg>
+          <span className="text-[10px] font-semibold">Delete</span>
+        </button>
+      </motion.div>
+
+      {/* Swipeable content */}
+      <motion.div
+        style={{ x }}
+        drag="x"
+        dragConstraints={{ left: -80, right: 0 }}
+        dragElastic={0.1}
+        onDragEnd={handleDragEnd}
+        onClick={handleTap}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.02 }}
+        className="relative flex w-full items-center gap-3 px-4 py-3 text-left bg-background cursor-pointer active:bg-secondary/50"
+      >
+        <div className="relative shrink-0">
+          {conv.avatar_url ? (
+            <img src={conv.avatar_url} alt={conv.username} className="h-12 w-12 rounded-[40%] object-cover" />
+          ) : (
+            <div className="flex h-12 w-12 items-center justify-center rounded-[40%] bg-secondary">
+              <PuffyIcon name="user" size={20} />
+            </div>
+          )}
+          {conv.is_online && (
+            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background bg-success" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <span className={`font-semibold text-foreground truncate ${conv.unread > 0 ? "font-bold" : ""} flex items-center gap-1`}>
+              {conv.username}
+              {conv.is_verified && <VerifiedBadge size={13} />}
+            </span>
+            <span className="text-xs text-muted-foreground shrink-0 ml-2">
+              {formatTime(conv.lastMessageTime)}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className={`truncate text-sm flex items-center gap-1 ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+              {conv.lastMessageIcon === "camera" && <img src="/src/assets/icons/camera-filled.png" alt="" className="h-4 w-4 opacity-60" />}
+              {conv.lastMessage || "Start a conversation"}
+            </p>
+            {conv.unread > 0 && (
+              <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground shrink-0">
+                {conv.unread}
+              </span>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 const Messages = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
