@@ -57,8 +57,8 @@ const SharedPostCard = ({ postId, isMine }: SharedPostCardProps) => {
 
   if (loading) {
     return (
-      <div className="w-[240px] rounded-2xl overflow-hidden bg-secondary/50 animate-pulse">
-        <div className="h-[180px] bg-muted" />
+      <div className="w-[220px] rounded-[20px] overflow-hidden bg-card border border-border/60 shadow-sm animate-pulse">
+        <div className="h-[160px] bg-muted" />
         <div className="p-3 space-y-2">
           <div className="h-3 w-20 rounded bg-muted" />
           <div className="h-3 w-32 rounded bg-muted" />
@@ -69,8 +69,8 @@ const SharedPostCard = ({ postId, isMine }: SharedPostCardProps) => {
 
   if (!post) {
     return (
-      <div className={`rounded-2xl px-4 py-3 text-sm ${
-        isMine ? "bg-primary/20 text-primary-foreground/70" : "bg-secondary text-muted-foreground"
+      <div className={`rounded-[20px] px-4 py-3 text-sm border ${
+        isMine ? "bg-primary/10 border-primary/20 text-foreground/70" : "bg-card border-border text-muted-foreground"
       }`}>
         Post unavailable
       </div>
@@ -79,42 +79,52 @@ const SharedPostCard = ({ postId, isMine }: SharedPostCardProps) => {
 
   return (
     <motion.button
-      whileTap={{ scale: 0.97 }}
+      whileTap={{ scale: 0.96 }}
       onClick={() => navigate(`/post/${post.id}`)}
-      className={`w-[240px] rounded-2xl overflow-hidden border text-left transition-all active:scale-[0.97] shadow-md ${
+      className={`w-[220px] rounded-[20px] overflow-hidden border text-left transition-all shadow-sm hover:shadow-md ${
         isMine
-          ? "bg-primary/10 border-primary/20 shadow-primary/10"
-          : "bg-secondary/80 border-border/50 shadow-black/5"
+          ? "bg-card border-primary/15 shadow-primary/8"
+          : "bg-card border-border/60 shadow-black/5"
       }`}
     >
+      {/* Image */}
       {post.image_url && (
-        <div className="m-2 overflow-hidden rounded-xl">
+        <div className="relative">
           <img
             src={post.image_url}
             alt=""
-            className="w-full h-[170px] object-cover"
+            className="w-full h-[160px] object-cover"
             loading="lazy"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         </div>
       )}
-      <div className="p-3">
-        <div className="flex items-center gap-2 mb-1">
+
+      {/* Content */}
+      <div className="px-3 pt-2.5 pb-3">
+        {/* Author row */}
+        <div className="flex items-center gap-2 mb-1.5">
           {post.avatar_url ? (
-            <img src={post.avatar_url} alt="" className="h-5 w-5 rounded-full object-cover" />
+            <img src={post.avatar_url} alt="" className="h-5 w-5 rounded-[40%] object-cover ring-1 ring-border/50" />
           ) : (
-            <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center">
-              <span className="text-[8px]">👤</span>
+            <div className="h-5 w-5 rounded-[40%] bg-secondary flex items-center justify-center ring-1 ring-border/50">
+              <span className="text-[8px] text-muted-foreground">👤</span>
             </div>
           )}
-          <span className="text-xs font-semibold text-foreground">@{post.username}</span>
+          <span className="text-[11px] font-bold text-foreground truncate flex-1">@{post.username}</span>
         </div>
+
+        {/* Caption */}
         {post.caption && (
-          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+          <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed mb-2">
             {post.caption}
           </p>
         )}
-        <div className="mt-2 flex items-center gap-1">
-          <span className="text-[10px] font-medium text-primary">View post →</span>
+
+        {/* CTA */}
+        <div className="flex items-center gap-1 pt-1 border-t border-border/40">
+          <span className="text-[10px] font-semibold text-primary mt-1">View post</span>
+          <span className="text-[10px] text-primary mt-1">→</span>
         </div>
       </div>
     </motion.button>
