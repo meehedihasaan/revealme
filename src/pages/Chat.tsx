@@ -661,7 +661,7 @@ const Chat = () => {
                 onClick={handleSendWave}
                 className="shrink-0"
               >
-                <img src={waveIcon} alt="wave" className="h-[22px] w-[22px] opacity-80" draggable={false} />
+                <img src={waveIcon} alt="wave" className="h-[22px] w-[22px] opacity-80 icon-adaptive-inverted" draggable={false} />
               </motion.button>
             ) : (
               <motion.button
