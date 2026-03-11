@@ -124,7 +124,6 @@ const Profile = () => {
   };
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-background pb-20">
       {/* Sticky header - appears on scroll */}
       <AnimatePresence>
@@ -163,6 +162,7 @@ const Profile = () => {
         </button>
       </div>
 
+      <PullToRefresh onRefresh={handleRefresh}>
       {/* Banner */}
       {profile?.cover_url ? (
         <img src={profile.cover_url} alt="Banner" className="h-48 w-full object-cover" />
@@ -423,9 +423,9 @@ const Profile = () => {
         )}
       </AnimatePresence>
 
+      </PullToRefresh>
       <BottomNav />
     </div>
-    </PullToRefresh>
   );
 };
 

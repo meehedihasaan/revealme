@@ -157,7 +157,6 @@ const Messages = () => {
   };
 
   return (
-    <PullToRefresh onRefresh={async () => { setLoading(true); await fetchConversations(); }}>
     <div className="min-h-screen bg-background pb-20">
       <div className="flex items-center justify-between px-4 py-3">
         <button onClick={() => navigate("/feed")}>
@@ -185,6 +184,7 @@ const Messages = () => {
 
       <div className="h-px bg-border" />
 
+      <PullToRefresh onRefresh={async () => { setLoading(true); await fetchConversations(); }}>
       <div>
         {loading ? (
           <MessagesShimmer />
@@ -244,9 +244,9 @@ const Messages = () => {
         )}
       </div>
 
+      </PullToRefresh>
       <BottomNav />
     </div>
-    </PullToRefresh>
   );
 };
 
