@@ -28,6 +28,9 @@ interface OtherUser {
   username: string;
   avatar_url: string | null;
   is_verified: boolean;
+  display_name: string | null;
+  bio: string | null;
+  created_at: string;
 }
 
 const Chat = () => {
