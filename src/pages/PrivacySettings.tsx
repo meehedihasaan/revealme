@@ -14,6 +14,13 @@ interface BlockedUser {
   avatar_url: string | null;
 }
 
+interface RestrictedUser {
+  id: string;
+  restricted_id: string;
+  username: string;
+  avatar_url: string | null;
+}
+
 const PrivacySettings = () => {
   const navigate = useNavigate();
   const { user, profile, refreshProfile } = useAuth();
