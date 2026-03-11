@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import PuffyIcon from "@/components/PuffyIcon";
 
 interface ChatMessageMenuProps {
   messageId: string;
@@ -54,24 +55,29 @@ const ChatMessageMenu = ({ messageId, messageText, isMine, isOpen, onClose, onEd
           >
             <button
               onClick={handleCopy}
-              className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-secondary transition-colors flex items-center gap-2"
+              className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-secondary transition-colors flex items-center gap-3"
             >
-              📋 Copy
+              <PuffyIcon name="copy" size={16} />
+              <span>Copy</span>
             </button>
             {isMine && (
               <button
                 onClick={() => { onEdit(messageId, messageText); onClose(); }}
-                className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-secondary transition-colors flex items-center gap-2 border-t border-border/50"
+                className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-secondary transition-colors flex items-center gap-3 border-t border-border/50"
               >
-                ✏️ Edit
+                <PuffyIcon name="edit" size={16} />
+                <span>Edit</span>
               </button>
             )}
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="w-full px-4 py-3 text-left text-sm text-destructive hover:bg-destructive/10 transition-colors flex items-center gap-2 border-t border-border/50"
+              className="w-full px-4 py-3 text-left text-sm text-destructive hover:bg-destructive/10 transition-colors flex items-center gap-3 border-t border-border/50"
             >
-              🗑️ Delete
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-destructive">
+                <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+              </svg>
+              <span>Delete</span>
             </button>
           </motion.div>
         </>
