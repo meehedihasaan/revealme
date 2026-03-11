@@ -484,7 +484,7 @@ const Chat = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4" id="chat-scroll">
+      <div className="flex-1 overflow-y-auto px-4 py-4 pb-20" id="chat-scroll">
         {/* Profile card at top */}
         {otherUser && (
           <motion.div
