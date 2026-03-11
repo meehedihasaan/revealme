@@ -727,11 +727,11 @@ const Chat = () => {
 
       {/* Input bar */}
       {isRestricted ? (
-        <div className="border-t border-border bg-background px-4 pb-4 pt-3 shrink-0">
+        <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background px-4 pb-4 pt-3 z-50">
           <p className="text-center text-sm text-muted-foreground">You can't message this user</p>
         </div>
       ) : (
-        <div className="border-t border-border bg-background px-3 pb-4 pt-3 shrink-0">
+        <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background px-3 pb-4 pt-3 z-50">
           <div className="flex items-center gap-3">
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
 
