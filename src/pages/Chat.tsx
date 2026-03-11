@@ -104,6 +104,15 @@ const Chat = () => {
     init();
   }, [conversationId, user]);
 
+  // Check if user is restricted by the other user
+  useEffect(() => {
+    if (!user || !otherUser) return;
+    supabase.from("restricted_users" as any).select("id")
+      .eq("restrictor_id", otherUser.user_id).eq("restricted_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setIsRestricted(!!data));
+  }, [user, otherUser]);
+
   // Chat-level presence for typing indicator
   useEffect(() => {
     if (!conversationId || !user || !otherUser) return;
