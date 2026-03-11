@@ -28,6 +28,9 @@ interface OtherUser {
   username: string;
   avatar_url: string | null;
   is_verified: boolean;
+  display_name: string | null;
+  bio: string | null;
+  created_at: string;
 }
 
 const Chat = () => {
@@ -90,7 +93,7 @@ const Chat = () => {
         const otherUserId = partnerRes.data[0].user_id;
         const { data: prof } = await supabase
           .from("profiles")
-          .select("user_id, username, avatar_url, is_verified")
+          .select("user_id, username, avatar_url, is_verified, display_name, bio, created_at")
           .eq("user_id", otherUserId)
           .single();
         if (prof) setOtherUser(prof as OtherUser);
@@ -433,7 +436,47 @@ const Chat = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4" id="chat-scroll">
+        {/* Profile card at top */}
+        {otherUser && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center pb-6 mb-4"
+          >
+            <button onClick={() => navigate(`/user/${otherUser.user_id}`)} className="flex flex-col items-center">
+              {otherUser.avatar_url ? (
+                <img
+                  src={otherUser.avatar_url}
+                  alt={otherUser.username}
+                  className="h-20 w-20 rounded-[40%] object-cover mb-3"
+                />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded-[40%] bg-secondary mb-3">
+                  <PuffyIcon name="user" size={32} />
+                </div>
+              )}
+              <p className="text-base font-bold text-foreground flex items-center gap-1">
+                {otherUser.display_name || otherUser.username}
+                {otherUser.is_verified && <VerifiedBadge size={14} />}
+              </p>
+              <p className="text-xs text-muted-foreground">@{otherUser.username}</p>
+              {otherUser.bio && (
+                <p className="text-xs text-muted-foreground mt-1 text-center max-w-[240px] line-clamp-2">{otherUser.bio}</p>
+              )}
+              <p className="text-[10px] text-muted-foreground/60 mt-1.5">
+                Joined {new Date(otherUser.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+              </p>
+            </button>
+            <button
+              onClick={() => navigate(`/user/${otherUser.user_id}`)}
+              className="mt-3 rounded-full bg-secondary px-5 py-1.5 text-xs font-semibold text-foreground transition-colors active:bg-secondary/70"
+            >
+              View Profile
+            </button>
+          </motion.div>
+        )}
+
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             <motion.div
