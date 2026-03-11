@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
+import waveIcon from "@/assets/icons/wave.png";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import SharedPostCard, { parseSharedPost } from "@/components/SharedPostCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -444,8 +445,9 @@ const Chat = () => {
               <motion.div
                 animate={{ rotate: [0, 20, -20, 15, -15, 0], y: [0, -6, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+                className="text-6xl mb-4"
               >
-                <img src="/src/assets/icons/wave.png" alt="wave" className="h-16 w-16 mb-4" />
+                👋
               </motion.div>
               <p className="text-lg font-semibold text-foreground mb-1">Say hello!</p>
               <p className="text-sm text-muted-foreground mb-5">Start the conversation with a wave</p>
@@ -455,7 +457,7 @@ const Chat = () => {
                 onClick={handleSendWave}
                 className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 transition-colors shadow-lg"
               >
-                <img src="/src/assets/icons/wave.png" alt="wave" className="h-5 w-5 brightness-0 invert" />
+                <img src={waveIcon} alt="wave" className="h-5 w-5 brightness-0 invert" draggable={false} />
                 <span className="text-sm font-bold text-primary-foreground">Hey!</span>
               </motion.button>
             </motion.div>
@@ -660,7 +662,7 @@ const Chat = () => {
                 onClick={handleSendWave}
                 className="shrink-0"
               >
-                <img src="/src/assets/icons/wave.png" alt="wave" className="h-[22px] w-[22px] opacity-80" />
+                <PuffyIcon name="wave" size={22} className="opacity-80" />
               </motion.button>
             ) : (
               <motion.button
