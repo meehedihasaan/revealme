@@ -202,6 +202,46 @@ const PrivacySettings = () => {
     );
   }
 
+  if (activeSection === "restricted") {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <button onClick={() => setActiveSection("menu")}>
+            <PuffyIcon name="arrow-left" size={22} />
+          </button>
+          <h1 className="text-lg font-bold text-foreground">Restricted Accounts</h1>
+        </div>
+        {restrictedUsers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+            <PuffyIcon name="shield" size={48} className="opacity-30 mb-3" />
+            <p className="text-sm">No restricted accounts</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            {restrictedUsers.map((ru) => (
+              <div key={ru.id} className="flex items-center gap-3 px-4 py-3">
+                {ru.avatar_url ? (
+                  <img src={ru.avatar_url} alt="" className="h-12 w-12 rounded-[40%] object-cover" />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[40%] bg-secondary">
+                    <PuffyIcon name="user" size={20} />
+                  </div>
+                )}
+                <span className="flex-1 font-semibold text-foreground">{ru.username}</span>
+                <button
+                  onClick={() => handleUnrestrict(ru.id)}
+                  className="rounded-lg bg-destructive/20 px-4 py-1.5 text-xs font-semibold text-destructive"
+                >
+                  Unrestrict
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="px-4 py-3">
