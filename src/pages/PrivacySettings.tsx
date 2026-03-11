@@ -27,12 +27,13 @@ const PrivacySettings = () => {
   const { t } = useLanguage();
   const [isPrivate, setIsPrivate] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
+  const [restrictedUsers, setRestrictedUsers] = useState<RestrictedUser[]>([]);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
-  const [activeSection, setActiveSection] = useState<"menu" | "password" | "blocked">("menu");
+  const [activeSection, setActiveSection] = useState<"menu" | "password" | "blocked" | "restricted">("menu");
 
   useEffect(() => {
     if (profile) setIsPrivate((profile as any).is_private || false);
