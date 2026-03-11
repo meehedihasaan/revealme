@@ -17,6 +17,7 @@ interface ConversationItem {
   avatar_url: string | null;
   is_verified: boolean;
   lastMessage: string;
+  lastMessageIcon: string | null;
   lastMessageTime: string;
   unread: number;
   is_online: boolean;
@@ -86,7 +87,8 @@ const Messages = () => {
         username: prof?.username || "user",
         avatar_url: prof?.avatar_url || null,
         is_verified: prof?.is_verified || false,
-        lastMessage: latestMsg?.image_url ? "📷 Photo" : (latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "📸 Shared a post" : (latestMsg?.text || "")),
+        lastMessage: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "Shared a post" : latestMsg?.image_url ? "Sent a photo" : (latestMsg?.text || ""),
+        lastMessageIcon: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "📸" : latestMsg?.image_url ? "📷" : null,
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
         is_online: isRecentlyOnline,
@@ -229,7 +231,8 @@ const Messages = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className={`truncate text-sm ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                  <p className={`truncate text-sm flex items-center gap-1 ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
+                    {conv.lastMessageIcon && <span>{conv.lastMessageIcon}</span>}
                     {conv.lastMessage || "Start a conversation"}
                   </p>
                   {conv.unread > 0 && (
