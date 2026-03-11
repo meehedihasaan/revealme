@@ -58,6 +58,9 @@ const Chat = () => {
   // Header menu
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
   
+  // Restrict state
+  const [isRestricted, setIsRestricted] = useState(false);
+  
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -100,6 +103,15 @@ const Chat = () => {
     };
     init();
   }, [conversationId, user]);
+
+  // Check if user is restricted by the other user
+  useEffect(() => {
+    if (!user || !otherUser) return;
+    supabase.from("restricted_users" as any).select("id")
+      .eq("restrictor_id", otherUser.user_id).eq("restricted_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setIsRestricted(!!data));
+  }, [user, otherUser]);
 
   // Chat-level presence for typing indicator
   useEffect(() => {
@@ -337,6 +349,7 @@ const Chat = () => {
           otherUsername={otherUser.username}
           isOpen={headerMenuOpen}
           onClose={() => setHeaderMenuOpen(false)}
+          onRestricted={() => setIsRestricted(true)}
         />
       )}
 
@@ -395,17 +408,30 @@ const Chat = () => {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-            <PuffyIcon name="message-circle" size={48} className="opacity-20 mb-3" />
-            <p className="text-sm mb-4">Send a message to start the conversation</p>
-            {/* Wave button */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={handleSendWave}
-              className="flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-5 py-2.5 transition-colors hover:bg-primary/20"
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.2 }}
+              className="flex flex-col items-center"
             >
-              <img src="/src/assets/icons/wave.png" alt="wave" className="h-5 w-5" />
-              <span className="text-sm font-semibold text-primary">Hey!</span>
-            </motion.button>
+              <motion.div
+                animate={{ rotate: [0, 20, -20, 15, -15, 0], y: [0, -6, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+              >
+                <img src="/src/assets/icons/wave.png" alt="wave" className="h-16 w-16 mb-4" />
+              </motion.div>
+              <p className="text-lg font-semibold text-foreground mb-1">Say hello!</p>
+              <p className="text-sm text-muted-foreground mb-5">Start the conversation with a wave</p>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                onClick={handleSendWave}
+                className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 transition-colors shadow-lg"
+              >
+                <img src="/src/assets/icons/wave.png" alt="wave" className="h-5 w-5 brightness-0 invert" />
+                <span className="text-sm font-bold text-primary-foreground">Hey!</span>
+              </motion.button>
+            </motion.div>
           </div>
         ) : (
           groupedMessages.map((group) => (
@@ -558,70 +584,76 @@ const Chat = () => {
       </AnimatePresence>
 
       {/* Input bar */}
-      <div className="border-t border-border bg-background px-3 pb-4 pt-3 shrink-0">
-        <div className="flex items-center gap-3">
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
-
-          <motion.button
-            whileTap={{ scale: 0.85 }}
-            onClick={() => fileInputRef.current?.click()}
-            className="text-primary shrink-0"
-            disabled={uploading}
-          >
-            <PuffyIcon name="camera" size={22} />
-          </motion.button>
-
-          <div className="flex-1 rounded-full bg-secondary px-4 py-3">
-            <input
-              type="text"
-              value={editingId ? editText : input}
-              onChange={(e) => {
-                if (editingId) {
-                  setEditText(e.target.value);
-                } else {
-                  setInput(e.target.value);
-                  broadcastTyping();
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  if (editingId) handleSaveEdit();
-                  else sendMessage();
-                }
-              }}
-              placeholder={editingId ? "Edit message..." : "Message..."}
-              className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-            />
-          </div>
-
-          {/* Wave button when input is empty and not editing */}
-          {!editingId && !input.trim() && !selectedFile ? (
-            <motion.button
-              whileTap={{ scale: 0.85 }}
-              onClick={handleSendWave}
-              className="shrink-0"
-            >
-              <img src="/src/assets/icons/wave.png" alt="wave" className="h-[22px] w-[22px] opacity-80" />
-            </motion.button>
-          ) : (
-            <motion.button
-              whileTap={{ scale: 0.85 }}
-              onClick={() => editingId ? handleSaveEdit() : sendMessage()}
-              disabled={editingId ? !editText.trim() : ((!input.trim() && !selectedFile) || sending || uploading)}
-              className="shrink-0 text-primary transition-opacity disabled:opacity-30"
-            >
-              {uploading ? (
-                <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
-              ) : editingId ? (
-                <PuffyIcon name="check" size={22} />
-              ) : (
-                <PuffyIcon name="send" size={22} />
-              )}
-            </motion.button>
-          )}
+      {isRestricted ? (
+        <div className="border-t border-border bg-background px-4 pb-4 pt-3 shrink-0">
+          <p className="text-center text-sm text-muted-foreground">You can't message this user</p>
         </div>
-      </div>
+      ) : (
+        <div className="border-t border-border bg-background px-3 pb-4 pt-3 shrink-0">
+          <div className="flex items-center gap-3">
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={() => fileInputRef.current?.click()}
+              className="text-primary shrink-0"
+              disabled={uploading}
+            >
+              <PuffyIcon name="camera" size={22} />
+            </motion.button>
+
+            <div className="flex-1 rounded-full bg-secondary px-4 py-3">
+              <input
+                type="text"
+                value={editingId ? editText : input}
+                onChange={(e) => {
+                  if (editingId) {
+                    setEditText(e.target.value);
+                  } else {
+                    setInput(e.target.value);
+                    broadcastTyping();
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (editingId) handleSaveEdit();
+                    else sendMessage();
+                  }
+                }}
+                placeholder={editingId ? "Edit message..." : "Message..."}
+                className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              />
+            </div>
+
+            {/* Wave button when input is empty and not editing */}
+            {!editingId && !input.trim() && !selectedFile ? (
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                onClick={handleSendWave}
+                className="shrink-0"
+              >
+                <img src="/src/assets/icons/wave.png" alt="wave" className="h-[22px] w-[22px] opacity-80" />
+              </motion.button>
+            ) : (
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                onClick={() => editingId ? handleSaveEdit() : sendMessage()}
+                disabled={editingId ? !editText.trim() : ((!input.trim() && !selectedFile) || sending || uploading)}
+                className="shrink-0 text-primary transition-opacity disabled:opacity-30"
+              >
+                {uploading ? (
+                  <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
+                ) : editingId ? (
+                  <PuffyIcon name="check" size={22} />
+                ) : (
+                  <PuffyIcon name="send" size={22} />
+                )}
+              </motion.button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

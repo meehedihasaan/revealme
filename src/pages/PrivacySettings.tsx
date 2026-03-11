@@ -14,18 +14,26 @@ interface BlockedUser {
   avatar_url: string | null;
 }
 
+interface RestrictedUser {
+  id: string;
+  restricted_id: string;
+  username: string;
+  avatar_url: string | null;
+}
+
 const PrivacySettings = () => {
   const navigate = useNavigate();
   const { user, profile, refreshProfile } = useAuth();
   const { t } = useLanguage();
   const [isPrivate, setIsPrivate] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
+  const [restrictedUsers, setRestrictedUsers] = useState<RestrictedUser[]>([]);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
-  const [activeSection, setActiveSection] = useState<"menu" | "password" | "blocked">("menu");
+  const [activeSection, setActiveSection] = useState<"menu" | "password" | "blocked" | "restricted">("menu");
 
   useEffect(() => {
     if (profile) setIsPrivate((profile as any).is_private || false);
@@ -38,16 +46,31 @@ const PrivacySettings = () => {
         .from("blocked_users")
         .select("id, blocked_id")
         .eq("blocker_id", user.id);
-      if (!blocks || blocks.length === 0) { setBlockedUsers([]); return; }
-      const ids = blocks.map(b => b.blocked_id);
-      const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", ids);
-      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
-      setBlockedUsers(blocks.map(b => ({
-        id: b.id,
-        blocked_id: b.blocked_id,
-        username: profileMap[b.blocked_id]?.username || "user",
-        avatar_url: profileMap[b.blocked_id]?.avatar_url || null,
-      })));
+      if (!blocks || blocks.length === 0) { setBlockedUsers([]); } else {
+        const ids = blocks.map(b => b.blocked_id);
+        const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", ids);
+        const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+        setBlockedUsers(blocks.map(b => ({
+          id: b.id, blocked_id: b.blocked_id,
+          username: profileMap[b.blocked_id]?.username || "user",
+          avatar_url: profileMap[b.blocked_id]?.avatar_url || null,
+        })));
+      }
+      // Fetch restricted users
+      const { data: restricts } = await supabase
+        .from("restricted_users" as any)
+        .select("id, restricted_id")
+        .eq("restrictor_id", user.id);
+      if (!restricts || restricts.length === 0) { setRestrictedUsers([]); } else {
+        const rIds = (restricts as any[]).map((r: any) => r.restricted_id);
+        const { data: rProfiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", rIds);
+        const rMap = Object.fromEntries((rProfiles || []).map(p => [p.user_id, p]));
+        setRestrictedUsers((restricts as any[]).map((r: any) => ({
+          id: r.id, restricted_id: r.restricted_id,
+          username: rMap[r.restricted_id]?.username || "user",
+          avatar_url: rMap[r.restricted_id]?.avatar_url || null,
+        })));
+      }
     };
     fetchBlocked();
   }, [user]);
@@ -89,6 +112,12 @@ const PrivacySettings = () => {
     await supabase.from("blocked_users").delete().eq("id", blockId);
     setBlockedUsers(prev => prev.filter(b => b.id !== blockId));
     toast.success("User unblocked");
+  };
+
+  const handleUnrestrict = async (restrictId: string) => {
+    await supabase.from("restricted_users" as any).delete().eq("id", restrictId);
+    setRestrictedUsers(prev => prev.filter(r => r.id !== restrictId));
+    toast.success("User unrestricted");
   };
 
   if (activeSection === "password") {
@@ -173,6 +202,46 @@ const PrivacySettings = () => {
     );
   }
 
+  if (activeSection === "restricted") {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <button onClick={() => setActiveSection("menu")}>
+            <PuffyIcon name="arrow-left" size={22} />
+          </button>
+          <h1 className="text-lg font-bold text-foreground">Restricted Accounts</h1>
+        </div>
+        {restrictedUsers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+            <PuffyIcon name="shield" size={48} className="opacity-30 mb-3" />
+            <p className="text-sm">No restricted accounts</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            {restrictedUsers.map((ru) => (
+              <div key={ru.id} className="flex items-center gap-3 px-4 py-3">
+                {ru.avatar_url ? (
+                  <img src={ru.avatar_url} alt="" className="h-12 w-12 rounded-[40%] object-cover" />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[40%] bg-secondary">
+                    <PuffyIcon name="user" size={20} />
+                  </div>
+                )}
+                <span className="flex-1 font-semibold text-foreground">{ru.username}</span>
+                <button
+                  onClick={() => handleUnrestrict(ru.id)}
+                  className="rounded-lg bg-destructive/20 px-4 py-1.5 text-xs font-semibold text-destructive"
+                >
+                  Unrestrict
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="px-4 py-3">
@@ -205,6 +274,17 @@ const PrivacySettings = () => {
         >
           <PuffyIcon name="shield" size={20} />
           <span className="flex-1 text-foreground">{t("password")}</span>
+          <PuffyIcon name="chevron-right" size={18} className="opacity-50" />
+        </button>
+
+        {/* Restricted Accounts */}
+        <button
+          onClick={() => setActiveSection("restricted")}
+          className="flex w-full items-center gap-4 px-4 py-4 text-left active:bg-secondary/50 transition-colors"
+        >
+          <PuffyIcon name="shield" size={20} />
+          <span className="flex-1 text-foreground">Restricted Accounts</span>
+          <span className="text-sm text-muted-foreground">{restrictedUsers.length}</span>
           <PuffyIcon name="chevron-right" size={18} className="opacity-50" />
         </button>
 
