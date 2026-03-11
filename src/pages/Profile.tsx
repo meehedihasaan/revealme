@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import ThoughtBubble from "@/components/ThoughtBubble";
 import { useUploadProgress } from "@/hooks/useUploadProgress";
+import PullToRefresh from "@/components/PullToRefresh";
 
 const STORY_GRADIENT = "gradient-story-ring";
 
