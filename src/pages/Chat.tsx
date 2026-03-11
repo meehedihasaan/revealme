@@ -318,6 +318,8 @@ const Chat = () => {
     return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
   };
 
+  const isBlocked = otherUser ? blockedIds.has(otherUser.user_id) : false;
+
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
@@ -327,6 +329,29 @@ const Chat = () => {
           <div className="h-4 w-24 rounded bg-muted animate-pulse" />
         </div>
         <ChatShimmer />
+      </div>
+    );
+  }
+
+  if (isBlocked) {
+    return (
+      <div className="flex h-screen flex-col bg-background">
+        <div className="flex items-center gap-3 border-b border-border px-4 py-3 shrink-0">
+          <button onClick={() => navigate("/messages")}>
+            <PuffyIcon name="arrow-left" size={22} />
+          </button>
+          <p className="font-semibold text-foreground">{otherUser?.username || "User"}</p>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground px-6">
+          <PuffyIcon name="shield" size={48} className="opacity-30 mb-3" />
+          <p className="text-sm text-center">You have blocked this user. Unblock them from Privacy Settings to continue messaging.</p>
+          <button
+            onClick={() => navigate("/settings/privacy")}
+            className="mt-4 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+          >
+            Privacy Settings
+          </button>
+        </div>
       </div>
     );
   }
