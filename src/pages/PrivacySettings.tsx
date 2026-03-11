@@ -231,6 +231,17 @@ const PrivacySettings = () => {
           <PuffyIcon name="chevron-right" size={18} className="opacity-50" />
         </button>
 
+        {/* Restricted Accounts */}
+        <button
+          onClick={() => setActiveSection("restricted")}
+          className="flex w-full items-center gap-4 px-4 py-4 text-left active:bg-secondary/50 transition-colors"
+        >
+          <PuffyIcon name="shield" size={20} />
+          <span className="flex-1 text-foreground">Restricted Accounts</span>
+          <span className="text-sm text-muted-foreground">{restrictedUsers.length}</span>
+          <PuffyIcon name="chevron-right" size={18} className="opacity-50" />
+        </button>
+
         {/* Blocked Accounts */}
         <button
           onClick={() => setActiveSection("blocked")}
