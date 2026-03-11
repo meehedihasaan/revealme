@@ -407,17 +407,30 @@ const Chat = () => {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-            <PuffyIcon name="message-circle" size={48} className="opacity-20 mb-3" />
-            <p className="text-sm mb-4">Send a message to start the conversation</p>
-            {/* Wave button */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={handleSendWave}
-              className="flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-5 py-2.5 transition-colors hover:bg-primary/20"
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.2 }}
+              className="flex flex-col items-center"
             >
-              <img src="/src/assets/icons/wave.png" alt="wave" className="h-5 w-5" />
-              <span className="text-sm font-semibold text-primary">Hey!</span>
-            </motion.button>
+              <motion.div
+                animate={{ rotate: [0, 20, -20, 15, -15, 0], y: [0, -6, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+              >
+                <img src="/src/assets/icons/wave.png" alt="wave" className="h-16 w-16 mb-4" />
+              </motion.div>
+              <p className="text-lg font-semibold text-foreground mb-1">Say hello!</p>
+              <p className="text-sm text-muted-foreground mb-5">Start the conversation with a wave</p>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                onClick={handleSendWave}
+                className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 transition-colors shadow-lg"
+              >
+                <img src="/src/assets/icons/wave.png" alt="wave" className="h-5 w-5 brightness-0 invert" />
+                <span className="text-sm font-bold text-primary-foreground">Hey!</span>
+              </motion.button>
+            </motion.div>
           </div>
         ) : (
           groupedMessages.map((group) => (
