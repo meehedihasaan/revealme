@@ -639,20 +639,6 @@ const Chat = () => {
                               }`}>
                                 {msg.text}
                               </div>
-                              {/* Heart animation on double tap */}
-                              <AnimatePresence>
-                                {heartAnimId === msg.id && (
-                                  <motion.span
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    animate={{ scale: 1.3, opacity: 1 }}
-                                    exit={{ scale: 0, opacity: 0 }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                                    className="absolute inset-0 flex items-center justify-center pointer-events-none text-3xl"
-                                  >
-                                    ❤️
-                                  </motion.span>
-                                )}
-                              </AnimatePresence>
                               {/* Reaction indicator */}
                               {msg.hasReaction && (
                                 <span className={`absolute -bottom-2.5 ${isMine ? "left-1" : "right-1"} text-sm`}>
