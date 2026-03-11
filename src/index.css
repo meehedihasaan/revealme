@@ -121,9 +121,9 @@
   }
 
   .text-reveal {
-    font-family: 'Playfair Display', serif;
-    font-weight: 900;
-    letter-spacing: -0.02em;
+    font-family: 'Auckland Hills', 'Playfair Display', serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
   }
 
   .gradient-primary {
