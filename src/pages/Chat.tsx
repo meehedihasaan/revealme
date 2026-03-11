@@ -320,6 +320,35 @@ const Chat = () => {
     sendMessage("Hi 👋");
   };
 
+  // Double-tap to love react
+  const handleDoubleTap = async (msg: Message) => {
+    if (!user || msg.text === "🚫 This message was deleted") return;
+    const now = Date.now();
+    if (doubleTapRef.current.id === msg.id && now - doubleTapRef.current.time < 300) {
+      // Double tap detected
+      doubleTapRef.current = { id: "", time: 0 };
+      
+      if (msg.hasReaction) {
+        // Remove reaction
+        await supabase.from("message_reactions").delete()
+          .eq("message_id", msg.id).eq("user_id", user.id);
+        setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, hasReaction: false } : m));
+      } else {
+        // Add reaction with heart animation
+        setHeartAnimId(msg.id);
+        setTimeout(() => setHeartAnimId(null), 800);
+        setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, hasReaction: true } : m));
+        await supabase.from("message_reactions").insert({
+          message_id: msg.id,
+          user_id: user.id,
+          reaction: "❤️",
+        });
+      }
+    } else {
+      doubleTapRef.current = { id: msg.id, time: now };
+    }
+  };
+
   // Group messages by date
   const groupedMessages = messages.reduce<{ date: string; msgs: Message[] }[]>((acc, msg) => {
     const date = new Date(msg.created_at).toLocaleDateString();
