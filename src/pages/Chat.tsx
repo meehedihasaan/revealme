@@ -33,6 +33,7 @@ const Chat = () => {
   const navigate = useNavigate();
   const { conversationId } = useParams<{ conversationId: string }>();
   const { user } = useAuth();
+  const { blockedIds, refetch: refetchBlocked } = useBlockedUsers();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
