@@ -23,7 +23,7 @@ import logOut from "@/assets/icons/log-out.png";
 import chevronRight from "@/assets/icons/chevron-right.png";
 import chevronDown from "@/assets/icons/chevron-down.png";
 import check from "@/assets/icons/check.png";
-import feed from "@/assets/icons/feed.png";
+import wave from "@/assets/icons/wave.png";
 
 const iconMap: Record<string, string> = {
   "arrow-left": arrowLeft,
