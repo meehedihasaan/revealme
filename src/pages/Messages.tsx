@@ -86,7 +86,7 @@ const Messages = () => {
         username: prof?.username || "user",
         avatar_url: prof?.avatar_url || null,
         is_verified: prof?.is_verified || false,
-        lastMessage: latestMsg?.image_url ? "📷 Photo" : (latestMsg?.text || ""),
+        lastMessage: latestMsg?.image_url ? "📷 Photo" : (latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "📸 Shared a post" : (latestMsg?.text || "")),
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
         is_online: isRecentlyOnline,
