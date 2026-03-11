@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate, PanInfo } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import BottomNav from "@/components/BottomNav";
@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { MessagesShimmer } from "@/components/ShimmerLoader";
 import PullToRefresh from "@/components/PullToRefresh";
+import { toast } from "sonner";
 
 interface ConversationItem {
   conversation_id: string;
