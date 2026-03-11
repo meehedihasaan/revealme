@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChatShimmer } from "@/components/ShimmerLoader";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserOnlineStatus, formatLastOnline } from "@/hooks/usePresence";
+import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import ChatMessageMenu from "@/components/ChatMessageMenu";
 import ChatHeaderMenu from "@/components/ChatHeaderMenu";
 

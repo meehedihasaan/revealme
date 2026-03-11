@@ -62,6 +62,7 @@ const ChatHeaderMenu = ({ otherUserId, otherUsername, isOpen, onClose, onRestric
     setRestrictLoading(false);
     onClose();
   };
+
   const handleDeleteChat = async () => {
     toast.success("Chat cleared");
     onClose();
@@ -104,13 +105,22 @@ const ChatHeaderMenu = ({ otherUserId, otherUsername, isOpen, onClose, onRestric
               <PuffyIcon name="shield" size={16} /> {isRestricted ? "Unrestrict" : "Restrict"}
             </button>
             <button onClick={handleDeleteChat} className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-secondary transition-colors flex items-center gap-3 border-t border-border/50">
-              🗑️ <span>Delete Chat</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-foreground shrink-0">
+                <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+              </svg>
+              <span>Delete Chat</span>
             </button>
             <button onClick={handleReport} className="w-full px-4 py-3 text-left text-sm text-destructive hover:bg-destructive/10 transition-colors flex items-center gap-3 border-t border-border/50">
-              ⚠️ <span>Report</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-destructive shrink-0">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <span>Report</span>
             </button>
             <button onClick={handleBlock} disabled={blocking} className="w-full px-4 py-3 text-left text-sm text-destructive hover:bg-destructive/10 transition-colors flex items-center gap-3 border-t border-border/50">
-              🚫 <span>Block @{otherUsername}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-destructive shrink-0">
+                <circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+              </svg>
+              <span>Block @{otherUsername}</span>
             </button>
           </motion.div>
         </>
