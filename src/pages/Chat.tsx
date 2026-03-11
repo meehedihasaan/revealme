@@ -91,7 +91,20 @@ const Chat = () => {
           .eq("conversation_id", conversationId)
           .order("created_at", { ascending: true }),
       ]);
-      setMessages((messagesRes.data as Message[]) || []);
+      const msgs = (messagesRes.data as Message[]) || [];
+      
+      // Fetch reactions for these messages
+      if (msgs.length > 0) {
+        const msgIds = msgs.map(m => m.id);
+        const { data: reactions } = await supabase
+          .from("message_reactions")
+          .select("message_id")
+          .in("message_id", msgIds);
+        const reactedIds = new Set((reactions || []).map((r: any) => r.message_id));
+        msgs.forEach(m => { m.hasReaction = reactedIds.has(m.id); });
+      }
+      
+      setMessages(msgs);
       if (partnerRes.data && partnerRes.data.length > 0) {
         const otherUserId = partnerRes.data[0].user_id;
         const { data: prof } = await supabase
