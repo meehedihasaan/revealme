@@ -183,7 +183,6 @@ const Notifications = () => {
   };
 
   return (
-    <PullToRefresh onRefresh={async () => { setLoading(true); await fetchNotifications(); }}>
     <div className="min-h-screen bg-background pb-20">
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-2xl font-bold text-foreground">
@@ -201,6 +200,7 @@ const Notifications = () => {
         </div>
       </div>
 
+      <PullToRefresh onRefresh={async () => { setLoading(true); await fetchNotifications(); }}>
       {loading ? (
         <NotificationsShimmer />
       ) : notifications.length === 0 ? (
