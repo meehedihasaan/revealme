@@ -232,7 +232,7 @@ const Messages = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <p className={`truncate text-sm flex items-center gap-1 ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                    {conv.lastMessageIcon && <span>{conv.lastMessageIcon}</span>}
+                    {conv.lastMessageIcon === "camera" && <img src="/src/assets/icons/camera-filled.png" alt="" className="h-4 w-4 opacity-60" />}
                     {conv.lastMessage || "Start a conversation"}
                   </p>
                   {conv.unread > 0 && (
