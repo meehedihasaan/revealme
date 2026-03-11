@@ -76,6 +76,7 @@ const EditProfile = () => {
         const path = `${user.id}/cover.${ext}`;
         await supabase.storage.from("avatars").upload(path, coverFile, { upsert: true });
         const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+        cover_url = `${publicUrl}?t=${Date.now()}`;
         cover_url = publicUrl;
       }
 

@@ -45,6 +45,7 @@ const SetAvatar = () => {
       const { data: { publicUrl } } = supabase.storage
         .from("avatars")
         .getPublicUrl(filePath);
+      const avatarUrlWithCache = `${publicUrl}?t=${Date.now()}`;
 
       await supabase
         .from("profiles")
