@@ -661,7 +661,7 @@ const Chat = () => {
                 onClick={handleSendWave}
                 className="shrink-0"
               >
-                <PuffyIcon name="wave" size={22} className="opacity-80" />
+                <img src={waveIcon} alt="wave" className="h-[22px] w-[22px] opacity-80" draggable={false} />
               </motion.button>
             ) : (
               <motion.button
