@@ -181,12 +181,12 @@ const Feed = () => {
             <button
               onClick={() => userHasStory ? navigate(`/story?user=${user?.id}`) : navigate("/create-story")}
             >
-            <div className={`rounded-[30%] p-[2.5px] ${userHasStory ? STORY_GRADIENT : ""}`}>
-                <div className="rounded-[30%] border-[2.5px] border-background overflow-hidden">
+            <div className={`rounded-[40%] p-[2.5px] ${userHasStory ? STORY_GRADIENT : ""}`}>
+                <div className="rounded-[40%] border-[2.5px] border-background overflow-hidden">
                   {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="You" className="h-[64px] w-[64px] rounded-[30%] object-cover block" />
+                    <img src={profile.avatar_url} alt="You" className="h-[64px] w-[64px] rounded-[40%] object-cover block" />
                   ) : (
-                    <div className="flex h-[64px] w-[64px] items-center justify-center rounded-[30%] bg-secondary">
+                    <div className="flex h-[64px] w-[64px] items-center justify-center rounded-[40%] bg-secondary">
                       <PuffyIcon name="user" size={28} />
                     </div>
                   )}
