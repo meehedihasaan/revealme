@@ -156,7 +156,6 @@ const Explore = () => {
   };
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
@@ -165,6 +164,8 @@ const Explore = () => {
           <img src={compassIcon} alt="Map" className="h-[22px] w-[22px] dark:invert" />
         </button>
       </div>
+
+      <PullToRefresh onRefresh={handleRefresh}>
 
       {/* Search */}
       <div className="px-4 pb-2">
