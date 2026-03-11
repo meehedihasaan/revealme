@@ -46,16 +46,31 @@ const PrivacySettings = () => {
         .from("blocked_users")
         .select("id, blocked_id")
         .eq("blocker_id", user.id);
-      if (!blocks || blocks.length === 0) { setBlockedUsers([]); return; }
-      const ids = blocks.map(b => b.blocked_id);
-      const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", ids);
-      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
-      setBlockedUsers(blocks.map(b => ({
-        id: b.id,
-        blocked_id: b.blocked_id,
-        username: profileMap[b.blocked_id]?.username || "user",
-        avatar_url: profileMap[b.blocked_id]?.avatar_url || null,
-      })));
+      if (!blocks || blocks.length === 0) { setBlockedUsers([]); } else {
+        const ids = blocks.map(b => b.blocked_id);
+        const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", ids);
+        const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+        setBlockedUsers(blocks.map(b => ({
+          id: b.id, blocked_id: b.blocked_id,
+          username: profileMap[b.blocked_id]?.username || "user",
+          avatar_url: profileMap[b.blocked_id]?.avatar_url || null,
+        })));
+      }
+      // Fetch restricted users
+      const { data: restricts } = await supabase
+        .from("restricted_users" as any)
+        .select("id, restricted_id")
+        .eq("restrictor_id", user.id);
+      if (!restricts || restricts.length === 0) { setRestrictedUsers([]); } else {
+        const rIds = (restricts as any[]).map((r: any) => r.restricted_id);
+        const { data: rProfiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", rIds);
+        const rMap = Object.fromEntries((rProfiles || []).map(p => [p.user_id, p]));
+        setRestrictedUsers((restricts as any[]).map((r: any) => ({
+          id: r.id, restricted_id: r.restricted_id,
+          username: rMap[r.restricted_id]?.username || "user",
+          avatar_url: rMap[r.restricted_id]?.avatar_url || null,
+        })));
+      }
     };
     fetchBlocked();
   }, [user]);
