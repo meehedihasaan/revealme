@@ -236,8 +236,18 @@ const Chat = () => {
   const sendMessage = async (overrideText?: string) => {
     const textToSend = overrideText ?? input.trim();
     if ((!textToSend && !selectedFile) || !user || !conversationId || sending) return;
+
+    const keepComposerFocused = () => {
+      requestAnimationFrame(() => {
+        chatInputRef.current?.focus({ preventScroll: true });
+      });
+    };
+
     setSending(true);
-    if (!overrideText) setInput("");
+    if (!overrideText) {
+      setInput("");
+      keepComposerFocused();
+    }
 
     let imageUrl: string | null = null;
     if (selectedFile) {
@@ -267,9 +277,9 @@ const Chat = () => {
     } else if (error) {
       setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
     }
+
     setSending(false);
-    // Keep focus on input so user can type next message
-    setTimeout(() => chatInputRef.current?.focus(), 50);
+    keepComposerFocused();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -773,6 +783,7 @@ const Chat = () => {
             {!editingId && !input.trim() && !selectedFile ? (
               <motion.button
                 whileTap={{ scale: 0.85 }}
+                onPointerDown={(e) => e.preventDefault()}
                 onClick={handleSendWave}
                 className="shrink-0"
               >
@@ -781,6 +792,7 @@ const Chat = () => {
             ) : (
               <motion.button
                 whileTap={{ scale: 0.85 }}
+                onPointerDown={(e) => e.preventDefault()}
                 onClick={() => editingId ? handleSaveEdit() : sendMessage()}
                 disabled={editingId ? !editText.trim() : ((!input.trim() && !selectedFile) || sending || uploading)}
                 className="shrink-0 text-primary transition-opacity disabled:opacity-30"
