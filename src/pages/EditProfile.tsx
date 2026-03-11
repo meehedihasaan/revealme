@@ -77,7 +77,6 @@ const EditProfile = () => {
         await supabase.storage.from("avatars").upload(path, coverFile, { upsert: true });
         const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
         cover_url = `${publicUrl}?t=${Date.now()}`;
-        cover_url = publicUrl;
       }
 
       if (username !== profile?.username && username) {
