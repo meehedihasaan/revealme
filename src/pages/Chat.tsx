@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
-import waveIcon from "@/assets/icons/wave.png";
+import waveIcon from "@/assets/icons/wave-hand.png";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import SharedPostCard, { parseSharedPost } from "@/components/SharedPostCard";
 import { supabase } from "@/integrations/supabase/client";
