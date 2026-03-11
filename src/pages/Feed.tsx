@@ -145,7 +145,7 @@ const Feed = () => {
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
-        <h1 className="text-reveal text-2xl text-foreground">Reveal.</h1>
+        <h1 className="text-reveal text-2xl text-foreground">Revealme.</h1>
         <div className="flex items-center gap-3">
           <button className="relative text-foreground" onClick={() => navigate("/messages")}>
             <PuffyIcon name="message-circle" size={24} />
