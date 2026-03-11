@@ -235,7 +235,6 @@ const Messages = () => {
                     {conv.lastMessageIcon && <span>{conv.lastMessageIcon}</span>}
                     {conv.lastMessage || "Start a conversation"}
                   </p>
-                  </p>
                   {conv.unread > 0 && (
                     <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground shrink-0">
                       {conv.unread}
