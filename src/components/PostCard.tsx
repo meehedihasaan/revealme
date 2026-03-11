@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, memo, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import Lottie from "lottie-react";
 import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,8 +12,7 @@ import PostMenu from "@/components/PostMenu";
 import LikesSheet from "@/components/LikesSheet";
 import PostImageCarousel from "@/components/PostImageCarousel";
 import heartFilledRedIcon from "@/assets/icons/heart-filled-red.png";
-
-const LottieHeart = lazy(() => import("@/components/LottieHeart"));
+import heartAnimation from "@/assets/heart-animation.json";
 
 const STORY_GRADIENT = "gradient-story-ring";
 
@@ -45,9 +45,7 @@ const DoubleTapHeart = () => (
     animate={{ opacity: 1 }}
     exit={{ opacity: 0, transition: { duration: 0.15, delay: 0.6 } }}
   >
-    <Suspense fallback={null}>
-      <LottieHeart />
-    </Suspense>
+    <Lottie animationData={heartAnimation} loop={false} autoplay style={{ width: 200, height: 200 }} />
   </motion.div>
 );
 
