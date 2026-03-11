@@ -143,7 +143,20 @@ const Explore = () => {
     navigate(`/chat/${conv.id}`);
   };
 
+  const handleRefresh = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("posts")
+      .select("id, image_url, user_id")
+      .not("image_url", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(30);
+    setPosts((data || []).filter(p => !blockedIds.has(p.user_id)) as PostResult[]);
+    setLoading(false);
+  };
+
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
