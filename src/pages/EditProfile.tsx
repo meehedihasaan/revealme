@@ -66,7 +66,7 @@ const EditProfile = () => {
         const path = `${user.id}/avatar.${ext}`;
         await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
         const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
-        avatar_url = publicUrl;
+        avatar_url = `${publicUrl}?t=${Date.now()}`;
       }
 
       if (coverDeleted) {
@@ -76,6 +76,7 @@ const EditProfile = () => {
         const path = `${user.id}/cover.${ext}`;
         await supabase.storage.from("avatars").upload(path, coverFile, { upsert: true });
         const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+        cover_url = `${publicUrl}?t=${Date.now()}`;
         cover_url = publicUrl;
       }
 
@@ -163,7 +164,7 @@ const EditProfile = () => {
         <div className="relative">
           <button onClick={() => fileRef.current?.click()}>
             {avatarPreview ? (
-              <img src={avatarPreview} alt="Avatar" className="h-24 w-24 rounded-[40%] object-cover border-4 border-background" />
+              <img src={avatarPreview} alt="Avatar" className="h-24 w-24 rounded-[40%] object-contain border-4 border-background bg-secondary" />
             ) : (
               <div className="flex h-24 w-24 items-center justify-center rounded-[40%] bg-secondary border-4 border-background">
                 <PuffyIcon name="user" size={40} />
