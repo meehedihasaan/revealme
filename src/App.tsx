@@ -46,6 +46,7 @@ import VerifyCode from "./pages/VerifyCode";
 import UserMap from "./pages/UserMap";
 import NearbyUsers from "./pages/NearbyUsers";
 import LocationSettings from "./pages/LocationSettings";
+import DiscoverPeople from "./pages/DiscoverPeople";
 
 const queryClient = new QueryClient();
 
