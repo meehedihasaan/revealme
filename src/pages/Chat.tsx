@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
-import waveIcon from "@/assets/icons/wave.png";
+import waveIcon from "@/assets/icons/wave-hand.png";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import SharedPostCard, { parseSharedPost } from "@/components/SharedPostCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -445,9 +445,8 @@ const Chat = () => {
               <motion.div
                 animate={{ rotate: [0, 20, -20, 15, -15, 0], y: [0, -6, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
-                className="text-6xl mb-4"
               >
-                👋
+                <img src={waveIcon} alt="wave" className="h-16 w-16 mb-4" draggable={false} />
               </motion.div>
               <p className="text-lg font-semibold text-foreground mb-1">Say hello!</p>
               <p className="text-sm text-muted-foreground mb-5">Start the conversation with a wave</p>
@@ -662,7 +661,7 @@ const Chat = () => {
                 onClick={handleSendWave}
                 className="shrink-0"
               >
-                <PuffyIcon name="wave" size={22} className="opacity-80" />
+                <img src={waveIcon} alt="wave" className="h-[22px] w-[22px] opacity-80" draggable={false} />
               </motion.button>
             ) : (
               <motion.button

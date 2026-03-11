@@ -203,10 +203,11 @@ const Messages = () => {
       });
     }
 
-    items.sort(
-      (a, b) =>
-        new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
-    );
+    items.sort((a, b) => {
+      const timeA = a.lastMessageTime ? new Date(a.lastMessageTime).getTime() : 0;
+      const timeB = b.lastMessageTime ? new Date(b.lastMessageTime).getTime() : 0;
+      return timeB - timeA;
+    });
 
     setConversations(items);
     setLoading(false);
