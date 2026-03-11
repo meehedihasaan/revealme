@@ -75,12 +75,11 @@ const ShareSheet = ({ postId, image, caption, username, isOpen, onClose }: Share
 
       if (!convId) throw new Error("Failed to create conversation");
 
-      // Send the post as a message
+      // Send the post as a structured shared post message
       await supabase.from("messages").insert({
         conversation_id: convId,
         sender_id: user.id,
-        text: `📸 Shared a post by @${username}: ${shareUrl}`,
-        image_url: image,
+        text: `[shared_post:${postId}]`,
       });
 
       setFollowers(prev =>
