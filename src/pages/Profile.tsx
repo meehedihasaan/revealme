@@ -124,7 +124,6 @@ const Profile = () => {
   };
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-background pb-20">
       {/* Sticky header - appears on scroll */}
       <AnimatePresence>
