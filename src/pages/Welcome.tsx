@@ -11,7 +11,7 @@ const Welcome = () => {
         animate={{ opacity: 1, y: 0 }}
         className="text-reveal text-3xl text-foreground"
       >
-        Reveal.
+        Revealme.
       </motion.h1>
 
       <motion.div
