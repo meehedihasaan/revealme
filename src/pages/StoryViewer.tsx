@@ -187,10 +187,17 @@ const StoryViewer = () => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [loaded, currentStory?.id, imageLoaded, paused, showViewers, storyIndex, groupIndex, groups.length]);
 
-  // Reset progress on story change
+  // Reset progress on story change + check if already hearted
   useEffect(() => {
     setProgress(0);
-  }, [storyIndex, groupIndex]);
+    setHearted(false);
+    if (!user || !currentStory) return;
+    setCheckingReaction(true);
+    supabase.from("story_reactions" as any).select("id")
+      .eq("story_id", currentStory.id).eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => { setHearted(!!data); setCheckingReaction(false); });
+  }, [storyIndex, groupIndex, currentStory?.id, user]);
 
   const goNext = () => {
     if (storyIndex < (currentGroup?.stories.length || 0) - 1) {
