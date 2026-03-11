@@ -210,49 +210,14 @@ const Messages = () => {
           </div>
         ) : (
           filtered.map((conv, i) => (
-            <motion.button
+            <SwipeableConversationRow
               key={conv.conversation_id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.02 }}
-              onClick={() => navigate(`/chat/${conv.conversation_id}`)}
-              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-secondary/50"
-            >
-              <div className="relative shrink-0">
-                {conv.avatar_url ? (
-                  <img src={conv.avatar_url} alt={conv.username} className="h-12 w-12 rounded-[40%] object-cover" />
-                ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[40%] bg-secondary">
-                    <PuffyIcon name="user" size={20} />
-                  </div>
-                )}
-                {conv.is_online && (
-                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background bg-success" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className={`font-semibold text-foreground truncate ${conv.unread > 0 ? "font-bold" : ""} flex items-center gap-1`}>
-                    {conv.username}
-                    {conv.is_verified && <VerifiedBadge size={13} />}
-                  </span>
-                  <span className="text-xs text-muted-foreground shrink-0 ml-2">
-                    {formatTime(conv.lastMessageTime)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className={`truncate text-sm flex items-center gap-1 ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
-                    {conv.lastMessageIcon === "camera" && <img src="/src/assets/icons/camera-filled.png" alt="" className="h-4 w-4 opacity-60" />}
-                    {conv.lastMessage || "Start a conversation"}
-                  </p>
-                  {conv.unread > 0 && (
-                    <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground shrink-0">
-                      {conv.unread}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </motion.button>
+              conv={conv}
+              index={i}
+              onTap={() => navigate(`/chat/${conv.conversation_id}`)}
+              onDelete={() => handleDeleteConversation(conv.conversation_id)}
+              formatTime={formatTime}
+            />
           ))
         )}
       </div>
