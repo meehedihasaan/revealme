@@ -583,70 +583,76 @@ const Chat = () => {
       </AnimatePresence>
 
       {/* Input bar */}
-      <div className="border-t border-border bg-background px-3 pb-4 pt-3 shrink-0">
-        <div className="flex items-center gap-3">
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
-
-          <motion.button
-            whileTap={{ scale: 0.85 }}
-            onClick={() => fileInputRef.current?.click()}
-            className="text-primary shrink-0"
-            disabled={uploading}
-          >
-            <PuffyIcon name="camera" size={22} />
-          </motion.button>
-
-          <div className="flex-1 rounded-full bg-secondary px-4 py-3">
-            <input
-              type="text"
-              value={editingId ? editText : input}
-              onChange={(e) => {
-                if (editingId) {
-                  setEditText(e.target.value);
-                } else {
-                  setInput(e.target.value);
-                  broadcastTyping();
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  if (editingId) handleSaveEdit();
-                  else sendMessage();
-                }
-              }}
-              placeholder={editingId ? "Edit message..." : "Message..."}
-              className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
-            />
-          </div>
-
-          {/* Wave button when input is empty and not editing */}
-          {!editingId && !input.trim() && !selectedFile ? (
-            <motion.button
-              whileTap={{ scale: 0.85 }}
-              onClick={handleSendWave}
-              className="shrink-0"
-            >
-              <img src="/src/assets/icons/wave.png" alt="wave" className="h-[22px] w-[22px] opacity-80" />
-            </motion.button>
-          ) : (
-            <motion.button
-              whileTap={{ scale: 0.85 }}
-              onClick={() => editingId ? handleSaveEdit() : sendMessage()}
-              disabled={editingId ? !editText.trim() : ((!input.trim() && !selectedFile) || sending || uploading)}
-              className="shrink-0 text-primary transition-opacity disabled:opacity-30"
-            >
-              {uploading ? (
-                <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
-              ) : editingId ? (
-                <PuffyIcon name="check" size={22} />
-              ) : (
-                <PuffyIcon name="send" size={22} />
-              )}
-            </motion.button>
-          )}
+      {isRestricted ? (
+        <div className="border-t border-border bg-background px-4 pb-4 pt-3 shrink-0">
+          <p className="text-center text-sm text-muted-foreground">You can't message this user</p>
         </div>
-      </div>
+      ) : (
+        <div className="border-t border-border bg-background px-3 pb-4 pt-3 shrink-0">
+          <div className="flex items-center gap-3">
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+
+            <motion.button
+              whileTap={{ scale: 0.85 }}
+              onClick={() => fileInputRef.current?.click()}
+              className="text-primary shrink-0"
+              disabled={uploading}
+            >
+              <PuffyIcon name="camera" size={22} />
+            </motion.button>
+
+            <div className="flex-1 rounded-full bg-secondary px-4 py-3">
+              <input
+                type="text"
+                value={editingId ? editText : input}
+                onChange={(e) => {
+                  if (editingId) {
+                    setEditText(e.target.value);
+                  } else {
+                    setInput(e.target.value);
+                    broadcastTyping();
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (editingId) handleSaveEdit();
+                    else sendMessage();
+                  }
+                }}
+                placeholder={editingId ? "Edit message..." : "Message..."}
+                className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              />
+            </div>
+
+            {/* Wave button when input is empty and not editing */}
+            {!editingId && !input.trim() && !selectedFile ? (
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                onClick={handleSendWave}
+                className="shrink-0"
+              >
+                <img src="/src/assets/icons/wave.png" alt="wave" className="h-[22px] w-[22px] opacity-80" />
+              </motion.button>
+            ) : (
+              <motion.button
+                whileTap={{ scale: 0.85 }}
+                onClick={() => editingId ? handleSaveEdit() : sendMessage()}
+                disabled={editingId ? !editText.trim() : ((!input.trim() && !selectedFile) || sending || uploading)}
+                className="shrink-0 text-primary transition-opacity disabled:opacity-30"
+              >
+                {uploading ? (
+                  <div className="h-[18px] w-[18px] rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
+                ) : editingId ? (
+                  <PuffyIcon name="check" size={22} />
+                ) : (
+                  <PuffyIcon name="send" size={22} />
+                )}
+              </motion.button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
