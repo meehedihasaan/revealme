@@ -295,7 +295,7 @@ const CreatePost = () => {
                   <div className="flex flex-wrap gap-2">
                     {taggedUsers.map(t => (
                       <div key={t.user_id} className="flex items-center gap-1.5 bg-secondary rounded-full px-3 py-1.5">
-                        {t.avatar_url ? <img src={t.avatar_url} className="h-4 w-4 rounded-sm object-cover" /> : <PuffyIcon name="user" size={12} />}
+                        {t.avatar_url ? <img src={t.avatar_url} className="h-4 w-4 rounded-[40%] object-cover" /> : <PuffyIcon name="user" size={12} />}
                         <span className="text-xs font-medium text-foreground">@{t.username}</span>
                         <button onClick={() => removeTag(t.user_id)} className="ml-1"><span className="text-muted-foreground text-xs">✕</span></button>
                       </div>

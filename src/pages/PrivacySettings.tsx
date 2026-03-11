@@ -152,9 +152,9 @@ const PrivacySettings = () => {
             {blockedUsers.map((bu) => (
               <div key={bu.id} className="flex items-center gap-3 px-4 py-3">
                 {bu.avatar_url ? (
-                  <img src={bu.avatar_url} alt="" className="h-12 w-12 rounded-xl object-cover" />
+                  <img src={bu.avatar_url} alt="" className="h-12 w-12 rounded-[40%] object-cover" />
                 ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[40%] bg-secondary">
                     <PuffyIcon name="user" size={20} />
                   </div>
                 )}

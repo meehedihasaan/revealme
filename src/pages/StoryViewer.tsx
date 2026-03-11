@@ -644,9 +644,9 @@ const StoryViewer = () => {
                       className="flex w-full items-center gap-3 px-5 py-3 text-left active:bg-secondary/50"
                     >
                       {v.avatar_url ? (
-                        <img src={v.avatar_url} className="h-10 w-10 rounded-xl object-cover" />
+                        <img src={v.avatar_url} className="h-10 w-10 rounded-[40%] object-cover" />
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-[40%] bg-secondary">
                           <PuffyIcon name="user" size={18} />
                         </div>
                       )}

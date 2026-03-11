@@ -145,9 +145,9 @@ const Following = () => {
               >
                 <button onClick={() => navigate(`/user/${person.user_id}`)} className="shrink-0">
                   {person.avatar_url ? (
-                    <img src={person.avatar_url} alt={username} className="h-12 w-12 rounded-xl object-cover" />
+                    <img src={person.avatar_url} alt={username} className="h-12 w-12 rounded-[40%] object-cover" />
                   ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-[40%] bg-secondary">
                       <PuffyIcon name="user" size={20} />
                     </div>
                   )}

@@ -210,10 +210,10 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
         <img
           src={comment.avatar_url}
           alt=""
-          className={`shrink-0 rounded-lg object-cover ${isReply ? "h-7 w-7" : "h-9 w-9"}`}
+          className={`shrink-0 rounded-[40%] object-cover ${isReply ? "h-7 w-7" : "h-9 w-9"}`}
         />
       ) : (
-        <div className={`flex shrink-0 items-center justify-center rounded-lg bg-secondary ${isReply ? "h-7 w-7" : "h-9 w-9"}`}>
+        <div className={`flex shrink-0 items-center justify-center rounded-[40%] bg-secondary ${isReply ? "h-7 w-7" : "h-9 w-9"}`}>
           <PuffyIcon name="user" size={isReply ? 12 : 14} />
         </div>
       )}
