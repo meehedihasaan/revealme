@@ -49,7 +49,7 @@ const SetAvatar = () => {
 
       await supabase
         .from("profiles")
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: avatarUrlWithCache })
         .eq("user_id", user.id);
     }
 
