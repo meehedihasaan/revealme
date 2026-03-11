@@ -21,6 +21,7 @@ interface Message {
   read: boolean;
   image_url?: string | null;
   mood?: string | null;
+  hasReaction?: boolean;
 }
 
 interface OtherUser {
