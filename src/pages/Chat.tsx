@@ -353,9 +353,7 @@ const Chat = () => {
           .eq("message_id", msg.id).eq("user_id", user.id);
         setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, hasReaction: false } : m));
       } else {
-        // Add reaction with heart animation
-        setHeartAnimId(msg.id);
-        setTimeout(() => setHeartAnimId(null), 800);
+        // Add reaction (no animation)
         setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, hasReaction: true } : m));
         await supabase.from("message_reactions").insert({
           message_id: msg.id,
