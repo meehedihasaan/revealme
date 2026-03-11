@@ -127,13 +127,19 @@ const Chat = () => {
     init();
   }, [conversationId, user]);
 
-  // Check if user is restricted by the other user
+  // Check if user is restricted (either direction)
   useEffect(() => {
     if (!user || !otherUser) return;
-    supabase.from("restricted_users" as any).select("id")
-      .eq("restrictor_id", otherUser.user_id).eq("restricted_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => setIsRestricted(!!data));
+    const checkRestriction = async () => {
+      // Check if other user restricted me
+      const { data: d1 } = await supabase.from("restricted_users").select("id")
+        .eq("restrictor_id", otherUser.user_id).eq("restricted_id", user.id).maybeSingle();
+      // Check if I restricted other user
+      const { data: d2 } = await supabase.from("restricted_users").select("id")
+        .eq("restrictor_id", user.id).eq("restricted_id", otherUser.user_id).maybeSingle();
+      setIsRestricted(!!d1 || !!d2);
+    };
+    checkRestriction();
   }, [user, otherUser]);
 
   // Chat-level presence for typing indicator
