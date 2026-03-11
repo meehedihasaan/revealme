@@ -73,7 +73,7 @@ const Chat = () => {
   const chatInputRef = useRef<HTMLInputElement>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const doubleTapRef = useRef<{ id: string; time: number }>({ id: "", time: 0 });
-  const [heartAnimId, setHeartAnimId] = useState<string | null>(null);
+  
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     bottomRef.current?.scrollIntoView({ behavior });
@@ -127,13 +127,19 @@ const Chat = () => {
     init();
   }, [conversationId, user]);
 
-  // Check if user is restricted by the other user
+  // Check if user is restricted (either direction)
   useEffect(() => {
     if (!user || !otherUser) return;
-    supabase.from("restricted_users" as any).select("id")
-      .eq("restrictor_id", otherUser.user_id).eq("restricted_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => setIsRestricted(!!data));
+    const checkRestriction = async () => {
+      // Check if other user restricted me
+      const { data: d1 } = await supabase.from("restricted_users").select("id")
+        .eq("restrictor_id", otherUser.user_id).eq("restricted_id", user.id).maybeSingle();
+      // Check if I restricted other user
+      const { data: d2 } = await supabase.from("restricted_users").select("id")
+        .eq("restrictor_id", user.id).eq("restricted_id", otherUser.user_id).maybeSingle();
+      setIsRestricted(!!d1 || !!d2);
+    };
+    checkRestriction();
   }, [user, otherUser]);
 
   // Chat-level presence for typing indicator
@@ -347,9 +353,7 @@ const Chat = () => {
           .eq("message_id", msg.id).eq("user_id", user.id);
         setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, hasReaction: false } : m));
       } else {
-        // Add reaction with heart animation
-        setHeartAnimId(msg.id);
-        setTimeout(() => setHeartAnimId(null), 800);
+        // Add reaction (no animation)
         setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, hasReaction: true } : m));
         await supabase.from("message_reactions").insert({
           message_id: msg.id,
@@ -402,11 +406,16 @@ const Chat = () => {
           <button onClick={() => navigate("/messages")}>
             <PuffyIcon name="arrow-left" size={22} />
           </button>
-          <p className="font-semibold text-foreground">{otherUser?.username || "User"}</p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[40%] bg-secondary">
+              <PuffyIcon name="user" size={20} />
+            </div>
+            <p className="font-semibold text-foreground">Revealme user</p>
+          </div>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground px-6">
           <PuffyIcon name="shield" size={48} className="opacity-30 mb-3" />
-          <p className="text-sm text-center">You have blocked this user. Unblock them from Privacy Settings to continue messaging.</p>
+          <p className="text-sm text-center">You can't message this user. Unblock them from Privacy Settings to continue messaging.</p>
           <button
             onClick={() => navigate("/settings/privacy")}
             className="mt-4 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
@@ -635,20 +644,6 @@ const Chat = () => {
                               }`}>
                                 {msg.text}
                               </div>
-                              {/* Heart animation on double tap */}
-                              <AnimatePresence>
-                                {heartAnimId === msg.id && (
-                                  <motion.span
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    animate={{ scale: 1.3, opacity: 1 }}
-                                    exit={{ scale: 0, opacity: 0 }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                                    className="absolute inset-0 flex items-center justify-center pointer-events-none text-3xl"
-                                  >
-                                    ❤️
-                                  </motion.span>
-                                )}
-                              </AnimatePresence>
                               {/* Reaction indicator */}
                               {msg.hasReaction && (
                                 <span className={`absolute -bottom-2.5 ${isMine ? "left-1" : "right-1"} text-sm`}>
