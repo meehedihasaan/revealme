@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { MessagesShimmer } from "@/components/ShimmerLoader";
+import PullToRefresh from "@/components/PullToRefresh";
 
 interface ConversationItem {
   conversation_id: string;
@@ -156,6 +157,7 @@ const Messages = () => {
   };
 
   return (
+    <PullToRefresh onRefresh={async () => { setLoading(true); await fetchConversations(); }}>
     <div className="min-h-screen bg-background pb-20">
       <div className="flex items-center justify-between px-4 py-3">
         <button onClick={() => navigate("/feed")}>
@@ -244,6 +246,7 @@ const Messages = () => {
 
       <BottomNav />
     </div>
+    </PullToRefresh>
   );
 };
 

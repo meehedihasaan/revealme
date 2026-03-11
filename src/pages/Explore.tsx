@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
 import { ExploreShimmer } from "@/components/ShimmerLoader";
+import PullToRefresh from "@/components/PullToRefresh";
 
 import explore1 from "@/assets/explore1.jpg";
 import explore2 from "@/assets/explore2.jpg";
@@ -142,7 +143,20 @@ const Explore = () => {
     navigate(`/chat/${conv.id}`);
   };
 
+  const handleRefresh = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("posts")
+      .select("id, image_url, user_id")
+      .not("image_url", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(30);
+    setPosts((data || []).filter(p => !blockedIds.has(p.user_id)) as PostResult[]);
+    setLoading(false);
+  };
+
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
@@ -284,6 +298,7 @@ const Explore = () => {
 
       <BottomNav />
     </div>
+    </PullToRefresh>
   );
 };
 

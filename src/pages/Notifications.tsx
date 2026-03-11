@@ -9,6 +9,7 @@ import { NotificationsShimmer } from "@/components/ShimmerLoader";
 import { formatDistanceToNow } from "date-fns";
 
 import VerifiedBadge from "@/components/VerifiedBadge";
+import PullToRefresh from "@/components/PullToRefresh";
 
 type NotifType = "like" | "comment" | "follow" | "story_react";
 
@@ -182,6 +183,7 @@ const Notifications = () => {
   };
 
   return (
+    <PullToRefresh onRefresh={async () => { setLoading(true); await fetchNotifications(); }}>
     <div className="min-h-screen bg-background pb-20">
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-2xl font-bold text-foreground">
@@ -259,6 +261,7 @@ const Notifications = () => {
 
       <BottomNav />
     </div>
+    </PullToRefresh>
   );
 };
 

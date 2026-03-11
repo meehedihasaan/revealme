@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import ThoughtBubble from "@/components/ThoughtBubble";
 import { useUploadProgress } from "@/hooks/useUploadProgress";
+import PullToRefresh from "@/components/PullToRefresh";
 
 const STORY_GRADIENT = "gradient-story-ring";
 
@@ -112,7 +113,18 @@ const Profile = () => {
     );
   }
 
+  const handleRefresh = async () => {
+    await refetch();
+    if (user) {
+      const { count: followers } = await supabase.from("follows").select("*", { count: "exact", head: true }).eq("following_id", user.id);
+      const { count: following } = await supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", user.id);
+      setFollowersCount(followers || 0);
+      setFollowingCount(following || 0);
+    }
+  };
+
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-background pb-20">
       {/* Sticky header - appears on scroll */}
       <AnimatePresence>
@@ -413,6 +425,7 @@ const Profile = () => {
 
       <BottomNav />
     </div>
+    </PullToRefresh>
   );
 };
 
