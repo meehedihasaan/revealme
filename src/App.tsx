@@ -46,6 +46,7 @@ import VerifyCode from "./pages/VerifyCode";
 import UserMap from "./pages/UserMap";
 import NearbyUsers from "./pages/NearbyUsers";
 import LocationSettings from "./pages/LocationSettings";
+import DiscoverPeople from "./pages/DiscoverPeople";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,7 @@ const AppRoutes = () => {
       <Route path="/onboarding/verify" element={<VerifyCode />} />
       <Route path="/onboarding/avatar" element={<ProtectedRoute><SetAvatar /></ProtectedRoute>} />
       <Route path="/onboarding/username" element={<ProtectedRoute><SetUsername /></ProtectedRoute>} />
+      <Route path="/onboarding/discover" element={<ProtectedRoute><DiscoverPeople /></ProtectedRoute>} />
       <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
       <Route path="/explore" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
