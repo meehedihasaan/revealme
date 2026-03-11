@@ -100,8 +100,8 @@ const ChatHeaderMenu = ({ otherUserId, otherUsername, isOpen, onClose, onRestric
             <button onClick={handleMuteNotifications} className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-secondary transition-colors flex items-center gap-3 border-t border-border/50">
               <PuffyIcon name="bell" size={16} /> Mute Notifications
             </button>
-            <button onClick={handleRestrict} className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-secondary transition-colors flex items-center gap-3 border-t border-border/50">
-              <PuffyIcon name="shield" size={16} /> Restrict
+            <button onClick={handleRestrict} disabled={restrictLoading} className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-secondary transition-colors flex items-center gap-3 border-t border-border/50">
+              <PuffyIcon name="shield" size={16} /> {isRestricted ? "Unrestrict" : "Restrict"}
             </button>
             <button onClick={handleDeleteChat} className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-secondary transition-colors flex items-center gap-3 border-t border-border/50">
               🗑️ <span>Delete Chat</span>

@@ -349,6 +349,7 @@ const Chat = () => {
           otherUsername={otherUser.username}
           isOpen={headerMenuOpen}
           onClose={() => setHeaderMenuOpen(false)}
+          onRestricted={() => setIsRestricted(true)}
         />
       )}
 

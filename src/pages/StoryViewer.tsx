@@ -545,18 +545,20 @@ const StoryViewer = () => {
         )}
       </AnimatePresence>
 
-      {/* Bottom: Viewers (for own stories) or reply area - separated from story */}
+      {/* Bottom: Viewers (for own stories) or reply area */}
       {isOwn ? (
         <div className="absolute bottom-0 left-0 right-0 z-20">
-          <div className="bg-background/95 dark:bg-card/95 backdrop-blur-md border-t border-border safe-bottom">
+          <div className="bg-black/40 backdrop-blur-xl border-t border-white/10 safe-bottom"
+            style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%)", backdropFilter: "blur(20px) saturate(180%)" }}
+          >
             <button
               onClick={(e) => { e.stopPropagation(); fetchViewers(); }}
               className="flex items-center justify-center gap-2 w-full py-4"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-foreground">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                 <polyline points="18 15 12 9 6 15" />
               </svg>
-              <span className="text-sm text-foreground font-medium">
+              <span className="text-sm text-white font-medium">
                 {viewedRef.current.size > 0 ? `Viewed` : "No views yet"}
               </span>
             </button>
@@ -564,7 +566,9 @@ const StoryViewer = () => {
         </div>
       ) : (
         <div className="absolute bottom-0 left-0 right-0 z-20" onClick={(e) => e.stopPropagation()}>
-          <div className="bg-background/95 dark:bg-card/95 backdrop-blur-md border-t border-border px-4 py-3 safe-bottom">
+          <div className="border-t border-white/10 px-4 py-3 safe-bottom"
+            style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%)", backdropFilter: "blur(20px) saturate(180%)" }}
+          >
             <div className="flex items-center gap-3">
               <form
                 onSubmit={(e) => { e.preventDefault(); handleSendReply(); }}
@@ -576,7 +580,7 @@ const StoryViewer = () => {
                   onFocus={() => { setReplyFocused(true); setPaused(true); }}
                   onBlur={() => { if (!replyText) { setReplyFocused(false); setPaused(false); } }}
                   placeholder="Send message..."
-                  className="w-full rounded-full border border-border bg-secondary px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
+                  className="w-full rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-white/40"
                 />
               </form>
               {replyFocused && replyText.trim() ? (
@@ -585,7 +589,7 @@ const StoryViewer = () => {
                   disabled={sendingReply}
                   className="p-1"
                 >
-                  <PuffyIcon name="send" size={22} />
+                  <PuffyIcon name="send" size={22} className="brightness-0 invert" />
                 </button>
               ) : (
                 <>
@@ -594,13 +598,17 @@ const StoryViewer = () => {
                     onClick={(e) => { e.stopPropagation(); handleHeartReact(); }}
                     className="p-1"
                   >
-                    <PuffyIcon name={hearted ? "heart-filled" : "heart"} size={24} />
+                    {hearted ? (
+                      <img src="/src/assets/icons/heart-filled-red.png" alt="" className="h-6 w-6" />
+                    ) : (
+                      <PuffyIcon name="heart" size={24} className="brightness-0 invert" />
+                    )}
                   </motion.button>
                   <button
                     onClick={(e) => { e.stopPropagation(); navigate(`/messages`); }}
                     className="p-1"
                   >
-                    <PuffyIcon name="send" size={22} />
+                    <PuffyIcon name="send" size={22} className="brightness-0 invert" />
                   </button>
                 </>
               )}
