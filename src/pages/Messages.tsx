@@ -88,7 +88,7 @@ const Messages = () => {
         avatar_url: prof?.avatar_url || null,
         is_verified: prof?.is_verified || false,
         lastMessage: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "Shared a post" : latestMsg?.image_url ? "Sent a photo" : (latestMsg?.text || ""),
-        lastMessageIcon: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "📸" : latestMsg?.image_url ? "📷" : null,
+        lastMessageIcon: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? null : latestMsg?.image_url ? "camera" : null,
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
         is_online: isRecentlyOnline,
