@@ -465,10 +465,19 @@ const StoryViewer = () => {
               <PuffyIcon name="user" size={16} className="invert" />
             </div>
           )}
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-semibold text-white drop-shadow">{currentGroup.display_name}</span>
-            {currentGroup.is_verified && <VerifiedBadge size={15} />}
-            <span className="text-xs text-white/60 drop-shadow">• {timeAgo}</span>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-semibold text-white drop-shadow">{currentGroup.display_name}</span>
+              {currentGroup.is_verified && <VerifiedBadge size={15} />}
+              {currentGroup.stories.length > 1 && (
+                <span className="text-xs font-medium text-white/80 drop-shadow ml-0.5">
+                  {storyIndex + 1}/{currentGroup.stories.length}
+                </span>
+              )}
+            </div>
+            <span className="text-[11px] text-white/60 drop-shadow">
+              {new Date(currentStory.created_at).toLocaleDateString(undefined, { month: "short", day: "2-digit" })} at {new Date(currentStory.created_at).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: true })}
+            </span>
           </div>
         </button>
         <div className="flex-1" />
