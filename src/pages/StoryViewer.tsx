@@ -234,11 +234,15 @@ const StoryViewer = () => {
     else goNext();
   };
 
+  const [dragY, setDragY] = useState(0);
+
   const handleDragEnd = (_: any, info: PanInfo) => {
-    if (Math.abs(info.velocity.y) > 300 && info.offset.y > 50) {
+    // Swipe down to close - lower threshold for easier closing
+    if (info.offset.y > 80 || (info.velocity.y > 200 && info.offset.y > 30)) {
       navigate(-1);
       return;
     }
+    setDragY(0);
     if (Math.abs(info.offset.x) > 60) {
       if (info.offset.x < 0) goNext();
       else goPrev();
