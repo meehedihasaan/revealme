@@ -566,8 +566,8 @@ const StoryViewer = () => {
         </div>
       ) : (
         <div className="absolute bottom-0 left-0 right-0 z-20" onClick={(e) => e.stopPropagation()}>
-          <div className="border-t border-white/10 px-4 py-3 safe-bottom"
-            style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%)", backdropFilter: "blur(20px) saturate(180%)" }}
+        <div className="px-4 py-3 safe-bottom"
+            style={{ background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.5) 100%)" }}
           >
             <div className="flex items-center gap-3">
               <form
@@ -579,7 +579,7 @@ const StoryViewer = () => {
                   onChange={(e) => setReplyText(e.target.value)}
                   onFocus={() => { setReplyFocused(true); setPaused(true); }}
                   onBlur={() => { if (!replyText) { setReplyFocused(false); setPaused(false); } }}
-                  placeholder="Send message..."
+                  placeholder="Reply privately..."
                   className="w-full rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-white/40"
                 />
               </form>
@@ -593,6 +593,12 @@ const StoryViewer = () => {
                 </button>
               ) : (
                 <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); navigate(`/messages`); }}
+                    className="p-1"
+                  >
+                    <PuffyIcon name="send" size={24} className="brightness-0 invert" />
+                  </button>
                   <motion.button
                     whileTap={{ scale: 0.8 }}
                     onClick={(e) => { e.stopPropagation(); handleHeartReact(); }}
@@ -604,12 +610,6 @@ const StoryViewer = () => {
                       <PuffyIcon name="heart" size={24} className="brightness-0 invert" />
                     )}
                   </motion.button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); navigate(`/messages`); }}
-                    className="p-1"
-                  >
-                    <PuffyIcon name="send" size={22} className="brightness-0 invert" />
-                  </button>
                 </>
               )}
             </div>

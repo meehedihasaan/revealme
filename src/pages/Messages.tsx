@@ -220,7 +220,7 @@ const Messages = () => {
         lastMessageIcon: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? null : latestMsg?.image_url ? "camera" : null,
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
-        is_online: isBlockedUser ? false : isRecentlyOnline,
+        is_online: isHidden ? false : isRecentlyOnline,
       });
     }
 

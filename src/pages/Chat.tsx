@@ -211,8 +211,20 @@ const Chat = () => {
   }, [conversationId, user]);
 
   useEffect(() => {
-    scrollToBottom(loading ? "instant" : "smooth");
-  }, [messages, loading]);
+    if (loading) return;
+    // Use setTimeout to ensure DOM has rendered before scrolling
+    const timer = setTimeout(() => {
+      scrollToBottom("instant");
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
+  // Smooth scroll on new messages
+  useEffect(() => {
+    if (!loading && messages.length > 0) {
+      scrollToBottom("smooth");
+    }
+  }, [messages.length]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
