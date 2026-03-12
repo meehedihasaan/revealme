@@ -234,11 +234,15 @@ const StoryViewer = () => {
     else goNext();
   };
 
+  const [dragY, setDragY] = useState(0);
+
   const handleDragEnd = (_: any, info: PanInfo) => {
-    if (Math.abs(info.velocity.y) > 300 && info.offset.y > 50) {
+    // Swipe down to close - lower threshold for easier closing
+    if (info.offset.y > 80 || (info.velocity.y > 200 && info.offset.y > 30)) {
       navigate(-1);
       return;
     }
+    setDragY(0);
     if (Math.abs(info.offset.x) > 60) {
       if (info.offset.x < 0) goNext();
       else goPrev();
@@ -401,23 +405,25 @@ const StoryViewer = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      style={{ opacity: dragY > 0 ? Math.max(0.3, 1 - dragY / 300) : 1 }}
     >
       <AnimatePresence mode="wait" custom={direction}>
         <motion.div
           key={`${groupIndex}-${storyIndex}`}
           custom={direction}
           initial={{ opacity: 0, x: direction > 0 ? 80 : direction < 0 ? -80 : 0 }}
-          animate={{ opacity: 1, x: 0 }}
+          animate={{ opacity: 1, x: 0, y: dragY, scale: dragY > 0 ? Math.max(0.85, 1 - dragY / 600) : 1, borderRadius: dragY > 20 ? 24 : 0 }}
           exit={{ opacity: 0, x: direction > 0 ? -80 : 80 }}
           transition={{ duration: 0.25, ease: "easeInOut" }}
-          className="absolute inset-0"
+          className="absolute inset-0 overflow-hidden"
           onClick={handleTap}
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
+          drag
+          dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+          dragElastic={{ left: 0.15, right: 0.15, top: 0.4, bottom: 0 }}
+          onDrag={(_, info) => { if (info.offset.y > 0) setDragY(info.offset.y); }}
           onDragEnd={handleDragEnd}
         >
           {/* Story image */}
@@ -431,7 +437,7 @@ const StoryViewer = () => {
 
           {/* Gradient overlays */}
           <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
         </motion.div>
       </AnimatePresence>
 
@@ -548,7 +554,7 @@ const StoryViewer = () => {
       {/* Bottom: Viewers (for own stories) or reply area */}
       {isOwn ? (
         <div className="absolute bottom-0 left-0 right-0 z-20">
-          <div className="bg-black/40 backdrop-blur-xl border-t border-white/10 safe-bottom"
+          <div className="bg-black/40 backdrop-blur-xl border-t border-white/10 pb-8"
             style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%)", backdropFilter: "blur(20px) saturate(180%)" }}
           >
             <button
@@ -566,10 +572,10 @@ const StoryViewer = () => {
         </div>
       ) : (
         <div className="absolute bottom-0 left-0 right-0 z-20" onClick={(e) => e.stopPropagation()}>
-        <div className="px-4 py-3 safe-bottom"
+          <div className="px-4 pt-3 pb-8"
             style={{ background: "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.5) 100%)" }}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-4">
               <form
                 onSubmit={(e) => { e.preventDefault(); handleSendReply(); }}
                 className="flex-1"
@@ -579,7 +585,7 @@ const StoryViewer = () => {
                   onChange={(e) => setReplyText(e.target.value)}
                   onFocus={() => { setReplyFocused(true); setPaused(true); }}
                   onBlur={() => { if (!replyText) { setReplyFocused(false); setPaused(false); } }}
-                  placeholder="Reply privately..."
+                  placeholder="Send message"
                   className="w-full rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-white/40"
                 />
               </form>
