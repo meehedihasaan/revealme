@@ -136,9 +136,27 @@ const Messages = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { blockedIds } = useBlockedUsers();
+  const [restrictedIds, setRestrictedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Fetch restricted user IDs (bidirectional)
+  useEffect(() => {
+    if (!user) return;
+    const fetchRestricted = async () => {
+      const [{ data: d1 }, { data: d2 }] = await Promise.all([
+        supabase.from("restricted_users").select("restricted_id").eq("restrictor_id", user.id),
+        supabase.from("restricted_users").select("restrictor_id").eq("restricted_id", user.id),
+      ]);
+      const ids = new Set<string>([
+        ...(d1 || []).map((r: any) => r.restricted_id),
+        ...(d2 || []).map((r: any) => r.restrictor_id),
+      ]);
+      setRestrictedIds(ids);
+    };
+    fetchRestricted();
+  }, [user]);
 
   const fetchConversations = useCallback(async () => {
     if (!user) return;
