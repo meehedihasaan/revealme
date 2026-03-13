@@ -427,13 +427,7 @@ const Chat = () => {
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground px-6">
           <PuffyIcon name="shield" size={48} className="opacity-30 mb-3" />
-          <p className="text-sm text-center">You can't message this user. Unblock them from Privacy Settings to continue messaging.</p>
-          <button
-            onClick={() => navigate("/settings/privacy")}
-            className="mt-4 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
-          >
-            Privacy Settings
-          </button>
+          <p className="text-sm text-center">You have been blocked from this user</p>
         </div>
       </div>
     );
