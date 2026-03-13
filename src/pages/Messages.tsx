@@ -229,20 +229,23 @@ const Messages = () => {
       const prof = profileMap[otherUserId];
       const lastOnline = (prof as any)?.last_online;
       const isRecentlyOnline = lastOnline ? (Date.now() - new Date(lastOnline).getTime()) < 2 * 60 * 1000 : false;
+      
+      const latestReaction = latestMsg ? reactionMap.get(latestMsg.id) : null;
+      const showReaction = latestReaction && latestMsg && new Date(latestReaction.created_at) >= new Date(latestMsg.created_at) && latestReaction.user_id !== user.id;
+      
+      const displayMessage = showReaction
+        ? "Reacted ❤️ to your message"
+        : latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "Shared a post" : latestMsg?.image_url ? "Sent a photo" : (latestMsg?.text || "");
+      const displayIcon = latestMsg?.image_url && !showReaction ? "camera" : null;
+
       items.push({
         conversation_id: convId,
         other_user_id: otherUserId,
         username: isHidden ? "Revealme user" : (prof?.username || "user"),
         avatar_url: isHidden ? null : (prof?.avatar_url || null),
         is_verified: isHidden ? false : (prof?.is_verified || false),
-        // Check if there's a reaction on the latest message that's newer than the message itself
-        const latestReaction = latestMsg ? reactionMap.get(latestMsg.id) : null;
-        const showReaction = latestReaction && latestMsg && new Date(latestReaction.created_at) >= new Date(latestMsg.created_at) && latestReaction.user_id !== user.id;
-        
-        const displayMessage = showReaction
-          ? "Reacted ❤️ to your message"
-          : latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "Shared a post" : latestMsg?.image_url ? "Sent a photo" : (latestMsg?.text || "");
-        const displayIcon = latestMsg?.image_url && !showReaction ? "camera" : null;
+        lastMessage: displayMessage,
+        lastMessageIcon: displayIcon,
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
         is_online: isHidden ? false : isRecentlyOnline,
