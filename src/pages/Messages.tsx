@@ -183,7 +183,7 @@ const Messages = () => {
         .in("user_id", otherUserIds as string[]),
       supabase
         .from("messages")
-        .select("conversation_id, text, created_at, read, sender_id, image_url")
+        .select("id, conversation_id, text, created_at, read, sender_id, image_url")
         .in("conversation_id", convIds as string[])
         .order("created_at", { ascending: false }),
     ]);
