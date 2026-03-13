@@ -270,7 +270,7 @@ const StoryViewer = () => {
         .in("story_id", storyIds)
         .order("created_at", { ascending: false }),
       supabase
-        .from("story_reactions" as any)
+        .from("story_reactions")
         .select("user_id, reaction, story_id")
         .in("story_id", storyIds),
     ]);
