@@ -47,6 +47,7 @@ import UserMap from "./pages/UserMap";
 import NearbyUsers from "./pages/NearbyUsers";
 import LocationSettings from "./pages/LocationSettings";
 import DiscoverPeople from "./pages/DiscoverPeople";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
