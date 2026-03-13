@@ -347,8 +347,8 @@ const StoryViewer = () => {
     setTimeout(() => { setShowHeartAnim(false); setPaused(false); }, 1200);
 
     try {
-      // Insert reaction into story_reactions (ignore errors if duplicate)
-      await supabase.from("story_reactions" as any).insert({
+      // Insert reaction into story_reactions
+      await supabase.from("story_reactions").insert({
         story_id: currentStory.id,
         user_id: user.id,
         reaction: "❤️",
