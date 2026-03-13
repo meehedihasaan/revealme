@@ -193,10 +193,10 @@ const StoryViewer = () => {
     setHearted(false);
     if (!user || !currentStory) return;
     setCheckingReaction(true);
-    supabase.from("story_reactions" as any).select("id")
+    supabase.from("story_reactions").select("id")
       .eq("story_id", currentStory.id).eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => { setHearted(!!data); setCheckingReaction(false); });
+      .then(({ data }: any) => { setHearted(!!data); setCheckingReaction(false); });
   }, [storyIndex, groupIndex, currentStory?.id, user]);
 
   const goNext = () => {
@@ -270,7 +270,7 @@ const StoryViewer = () => {
         .in("story_id", storyIds)
         .order("created_at", { ascending: false }),
       supabase
-        .from("story_reactions" as any)
+        .from("story_reactions")
         .select("user_id, reaction, story_id")
         .in("story_id", storyIds),
     ]);
@@ -347,8 +347,8 @@ const StoryViewer = () => {
     setTimeout(() => { setShowHeartAnim(false); setPaused(false); }, 1200);
 
     try {
-      // Insert reaction into story_reactions (ignore errors if duplicate)
-      await supabase.from("story_reactions" as any).insert({
+      // Insert reaction into story_reactions
+      await supabase.from("story_reactions").insert({
         story_id: currentStory.id,
         user_id: user.id,
         reaction: "❤️",
@@ -611,7 +611,7 @@ const StoryViewer = () => {
                     className="p-1"
                   >
                     {hearted ? (
-                      <img src="/src/assets/icons/heart-filled-red.png" alt="" className="h-6 w-6" />
+                      <span className="text-2xl">❤️</span>
                     ) : (
                       <PuffyIcon name="heart" size={24} className="brightness-0 invert" />
                     )}

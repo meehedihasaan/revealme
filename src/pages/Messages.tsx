@@ -111,7 +111,7 @@ const SwipeableConversationRow = ({
               {conv.username}
               {conv.is_verified && <VerifiedBadge size={13} />}
             </span>
-            <span className="text-xs text-muted-foreground shrink-0 ml-2">
+              <span className="text-xs text-muted-foreground shrink-0 ml-2">
               {formatTime(conv.lastMessageTime)}
             </span>
           </div>
@@ -183,7 +183,7 @@ const Messages = () => {
         .in("user_id", otherUserIds as string[]),
       supabase
         .from("messages")
-        .select("conversation_id, text, created_at, read, sender_id, image_url")
+        .select("id, conversation_id, text, created_at, read, sender_id, image_url")
         .in("conversation_id", convIds as string[])
         .order("created_at", { ascending: false }),
     ]);
@@ -192,6 +192,25 @@ const Messages = () => {
       (profilesRes.data || []).map((p) => [p.user_id, p])
     );
     const allMessages = messagesRes.data || [];
+
+    // Fetch latest reactions per conversation to show "Reacted ❤️ to your message"
+    const latestMsgIds = new Set<string>();
+    for (const partner of partners) {
+      const msg = allMessages.find((m) => m.conversation_id === partner.conversation_id);
+      if (msg) latestMsgIds.add(msg.id);
+    }
+    const { data: reactionsData } = latestMsgIds.size > 0
+      ? await supabase.from("message_reactions").select("message_id, user_id, created_at").in("message_id", [...latestMsgIds])
+      : { data: [] };
+    
+    // Build a map: message_id -> latest reaction
+    const reactionMap = new Map<string, any>();
+    for (const r of (reactionsData || [])) {
+      const existing = reactionMap.get(r.message_id);
+      if (!existing || new Date(r.created_at) > new Date(existing.created_at)) {
+        reactionMap.set(r.message_id, r);
+      }
+    }
 
     const items: ConversationItem[] = [];
 
@@ -210,14 +229,23 @@ const Messages = () => {
       const prof = profileMap[otherUserId];
       const lastOnline = (prof as any)?.last_online;
       const isRecentlyOnline = lastOnline ? (Date.now() - new Date(lastOnline).getTime()) < 2 * 60 * 1000 : false;
+      
+      const latestReaction = latestMsg ? reactionMap.get(latestMsg.id) : null;
+      const showReaction = latestReaction && latestMsg && new Date(latestReaction.created_at) >= new Date(latestMsg.created_at) && latestReaction.user_id !== user.id;
+      
+      const displayMessage = showReaction
+        ? "Reacted ❤️ to your message"
+        : latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "Shared a post" : latestMsg?.image_url ? "Sent a photo" : (latestMsg?.text || "");
+      const displayIcon = latestMsg?.image_url && !showReaction ? "camera" : null;
+
       items.push({
         conversation_id: convId,
         other_user_id: otherUserId,
         username: isHidden ? "Revealme user" : (prof?.username || "user"),
         avatar_url: isHidden ? null : (prof?.avatar_url || null),
         is_verified: isHidden ? false : (prof?.is_verified || false),
-        lastMessage: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "Shared a post" : latestMsg?.image_url ? "Sent a photo" : (latestMsg?.text || ""),
-        lastMessageIcon: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? null : latestMsg?.image_url ? "camera" : null,
+        lastMessage: displayMessage,
+        lastMessageIcon: displayIcon,
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
         is_online: isHidden ? false : isRecentlyOnline,
@@ -252,7 +280,7 @@ const Messages = () => {
               if (c.conversation_id !== msg.conversation_id) return c;
               return {
                 ...c,
-                lastMessage: msg.image_url ? "📷 Photo" : msg.text,
+                lastMessage: msg.image_url ? "Sent a photo" : msg.text,
                 lastMessageTime: msg.created_at,
                 unread: msg.sender_id !== user.id ? c.unread + 1 : c.unread,
               };
