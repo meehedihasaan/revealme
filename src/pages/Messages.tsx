@@ -217,7 +217,7 @@ const Messages = () => {
         avatar_url: isHidden ? null : (prof?.avatar_url || null),
         is_verified: isHidden ? false : (prof?.is_verified || false),
         lastMessage: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "Shared a post" : latestMsg?.image_url ? "Sent a photo" : (latestMsg?.text || ""),
-        lastMessageIcon: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? null : latestMsg?.image_url ? "camera" : null,
+        lastMessageIcon: latestMsg?.image_url ? "camera" : null,
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
         is_online: isHidden ? false : isRecentlyOnline,
