@@ -118,7 +118,7 @@ const SwipeableConversationRow = ({
           <div className="flex items-center justify-between">
             <p className={`truncate text-sm flex items-center gap-1 ${conv.unread > 0 ? "font-medium text-foreground" : "text-muted-foreground"}`}>
               {conv.lastMessageIcon === "camera" && <img src={cameraFilledIcon} alt="" className="h-4 w-4 opacity-60 icon-adaptive" />}
-              {conv.lastMessage === "Reacted ❤️ to your message" ? "Reacted ❤️ to your message" : (conv.lastMessage || "Start a conversation")}
+              {conv.lastMessage || "Start a conversation"}
             </p>
             {conv.unread > 0 && (
               <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground shrink-0">
