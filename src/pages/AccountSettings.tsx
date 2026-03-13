@@ -96,6 +96,7 @@ const AccountSettings = () => {
 
     setDeleting(true);
     try {
+      // Verify password first
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: deletePassword,
@@ -106,14 +107,15 @@ const AccountSettings = () => {
         return;
       }
 
-      await supabase.from("posts").delete().eq("user_id", user.id);
-      await supabase.from("stories").delete().eq("user_id", user.id);
-      await supabase.from("likes").delete().eq("user_id", user.id);
-      await supabase.from("saved_posts").delete().eq("user_id", user.id);
-      await supabase.from("follows").delete().eq("follower_id", user.id);
-      await supabase.from("follows").delete().eq("following_id", user.id);
-      await supabase.from("blocked_users").delete().eq("blocker_id", user.id);
-      await supabase.from("profiles").delete().eq("user_id", user.id);
+      // Call edge function to permanently delete user from server
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await supabase.functions.invoke("delete-user", {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to delete account");
+      }
 
       await signOut();
       toast.success("Account deleted successfully");

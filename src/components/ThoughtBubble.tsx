@@ -22,10 +22,12 @@ const ThoughtBubble = ({ userId, isOwnProfile = false }: ThoughtBubbleProps) => 
   useEffect(() => {
     if (!userId) return;
     const fetchThought = async () => {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from("user_thoughts")
-        .select("thought")
+        .select("thought, updated_at")
         .eq("user_id", userId)
+        .gte("updated_at", since)
         .maybeSingle();
       setThought(data?.thought || null);
       setLoading(false);

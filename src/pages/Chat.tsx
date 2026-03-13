@@ -372,6 +372,11 @@ const Chat = () => {
           user_id: user.id,
           reaction: "❤️",
         });
+        // Update last message in conversation to show reaction
+        if (msg.sender_id !== user.id) {
+          // The other user's message was reacted to - no extra message needed
+          // The inbox will show via realtime
+        }
       }
     } else {
       doubleTapRef.current = { id: msg.id, time: now };

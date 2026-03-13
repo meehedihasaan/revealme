@@ -611,7 +611,7 @@ const StoryViewer = () => {
                     className="p-1"
                   >
                     {hearted ? (
-                      <img src="/src/assets/icons/heart-filled-red.png" alt="" className="h-6 w-6" />
+                      <span className="text-2xl">❤️</span>
                     ) : (
                       <PuffyIcon name="heart" size={24} className="brightness-0 invert" />
                     )}
