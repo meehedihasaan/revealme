@@ -193,10 +193,10 @@ const StoryViewer = () => {
     setHearted(false);
     if (!user || !currentStory) return;
     setCheckingReaction(true);
-    supabase.from("story_reactions" as any).select("id")
+    supabase.from("story_reactions").select("id")
       .eq("story_id", currentStory.id).eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => { setHearted(!!data); setCheckingReaction(false); });
+      .then(({ data }: any) => { setHearted(!!data); setCheckingReaction(false); });
   }, [storyIndex, groupIndex, currentStory?.id, user]);
 
   const goNext = () => {
