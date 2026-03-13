@@ -193,6 +193,25 @@ const Messages = () => {
     );
     const allMessages = messagesRes.data || [];
 
+    // Fetch latest reactions per conversation to show "Reacted ❤️ to your message"
+    const latestMsgIds = new Set<string>();
+    for (const partner of partners) {
+      const msg = allMessages.find((m) => m.conversation_id === partner.conversation_id);
+      if (msg) latestMsgIds.add(msg.id);
+    }
+    const { data: reactionsData } = latestMsgIds.size > 0
+      ? await supabase.from("message_reactions").select("message_id, user_id, created_at").in("message_id", [...latestMsgIds])
+      : { data: [] };
+    
+    // Build a map: message_id -> latest reaction
+    const reactionMap = new Map<string, any>();
+    for (const r of (reactionsData || [])) {
+      const existing = reactionMap.get(r.message_id);
+      if (!existing || new Date(r.created_at) > new Date(existing.created_at)) {
+        reactionMap.set(r.message_id, r);
+      }
+    }
+
     const items: ConversationItem[] = [];
 
     for (const partner of partners) {
