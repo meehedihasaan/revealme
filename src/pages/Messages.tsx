@@ -235,8 +235,14 @@ const Messages = () => {
         username: isHidden ? "Revealme user" : (prof?.username || "user"),
         avatar_url: isHidden ? null : (prof?.avatar_url || null),
         is_verified: isHidden ? false : (prof?.is_verified || false),
-        lastMessage: latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "Shared a post" : latestMsg?.image_url ? "Sent a photo" : (latestMsg?.text || ""),
-        lastMessageIcon: latestMsg?.image_url ? "camera" : null,
+        // Check if there's a reaction on the latest message that's newer than the message itself
+        const latestReaction = latestMsg ? reactionMap.get(latestMsg.id) : null;
+        const showReaction = latestReaction && latestMsg && new Date(latestReaction.created_at) >= new Date(latestMsg.created_at) && latestReaction.user_id !== user.id;
+        
+        const displayMessage = showReaction
+          ? "Reacted ❤️ to your message"
+          : latestMsg?.text?.match(/\[shared_post:[a-f0-9-]+\]/) ? "Shared a post" : latestMsg?.image_url ? "Sent a photo" : (latestMsg?.text || "");
+        const displayIcon = latestMsg?.image_url && !showReaction ? "camera" : null;
         lastMessageTime: latestMsg?.created_at || "",
         unread: unreadCount,
         is_online: isHidden ? false : isRecentlyOnline,
