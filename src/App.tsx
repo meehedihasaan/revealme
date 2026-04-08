@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import PageLoader from "@/components/PageLoader";
 import PageLoadWrapper from "@/components/PageLoadWrapper";
 import { usePresence } from "@/hooks/usePresence";
+import { useScrollToTop } from "@/hooks/useScrollToTop";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -41,6 +42,9 @@ import AdminUserManagement from "./pages/admin/AdminUserManagement";
 import AdminRoleManagement from "./pages/admin/AdminRoleManagement";
 import AdminAppSettings from "./pages/admin/AdminAppSettings";
 import AdminPosts from "./pages/admin/AdminPosts";
+import AdminBanManagement from "./pages/admin/AdminBanManagement";
+import AdminWordFilter from "./pages/admin/AdminWordFilter";
+import AdminReportedContent from "./pages/admin/AdminReportedContent";
 import PostDetail from "./pages/PostDetail";
 import VerifyCode from "./pages/VerifyCode";
 import UserMap from "./pages/UserMap";
@@ -61,7 +65,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, profile, loading } = useAuth();
   if (loading) return <PageLoader />;
-  // Wait for both user and profile to be loaded before making routing decisions
   if (user && profile === null) return <PageLoader />;
   if (user && profile?.onboarding_completed) return <Navigate to="/feed" replace />;
   if (user && !profile?.onboarding_completed) return <Navigate to="/onboarding/avatar" replace />;
@@ -69,7 +72,8 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  usePresence(); // Track global online presence
+  usePresence();
+  useScrollToTop();
   return (
   <div className="mx-auto max-w-md min-h-screen">
     <Routes>
@@ -111,6 +115,9 @@ const AppRoutes = () => {
         <Route path="roles" element={<AdminRoleManagement />} />
         <Route path="settings" element={<AdminAppSettings />} />
         <Route path="posts" element={<AdminPosts />} />
+        <Route path="bans" element={<AdminBanManagement />} />
+        <Route path="word-filter" element={<AdminWordFilter />} />
+        <Route path="reports" element={<AdminReportedContent />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

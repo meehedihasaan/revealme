@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useBannedWords, containsBannedWord } from "@/hooks/useBannedWords";
 
 const SetUsername = () => {
   const navigate = useNavigate();
@@ -12,6 +13,9 @@ const SetUsername = () => {
   const [userLocation, setUserLocation] = useState(profile?.location || "");
   const [loading, setLoading] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
+  const { data: bannedWords = [] } = useBannedWords();
+
+  const hasBannedWord = username.length > 0 && containsBannedWord(username, bannedWords);
 
   const checkAvailability = async (value: string) => {
     if (value.length < 3) {
@@ -27,7 +31,7 @@ const SetUsername = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/[^a-zA-Z0-9._]/g, "").toLowerCase();
+    const val = e.target.value.replace(/[^a-zA-Z0-9._]/g, "").toLowerCase().slice(0, 10);
     setUsername(val);
     checkAvailability(val);
   };
@@ -36,6 +40,10 @@ const SetUsername = () => {
     if (!user || !username || username.length < 3) return;
     if (available === false) {
       toast.error("Username is taken");
+      return;
+    }
+    if (hasBannedWord) {
+      toast.error("Username contains a restricted word");
       return;
     }
     setLoading(true);
@@ -113,7 +121,7 @@ const SetUsername = () => {
           className="mb-5"
         >
           <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Username
+            Username <span className="font-normal normal-case text-muted-foreground/60">(max 10 chars)</span>
           </label>
           <div className="group relative flex items-center rounded-2xl border-2 border-transparent bg-secondary px-4 py-3.5 transition-all focus-within:border-primary/40 focus-within:bg-secondary/80">
             <span className="mr-1 text-lg font-bold bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
@@ -124,10 +132,11 @@ const SetUsername = () => {
               value={username}
               onChange={handleChange}
               placeholder="yourname"
-              maxLength={30}
+              maxLength={10}
               className="flex-1 bg-transparent text-lg font-medium text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
             />
-            {username.length >= 3 && available !== null && (
+            <span className="text-xs text-muted-foreground mr-2">{username.length}/10</span>
+            {username.length >= 3 && available !== null && !hasBannedWord && (
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -141,7 +150,16 @@ const SetUsername = () => {
               </motion.span>
             )}
           </div>
-          {username.length >= 3 && available !== null && (
+          {hasBannedWord && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-2 text-xs font-medium text-destructive"
+            >
+              This username contains a restricted word
+            </motion.p>
+          )}
+          {!hasBannedWord && username.length >= 3 && available !== null && (
             <motion.p
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
@@ -188,7 +206,7 @@ const SetUsername = () => {
         >
           <button
             onClick={handleSubmit}
-            disabled={loading || !available || username.length < 3}
+            disabled={loading || !available || username.length < 3 || hasBannedWord}
             className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
           >
             {loading ? (

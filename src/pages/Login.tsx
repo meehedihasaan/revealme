@@ -2,30 +2,69 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-
 import { toast } from "sonner";
-import PuffyIcon from "@/components/PuffyIcon";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    let email = identifier.trim();
+
+    // If not an email, look up username via edge function
+    if (!email.includes("@")) {
+      try {
+        const { data, error } = await supabase.functions.invoke("lookup-username", {
+          body: { username: email.toLowerCase() },
+        });
+        if (error || !data?.email) {
+          toast.error("Username not found");
+          setLoading(false);
+          return;
+        }
+        email = data.email;
+      } catch {
+        toast.error("Failed to look up username");
+        setLoading(false);
+        return;
+      }
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      // Check if user is banned
+      if (error.message) {
+        toast.error(error.message);
+      }
     } else {
+      // Check ban status after login
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: ban } = await supabase
+          .from('user_bans')
+          .select('expires_at, reason')
+          .eq('user_id', user.id)
+          .gt('expires_at', new Date().toISOString())
+          .maybeSingle();
+        if (ban) {
+          await supabase.auth.signOut();
+          toast.error(`Your account is temporarily banned: ${ban.reason}`);
+          return;
+        }
+      }
       navigate("/feed");
     }
   };
 
   const handleForgotPassword = async () => {
-    if (!email) {
+    const email = identifier.trim();
+    if (!email || !email.includes("@")) {
       toast.error("Please enter your email address first");
       return;
     }
@@ -41,7 +80,6 @@ const Login = () => {
     }
   };
 
-
   return (
     <div className="flex min-h-screen flex-col bg-background px-6 py-8">
       <motion.div
@@ -54,12 +92,12 @@ const Login = () => {
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Email</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">Email or Username</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="your@email.com or username"
               required
               className="w-full rounded-xl bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
@@ -95,8 +133,6 @@ const Login = () => {
             {loading ? "Logging in..." : "Log in"}
           </button>
         </form>
-
-
 
         <div className="mt-auto pt-8 text-center">
           <p className="text-sm text-muted-foreground">
