@@ -47,6 +47,24 @@ export type Database = {
         }
         Relationships: []
       }
+      banned_words: {
+        Row: {
+          created_at: string
+          id: string
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          word: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          word?: string
+        }
+        Relationships: []
+      }
       blocked_users: {
         Row: {
           blocked_id: string
@@ -198,6 +216,75 @@ export type Database = {
           follower_id?: string
           following_id?: string
           id?: string
+        }
+        Relationships: []
+      }
+      highlight_items: {
+        Row: {
+          created_at: string
+          display_order: number
+          highlight_id: string
+          id: string
+          image_url: string
+          story_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          highlight_id: string
+          id?: string
+          image_url: string
+          story_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          highlight_id?: string
+          id?: string
+          image_url?: string
+          story_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "highlight_items_highlight_id_fkey"
+            columns: ["highlight_id"]
+            isOneToOne: false
+            referencedRelation: "highlights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "highlight_items_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      highlights: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          display_order: number
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          title?: string
+          user_id: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -633,6 +720,36 @@ export type Database = {
           },
         ]
       }
+      user_bans: {
+        Row: {
+          banned_at: string
+          banned_by: string
+          created_at: string
+          expires_at: string
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          banned_at?: string
+          banned_by: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          reason?: string
+          user_id: string
+        }
+        Update: {
+          banned_at?: string
+          banned_by?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -751,6 +868,7 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_user_banned: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
