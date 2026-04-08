@@ -94,7 +94,12 @@ export default function AdminUserManagement() {
 
   const deleteUser = useMutation({
     mutationFn: async (userId: string) => {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      // Use edge function for proper deletion
+      const { data: { session } } = await supabase.auth.getSession();
+      const { error } = await supabase.functions.invoke("delete-user", {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+        body: { target_user_id: userId },
+      });
       if (error) throw error;
     },
     onSuccess: () => {
