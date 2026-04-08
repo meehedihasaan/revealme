@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import PuffyIcon from "@/components/PuffyIcon";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,41 +16,48 @@ const Login = () => {
 
     let email = identifier.trim();
 
-    // If not an email, look up username
+    // If not an email, look up username via edge function
     if (!email.includes("@")) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("user_id")
-        .eq("username", email.toLowerCase())
-        .maybeSingle();
-
-      if (!profile) {
-        toast.error("Username not found");
+      try {
+        const { data, error } = await supabase.functions.invoke("lookup-username", {
+          body: { username: email.toLowerCase() },
+        });
+        if (error || !data?.email) {
+          toast.error("Username not found");
+          setLoading(false);
+          return;
+        }
+        email = data.email;
+      } catch {
+        toast.error("Failed to look up username");
         setLoading(false);
         return;
       }
-
-      // Get user email from auth via a workaround: try sign in with user_id won't work,
-      // so we need to store email. Instead, we'll look it up from the profiles approach.
-      // Since we can't get email from profiles, let's try another approach:
-      // We'll use the admin API or just ask user to use email.
-      // Better approach: store the lookup and use supabase auth
-      // Actually, supabase doesn't expose email from user_id on client side.
-      // So we need to use an edge function or store email in profiles.
-
-      // For now, let's try to find if there's an auth user we can match
-      // The simplest approach: look up using identifiers endpoint isn't available
-      // So let's just inform the user
-      toast.error("Please use your email address to login");
-      setLoading(false);
-      return;
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      // Check if user is banned
+      if (error.message) {
+        toast.error(error.message);
+      }
     } else {
+      // Check ban status after login
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: ban } = await supabase
+          .from('user_bans')
+          .select('expires_at, reason')
+          .eq('user_id', user.id)
+          .gt('expires_at', new Date().toISOString())
+          .maybeSingle();
+        if (ban) {
+          await supabase.auth.signOut();
+          toast.error(`Your account is temporarily banned: ${ban.reason}`);
+          return;
+        }
+      }
       navigate("/feed");
     }
   };
