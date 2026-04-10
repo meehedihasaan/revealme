@@ -1,3 +1,5 @@
+import { lazy, Suspense } from "react";
+import { icons } from "lucide-react";
 import arrowLeft from "@/assets/icons/arrow-left.png";
 import camera from "@/assets/icons/camera.png";
 import search from "@/assets/icons/search.png";
@@ -56,6 +58,37 @@ const iconMap: Record<string, string> = {
   wave,
 };
 
+// Map kebab-case names to PascalCase lucide icon names
+const lucideNameMap: Record<string, string> = {
+  "activity": "Activity",
+  "database": "Database",
+  "help-circle": "HelpCircle",
+  "alert-circle": "AlertCircle",
+  "file-text": "FileText",
+  "map-pin": "MapPin",
+  "eye": "Eye",
+  "eye-off": "EyeOff",
+  "lock": "Lock",
+  "globe": "Globe",
+  "trash": "Trash2",
+  "x": "X",
+  "image": "Image",
+  "video": "Video",
+  "download": "Download",
+  "upload": "Upload",
+  "refresh-cw": "RefreshCw",
+  "star": "Star",
+  "flag": "Flag",
+  "link": "Link",
+  "mail": "Mail",
+  "clock": "Clock",
+  "calendar": "Calendar",
+  "filter": "Filter",
+  "zap": "Zap",
+  "volume-2": "Volume2",
+  "mic": "Mic",
+};
+
 export type PuffyIconName = keyof typeof iconMap;
 
 interface PuffyIconProps {
@@ -67,22 +100,29 @@ interface PuffyIconProps {
 
 const PuffyIcon = ({ name, size = 24, className = "", style }: PuffyIconProps) => {
   const src = iconMap[name];
-  if (!src) {
-    console.warn(`PuffyIcon: unknown icon "${name}"`);
-    return null;
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={name}
+        width={size}
+        height={size}
+        className={`inline-block shrink-0 icon-adaptive ${className}`}
+        style={style}
+        draggable={false}
+      />
+    );
   }
 
-  return (
-    <img
-      src={src}
-      alt={name}
-      width={size}
-      height={size}
-      className={`inline-block shrink-0 icon-adaptive ${className}`}
-      style={style}
-      draggable={false}
-    />
-  );
+  // Fallback to Lucide icon
+  const lucideName = lucideNameMap[name] || name.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join("");
+  const LucideIcon = (icons as any)[lucideName];
+  if (LucideIcon) {
+    return <LucideIcon size={size} className={`inline-block shrink-0 ${className}`} style={style} />;
+  }
+
+  console.warn(`PuffyIcon: unknown icon "${name}"`);
+  return null;
 };
 
 export default PuffyIcon;
