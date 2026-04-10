@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Music } from "lucide-react";
+
 import Lottie from "lottie-react";
 import heartAnimation from "@/assets/heart-animation.json";
 import { supabase } from "@/integrations/supabase/client";
@@ -217,7 +217,7 @@ const Reels = () => {
       </motion.div>
 
       {/* Right side actions */}
-      <div className="absolute right-3 bottom-36 flex flex-col items-center gap-5 z-20">
+      <div className="absolute right-3 bottom-28 flex flex-col items-center gap-5 z-20">
         {/* Like */}
         <button onClick={(e) => { e.stopPropagation(); toggleLike(currentReel); }} className="flex flex-col items-center gap-1">
           {currentReel.isLiked ? (
@@ -246,7 +246,7 @@ const Reels = () => {
       </div>
 
       {/* Bottom info */}
-      <div className="absolute bottom-24 left-0 right-16 px-4 z-20">
+      <div className="absolute bottom-16 left-0 right-16 px-4 z-20 pb-1">
         {/* View count */}
         <div className="flex items-center gap-1.5 mb-2">
           <PuffyIcon name="eye" size={14} className={`${W} opacity-80`} />
@@ -278,8 +278,8 @@ const Reels = () => {
         )}
 
         {/* Audio */}
-        <div className="flex items-center gap-1.5 mt-2">
-          <Music size={12} className="text-white/70" />
+        <div className="flex items-center gap-1.5 mt-1.5">
+          <PuffyIcon name="music" size={12} className={`${W} opacity-70`} />
           <span className="text-white/70 text-xs">Audio name · audio creator</span>
         </div>
       </div>
