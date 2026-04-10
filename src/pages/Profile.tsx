@@ -6,7 +6,7 @@ import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
-import { ProfileShimmer, FeedShimmer } from "@/components/ShimmerLoader";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { useTaggedPosts } from "@/hooks/usePostTags";
@@ -108,7 +108,7 @@ const Profile = () => {
   if (!profile || loading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <ProfileShimmer />
+        <div className="min-h-screen bg-background pb-20" />
         <BottomNav />
       </div>
     );
@@ -330,7 +330,7 @@ const Profile = () => {
       {/* Posts as cards */}
       {activeTab === "grid" ? (
         loading ? (
-          <FeedShimmer />
+          null
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
@@ -362,7 +362,7 @@ const Profile = () => {
           </div>
         )
       ) : taggedLoading ? (
-        <FeedShimmer />
+        null
       ) : taggedPosts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />

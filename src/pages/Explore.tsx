@@ -7,7 +7,7 @@ import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
-import { ExploreShimmer } from "@/components/ShimmerLoader";
+
 import PullToRefresh from "@/components/PullToRefresh";
 
 import explore1 from "@/assets/explore1.jpg";
@@ -274,7 +274,7 @@ const Explore = () => {
       ) : (
         /* Content grid */
         loading ? (
-          <ExploreShimmer />
+          null
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />

@@ -5,7 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { FollowersShimmer } from "@/components/ShimmerLoader";
+
 
 interface UserItem {
   user_id: string;
@@ -127,7 +127,7 @@ const FollowersList = () => {
 
       {/* List */}
       {loading ? (
-        <FollowersShimmer />
+        null
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />

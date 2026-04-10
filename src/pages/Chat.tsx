@@ -6,7 +6,7 @@ import waveIcon from "@/assets/icons/wave-so-so.png";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import SharedPostCard, { parseSharedPost } from "@/components/SharedPostCard";
 import { supabase } from "@/integrations/supabase/client";
-import { ChatShimmer } from "@/components/ShimmerLoader";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserOnlineStatus, formatLastOnline } from "@/hooks/usePresence";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
@@ -411,7 +411,7 @@ const Chat = () => {
           <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
           <div className="h-4 w-24 rounded bg-muted animate-pulse" />
         </div>
-        <ChatShimmer />
+        <div className="flex-1" />
       </div>
     );
   }
