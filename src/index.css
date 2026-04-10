@@ -143,17 +143,20 @@
     padding-bottom: env(safe-area-inset-bottom, 16px);
   }
 
-  /* Invert white PNG icons in light theme */
-  .light-theme .icon-adaptive {
+  /* Icons are black PNGs (Icons8 Puffy Outline) - invert to white in dark mode */
+  .icon-adaptive {
     filter: invert(1);
+  }
+  .light-theme .icon-adaptive {
+    filter: none;
   }
 
-  /* Invert black PNG icons in dark theme (default) */
+  /* Already-white icons that need no inversion in dark mode */
   .icon-adaptive-inverted {
-    filter: invert(1);
+    filter: none;
   }
   .light-theme .icon-adaptive-inverted {
-    filter: none;
+    filter: invert(1);
   }
 }
 
