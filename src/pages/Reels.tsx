@@ -57,6 +57,7 @@ const Reels = () => {
     const { data: postsData } = await supabase
       .from("posts")
       .select("*")
+      .eq("post_type", "reel")
       .not("image_url", "is", null)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -187,10 +188,10 @@ const Reels = () => {
       <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-3 pb-2 safe-top">
         <h1 className="text-white text-lg font-bold">Clips</h1>
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate("/create-post")} className="active:opacity-60">
+          <button onClick={() => navigate("/create-reel")} className="active:opacity-60">
             <PuffyIcon name="camera" size={22} className={W} />
           </button>
-          <button onClick={() => navigate("/create-post")} className="active:opacity-60">
+          <button onClick={() => navigate("/create-reel")} className="active:opacity-60">
             <PuffyIcon name="plus" size={22} className={W} />
           </button>
           <button onClick={() => navigate("/messages")} className="active:opacity-60">
@@ -222,7 +223,7 @@ const Reels = () => {
             </AnimatePresence>
 
             {/* Right side actions */}
-            <div className="absolute right-3 bottom-20 flex flex-col items-center gap-5 z-20">
+            <div className="absolute right-3 bottom-[4.5rem] flex flex-col items-center gap-5 z-20">
               {/* Like */}
               <button onClick={(e) => { e.stopPropagation(); toggleLike(reel); }} className="flex flex-col items-center gap-1">
                 {reel.isLiked ? (
