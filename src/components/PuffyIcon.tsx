@@ -33,7 +33,7 @@ const iconMap: Record<string, string> = {
   "arrow-left": arrowLeft,
   camera,
   search,
-  "message-circle": messageCircle,
+  "message-circle": comments,
   bell,
   user,
   plus,
