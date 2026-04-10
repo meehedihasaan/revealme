@@ -166,12 +166,12 @@ const PostCard = memo(({
     <div className="border-b border-border">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-2.5">
-        <button onClick={navigateToStoryOrUser} className={`rounded-[40%] p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
-          <div className={`rounded-[40%] overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
+        <button onClick={navigateToStoryOrUser} className={`rounded-full p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
+          <div className={`rounded-full overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
             {avatar ? (
-              <img src={avatar} alt={username} className="h-9 w-9 rounded-[40%] object-cover block" loading="lazy" />
+              <img src={avatar} alt={username} className="h-9 w-9 rounded-full object-cover block" loading="lazy" />
             ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-[40%] bg-secondary">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
                 <PuffyIcon name="user" size={16} />
               </div>
             )}
