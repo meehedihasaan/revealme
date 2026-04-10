@@ -40,7 +40,7 @@ const ActivitySettings = () => {
     </div>
   );
 
-  const Row = ({ label, desc, value, onToggle }: { label: string; desc?: string; value: boolean; onToggle: () => void }) => (
+  const Row = ({ label, desc, value, onToggle }: { label: string; desc?: string; value: boolean; onToggle: (v: boolean) => void }) => (
     <div className="flex items-center justify-between px-4 py-3.5">
       <div className="flex-1 mr-3">
         <p className="text-sm font-medium text-foreground">{label}</p>
