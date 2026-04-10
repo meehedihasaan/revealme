@@ -1,4 +1,3 @@
-import { lazy, Suspense } from "react";
 import { icons } from "lucide-react";
 import arrowLeft from "@/assets/icons/arrow-left.png";
 import camera from "@/assets/icons/camera.png";
@@ -28,6 +27,34 @@ import check from "@/assets/icons/check.png";
 import feed from "@/assets/icons/home.png";
 import wave from "@/assets/icons/wave.png";
 import comments from "@/assets/icons/comments.png";
+// New puffy outline icons
+import activity from "@/assets/icons/activity.png";
+import database from "@/assets/icons/database.png";
+import helpCircle from "@/assets/icons/help-circle.png";
+import alertCircle from "@/assets/icons/alert-circle.png";
+import fileText from "@/assets/icons/file-text.png";
+import mapPin from "@/assets/icons/map-pin.png";
+import eye from "@/assets/icons/eye.png";
+import eyeOff from "@/assets/icons/eye-off.png";
+import lock from "@/assets/icons/lock.png";
+import globe from "@/assets/icons/globe.png";
+import trash from "@/assets/icons/trash.png";
+import xIcon from "@/assets/icons/x.png";
+import imageIcon from "@/assets/icons/image.png";
+import video from "@/assets/icons/video.png";
+import download from "@/assets/icons/download.png";
+import upload from "@/assets/icons/upload.png";
+import refreshCw from "@/assets/icons/refresh-cw.png";
+import star from "@/assets/icons/star.png";
+import flag from "@/assets/icons/flag.png";
+import link from "@/assets/icons/link.png";
+import mail from "@/assets/icons/mail.png";
+import clock from "@/assets/icons/clock.png";
+import calendar from "@/assets/icons/calendar.png";
+import filter from "@/assets/icons/filter.png";
+import zap from "@/assets/icons/zap.png";
+import volume2 from "@/assets/icons/volume-2.png";
+import mic from "@/assets/icons/mic.png";
 
 const iconMap: Record<string, string> = {
   "arrow-left": arrowLeft,
@@ -57,37 +84,34 @@ const iconMap: Record<string, string> = {
   check,
   feed,
   wave,
-};
-
-// Map kebab-case names to PascalCase lucide icon names
-const lucideNameMap: Record<string, string> = {
-  "activity": "Activity",
-  "database": "Database",
-  "help-circle": "HelpCircle",
-  "alert-circle": "AlertCircle",
-  "file-text": "FileText",
-  "map-pin": "MapPin",
-  "eye": "Eye",
-  "eye-off": "EyeOff",
-  "lock": "Lock",
-  "globe": "Globe",
-  "trash": "Trash2",
-  "x": "X",
-  "image": "Image",
-  "video": "Video",
-  "download": "Download",
-  "upload": "Upload",
-  "refresh-cw": "RefreshCw",
-  "star": "Star",
-  "flag": "Flag",
-  "link": "Link",
-  "mail": "Mail",
-  "clock": "Clock",
-  "calendar": "Calendar",
-  "filter": "Filter",
-  "zap": "Zap",
-  "volume-2": "Volume2",
-  "mic": "Mic",
+  // New puffy outline icons
+  activity,
+  database,
+  "help-circle": helpCircle,
+  "alert-circle": alertCircle,
+  "file-text": fileText,
+  "map-pin": mapPin,
+  eye,
+  "eye-off": eyeOff,
+  lock,
+  globe,
+  trash,
+  x: xIcon,
+  image: imageIcon,
+  video,
+  download,
+  upload,
+  "refresh-cw": refreshCw,
+  star,
+  flag,
+  link,
+  mail,
+  clock,
+  calendar,
+  filter,
+  zap,
+  "volume-2": volume2,
+  mic,
 };
 
 export type PuffyIconName = keyof typeof iconMap;
@@ -116,7 +140,7 @@ const PuffyIcon = ({ name, size = 24, className = "", style }: PuffyIconProps) =
   }
 
   // Fallback to Lucide icon
-  const lucideName = lucideNameMap[name] || name.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join("");
+  const lucideName = name.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join("");
   const LucideIcon = (icons as any)[lucideName];
   if (LucideIcon) {
     return <LucideIcon size={size} className={`inline-block shrink-0 ${className}`} style={style} />;
