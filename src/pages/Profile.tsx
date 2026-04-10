@@ -400,15 +400,17 @@ const Profile = () => {
             {clipPosts.map((post) => (
               <button
                 key={post.id}
-                onClick={() => navigate(`/post/${post.id}`)}
+                onClick={() => navigate(`/reels`)}
                 className="relative aspect-[9/16] overflow-hidden bg-secondary"
               >
-                <img src={post.image_url!} alt="" className="h-full w-full object-cover" />
+                {post.image_url?.match(/\.(mp4|mov|webm|ogg)(\?|$)/i) ? (
+                  <video src={post.image_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+                ) : (
+                  <img src={post.image_url!} alt="" className="h-full w-full object-cover" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-1 left-1 flex items-center gap-1">
-                  <PuffyIcon name="eye" size={10} className="!brightness-0 !invert opacity-80" />
-                  <span className="text-white text-[10px] font-medium drop-shadow-lg">
-                    {Math.floor(Math.random() * 900) + 100}
-                  </span>
+                  <PuffyIcon name="reels" size={10} className="!brightness-0 !invert opacity-80" />
                 </div>
               </button>
             ))}
