@@ -136,7 +136,7 @@ const BottomNav = ({ darkMode = false }: { darkMode?: boolean }) => {
               }`}
               aria-label={label}
             >
-              <PuffyIcon name={icon} size={24} />
+              <PuffyIcon name={icon} size={24} className={darkMode ? "brightness-0 invert" : ""} />
               {badge > 0 && (
                 <span className="absolute -top-0.5 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
                   {badge > 99 ? "99+" : badge}
