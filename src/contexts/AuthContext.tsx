@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState, useRef, ReactNode } from "react";
-import { User, Session } from "@supabase/supabase-js";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, ReactNode } from "react";
+import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Profile {
@@ -43,80 +43,142 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+
   const initialized = useRef(false);
+  const mounted = useRef(true);
+  const currentUserId = useRef<string | null>(null);
   const profileCache = useRef<Record<string, Profile | null>>({});
 
-  const fetchProfile = async (userId: string) => {
-    // Use cache to avoid re-fetching on every auth event
-    if (profileCache.current[userId]) {
-      setProfile(profileCache.current[userId]);
-      return;
+  const setStableAuthState = useCallback((nextSession: Session | null, forceUserObject = false) => {
+    const nextUser = nextSession?.user ?? null;
+    currentUserId.current = nextUser?.id ?? null;
+
+    setSession((prev) => {
+      if (!prev && !nextSession) return prev;
+      if (
+        prev &&
+        nextSession &&
+        prev.user.id === nextSession.user.id &&
+        prev.access_token === nextSession.access_token
+      ) {
+        return prev;
+      }
+      return nextSession;
+    });
+
+    setUser((prev) => {
+      if (!forceUserObject && prev?.id === nextUser?.id) {
+        return prev;
+      }
+      return nextUser;
+    });
+  }, []);
+
+  const fetchProfile = useCallback(async (userId: string, force = false) => {
+    if (!force && userId in profileCache.current) {
+      const cachedProfile = profileCache.current[userId];
+      if (mounted.current && currentUserId.current === userId) {
+        setProfile(cachedProfile);
+      }
+      return cachedProfile;
     }
+
     const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userId)
-      .single();
-    const prof = data as Profile | null;
-    if (prof) profileCache.current[userId] = prof;
-    setProfile(prof);
-  };
+      .maybeSingle();
 
-  const refreshProfile = async () => {
-    if (user) {
-      // Clear cache to force fresh fetch
-      delete profileCache.current[user.id];
-      await fetchProfile(user.id);
+    const nextProfile = (data as Profile | null) ?? null;
+    profileCache.current[userId] = nextProfile;
+
+    if (mounted.current && currentUserId.current === userId) {
+      setProfile(nextProfile);
     }
-  };
+
+    return nextProfile;
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    if (!currentUserId.current) return;
+    delete profileCache.current[currentUserId.current];
+    await fetchProfile(currentUserId.current, true);
+  }, [fetchProfile]);
 
   useEffect(() => {
-    // Get initial session first
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) {
-        fetchProfile(s.user.id).then(() => {
-          initialized.current = true;
-          setLoading(false);
-        });
-      } else {
+    mounted.current = true;
+
+    const initializeAuth = async () => {
+      try {
+        const {
+          data: { session: initialSession },
+        } = await supabase.auth.getSession();
+
+        if (!mounted.current) return;
+
+        const nextUserId = initialSession?.user?.id ?? null;
+        setStableAuthState(initialSession, true);
+
+        if (nextUserId) {
+          await fetchProfile(nextUserId);
+        } else {
+          setProfile(null);
+        }
+      } finally {
         initialized.current = true;
-        setLoading(false);
+        if (mounted.current) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void initializeAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (!initialized.current || !mounted.current) return;
+
+      const previousUserId = currentUserId.current;
+      const nextUserId = nextSession?.user?.id ?? null;
+
+      setStableAuthState(nextSession, event === "USER_UPDATED");
+
+      if (!nextUserId) {
+        profileCache.current = {};
+        setProfile(null);
+        return;
+      }
+
+      if (previousUserId !== nextUserId) {
+        setProfile(null);
+      }
+
+      const shouldRefreshProfile =
+        previousUserId !== nextUserId ||
+        event === "SIGNED_IN" ||
+        event === "USER_UPDATED" ||
+        !(nextUserId in profileCache.current);
+
+      if (shouldRefreshProfile) {
+        void fetchProfile(nextUserId, event === "SIGNED_IN" || event === "USER_UPDATED");
       }
     });
 
-    // Then listen for changes (sign in, sign out, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, s) => {
-        // Skip if this is the initial event before getSession resolves
-        if (!initialized.current) return;
+    return () => {
+      mounted.current = false;
+      subscription.unsubscribe();
+    };
+  }, [fetchProfile, setStableAuthState]);
 
-        setSession(s);
-        setUser(s?.user ?? null);
-        if (s?.user) {
-          // Only refetch profile on actual auth changes, not token refreshes
-          if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-            delete profileCache.current[s.user.id];
-            await fetchProfile(s.user.id);
-          }
-        } else {
-          setProfile(null);
-          profileCache.current = {};
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
+  const signOut = useCallback(async () => {
+    profileCache.current = {};
+    currentUserId.current = null;
+    setProfile(null);
     setUser(null);
     setSession(null);
-    setProfile(null);
-    profileCache.current = {};
-  };
+    await supabase.auth.signOut();
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, session, profile, loading, signOut, refreshProfile }}>

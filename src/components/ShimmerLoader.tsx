@@ -1,5 +1,5 @@
 const ShimmerBlock = ({ className }: { className?: string }) => (
-  <div className={`animate-pulse rounded-lg bg-muted ${className || ""}`} />
+  <div aria-hidden="true" className={`shimmer-block rounded-lg ${className || ""}`} />
 );
 
 export const FeedShimmer = () => (

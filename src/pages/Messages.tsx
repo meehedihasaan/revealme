@@ -7,8 +7,8 @@ import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
-
 import PullToRefresh from "@/components/PullToRefresh";
+import { MessagesShimmer } from "@/components/ShimmerLoader";
 import { toast } from "sonner";
 import cameraFilledIcon from "@/assets/icons/camera-filled.png";
 
@@ -357,7 +357,7 @@ const Messages = () => {
       <PullToRefresh onRefresh={async () => { setLoading(true); await fetchConversations(); }}>
       <div>
         {loading ? (
-          null
+          <MessagesShimmer />
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <PuffyIcon name="message-circle" size={40} className="opacity-30 mb-3" />
