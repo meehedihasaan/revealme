@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
 import cameraIcon from "@/assets/icons/camera.png";
+import PeopleYouMayKnow from "@/components/PeopleYouMayKnow";
 
 
 const STORY_GRADIENT = "gradient-story-ring";
