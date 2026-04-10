@@ -38,7 +38,159 @@ const DoubleTapHeart = () => (
   </motion.div>
 );
 
-const W = "!brightness-0 !invert"; // force white for puffy icons on dark bg
+const W = "!brightness-0 !invert";
+
+const isVideoUrl = (url: string) => /\.(mp4|mov|webm|ogg)(\?|$)/i.test(url);
+
+const ReelItem = ({
+  reel,
+  index,
+  isActive,
+  isMuted,
+  onToggleMute,
+  onDoubleTap,
+  onToggleLike,
+  onComment,
+  onShare,
+  navigate,
+  userId,
+}: {
+  reel: ReelPost;
+  index: number;
+  isActive: boolean;
+  isMuted: boolean;
+  onToggleMute: () => void;
+  onDoubleTap: (index: number) => void;
+  onToggleLike: (reel: ReelPost) => void;
+  onComment: (index: number) => void;
+  onShare: (index: number) => void;
+  navigate: ReturnType<typeof useNavigate>;
+  userId?: string;
+}) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const isVideo = isVideoUrl(reel.image_url);
+
+  // Auto-play/pause based on visibility
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    if (isActive) {
+      vid.currentTime = 0;
+      vid.play().catch(() => {});
+    } else {
+      vid.pause();
+    }
+  }, [isActive]);
+
+  // Sync mute state
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (vid) vid.muted = isMuted;
+  }, [isMuted]);
+
+  const audioName = `Original audio · ${reel.username}`;
+
+  return (
+    <div
+      data-index={index}
+      className="relative h-full w-full snap-start snap-always shrink-0"
+      onClick={() => onDoubleTap(index)}
+    >
+      {isVideo ? (
+        <video
+          ref={videoRef}
+          src={reel.image_url}
+          className="h-full w-full object-cover"
+          loop
+          playsInline
+          muted={isMuted}
+          draggable={false}
+        />
+      ) : (
+        <img src={reel.image_url} alt="" className="h-full w-full object-cover" draggable={false} />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
+
+      {/* Mute/Unmute button */}
+      {isVideo && isActive && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggleMute(); }}
+          className="absolute top-14 right-4 z-30 h-8 w-8 rounded-full bg-black/40 flex items-center justify-center"
+        >
+          <PuffyIcon name={isMuted ? "volume-2" : "volume-2"} size={14} className={W} />
+          {isMuted && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-5 h-[1.5px] bg-white rotate-45 rounded-full" />
+            </div>
+          )}
+        </button>
+      )}
+
+      {/* Right side actions */}
+      <div className="absolute right-3 bottom-[4.5rem] flex flex-col items-center gap-5 z-20">
+        <button onClick={(e) => { e.stopPropagation(); onToggleLike(reel); }} className="flex flex-col items-center gap-1">
+          {reel.isLiked ? (
+            <PuffyIcon name="heart-filled-red" size={28} />
+          ) : (
+            <PuffyIcon name="heart" size={28} className={W} />
+          )}
+          <span className="text-white text-xs font-semibold">{reel.likesCount}</span>
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); onComment(index); }} className="flex flex-col items-center gap-1">
+          <PuffyIcon name="message-circle" size={28} className={W} />
+          <span className="text-white text-xs font-semibold">{reel.commentsCount}</span>
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); onShare(index); }} className="flex flex-col items-center gap-1">
+          <PuffyIcon name="send" size={26} className={W} />
+        </button>
+        <button onClick={(e) => e.stopPropagation()} className="flex flex-col items-center gap-1">
+          <PuffyIcon name="more-horizontal" size={26} className={W} />
+        </button>
+      </div>
+
+      {/* Bottom info */}
+      <div className="absolute bottom-16 left-0 right-16 px-4 z-20 pb-1">
+        <div className="flex items-center gap-1.5 mb-2">
+          <PuffyIcon name="eye" size={14} className={`${W} opacity-80`} />
+          <span className="text-white/80 text-xs font-medium">{reel.viewCount}</span>
+        </div>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(reel.user_id === userId ? "/profile" : `/user/${reel.user_id}`);
+          }}
+          className="flex items-center gap-2 mb-2"
+        >
+          {reel.avatar_url ? (
+            <img src={reel.avatar_url} alt="" className="h-9 w-9 rounded-[40%] object-cover border border-white/30" />
+          ) : (
+            <div className="h-9 w-9 rounded-[40%] bg-white/20 flex items-center justify-center">
+              <PuffyIcon name="user" size={16} className={W} />
+            </div>
+          )}
+          <span className="text-white font-bold text-sm">{reel.username}</span>
+          {reel.is_verified && <VerifiedBadge size={14} />}
+        </button>
+        {reel.caption && (
+          <p className="text-white text-sm leading-snug line-clamp-2">{reel.caption}</p>
+        )}
+        {/* Audio - tappable with marquee */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/sound/${reel.id}`);
+          }}
+          className="flex items-center gap-1.5 mt-1.5 max-w-full overflow-hidden"
+        >
+          <PuffyIcon name="volume-2" size={12} className={`${W} opacity-70 shrink-0`} />
+          <div className="overflow-hidden whitespace-nowrap">
+            <span className="text-white/70 text-xs inline-block animate-marquee">{audioName}</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const Reels = () => {
   const navigate = useNavigate();
@@ -50,6 +202,7 @@ const Reels = () => {
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const lastTapTime = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -111,7 +264,7 @@ const Reels = () => {
 
   useEffect(() => { fetchReels(); }, [fetchReels]);
 
-  const toggleLike = async (reel: ReelPost) => {
+  const toggleLike = useCallback(async (reel: ReelPost) => {
     if (!user) return;
     setReels((prev) =>
       prev.map((r) =>
@@ -125,7 +278,7 @@ const Reels = () => {
     } else {
       await supabase.from("likes").insert({ user_id: user.id, post_id: reel.id });
     }
-  };
+  }, [user]);
 
   const handleDoubleTap = useCallback((index: number) => {
     const now = Date.now();
@@ -139,9 +292,9 @@ const Reels = () => {
     } else {
       lastTapTime.current = now;
     }
-  }, [reels, user]);
+  }, [reels, toggleLike]);
 
-  // Snap scroll observer to detect current reel
+  // Snap scroll observer
   useEffect(() => {
     const container = containerRef.current;
     if (!container || reels.length === 0) return;
@@ -160,7 +313,6 @@ const Reels = () => {
 
     const items = container.querySelectorAll("[data-index]");
     items.forEach((item) => observer.observe(item));
-
     return () => observer.disconnect();
   }, [reels]);
 
@@ -199,103 +351,27 @@ const Reels = () => {
         style={{ scrollSnapType: "y mandatory", WebkitOverflowScrolling: "touch" }}
       >
         {reels.map((reel, index) => (
-          <div
+          <ReelItem
             key={reel.id}
-            data-index={index}
-            className="relative h-full w-full snap-start snap-always shrink-0"
-            onClick={() => handleDoubleTap(index)}
-          >
-            {/* Media */}
-            {reel.image_url.match(/\.(mp4|mov|webm|ogg)(\?|$)/i) ? (
-              <video
-                src={reel.image_url}
-                className="h-full w-full object-cover"
-                autoPlay
-                loop
-                muted
-                playsInline
-                draggable={false}
-              />
-            ) : (
-              <img src={reel.image_url} alt="" className="h-full w-full object-cover" draggable={false} />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
-
-            {/* Double tap heart */}
-            <AnimatePresence>
-              {showHeart && currentIndex === index && <DoubleTapHeart />}
-            </AnimatePresence>
-
-            {/* Right side actions */}
-            <div className="absolute right-3 bottom-[4.5rem] flex flex-col items-center gap-5 z-20">
-              {/* Like */}
-              <button onClick={(e) => { e.stopPropagation(); toggleLike(reel); }} className="flex flex-col items-center gap-1">
-                {reel.isLiked ? (
-                  <PuffyIcon name="heart-filled-red" size={28} />
-                ) : (
-                  <PuffyIcon name="heart" size={28} className={W} />
-                )}
-                <span className="text-white text-xs font-semibold">{reel.likesCount}</span>
-              </button>
-
-              {/* Comment */}
-              <button onClick={(e) => { e.stopPropagation(); setCurrentIndex(index); setCommentOpen(true); }} className="flex flex-col items-center gap-1">
-                <PuffyIcon name="message-circle" size={28} className={W} />
-                <span className="text-white text-xs font-semibold">{reel.commentsCount}</span>
-              </button>
-
-              {/* Share */}
-              <button onClick={(e) => { e.stopPropagation(); setCurrentIndex(index); setShareOpen(true); }} className="flex flex-col items-center gap-1">
-                <PuffyIcon name="send" size={26} className={W} />
-              </button>
-
-              {/* More */}
-              <button onClick={(e) => e.stopPropagation()} className="flex flex-col items-center gap-1">
-                <PuffyIcon name="more-horizontal" size={26} className={W} />
-              </button>
-            </div>
-
-            {/* Bottom info */}
-            <div className="absolute bottom-16 left-0 right-16 px-4 z-20 pb-1">
-              {/* View count */}
-              <div className="flex items-center gap-1.5 mb-2">
-                <PuffyIcon name="eye" size={14} className={`${W} opacity-80`} />
-                <span className="text-white/80 text-xs font-medium">{reel.viewCount}</span>
-              </div>
-
-              {/* User info */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(reel.user_id === user?.id ? "/profile" : `/user/${reel.user_id}`);
-                }}
-                className="flex items-center gap-2 mb-2"
-              >
-                {reel.avatar_url ? (
-                  <img src={reel.avatar_url} alt="" className="h-9 w-9 rounded-[40%] object-cover border border-white/30" />
-                ) : (
-                  <div className="h-9 w-9 rounded-[40%] bg-white/20 flex items-center justify-center">
-                    <PuffyIcon name="user" size={16} className={W} />
-                  </div>
-                )}
-                <span className="text-white font-bold text-sm">{reel.username}</span>
-                {reel.is_verified && <VerifiedBadge size={14} />}
-              </button>
-
-              {/* Caption */}
-              {reel.caption && (
-                <p className="text-white text-sm leading-snug line-clamp-2">{reel.caption}</p>
-              )}
-
-              {/* Audio */}
-              <div className="flex items-center gap-1.5 mt-1.5">
-                <PuffyIcon name="volume-2" size={12} className={`${W} opacity-70`} />
-                <span className="text-white/70 text-xs">Audio name · audio creator</span>
-              </div>
-            </div>
-          </div>
+            reel={reel}
+            index={index}
+            isActive={currentIndex === index}
+            isMuted={isMuted}
+            onToggleMute={() => setIsMuted((m) => !m)}
+            onDoubleTap={handleDoubleTap}
+            onToggleLike={toggleLike}
+            onComment={(i) => { setCurrentIndex(i); setCommentOpen(true); }}
+            onShare={(i) => { setCurrentIndex(i); setShareOpen(true); }}
+            navigate={navigate}
+            userId={user?.id}
+          />
         ))}
       </div>
+
+      {/* Double tap heart overlay */}
+      <AnimatePresence>
+        {showHeart && <DoubleTapHeart />}
+      </AnimatePresence>
 
       <CommentSheet postId={reels[currentIndex]?.id} isOpen={commentOpen} onClose={() => setCommentOpen(false)} />
       <ShareSheet postId={reels[currentIndex]?.id} image={reels[currentIndex]?.image_url} caption={reels[currentIndex]?.caption} username={reels[currentIndex]?.username} isOpen={shareOpen} onClose={() => setShareOpen(false)} />

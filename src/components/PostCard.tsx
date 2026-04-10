@@ -36,6 +36,7 @@ interface PostCardProps {
   onFollowChange?: (userId: string, isNowFollowing: boolean) => void;
   commentCount?: number;
   hasStory?: boolean;
+  postType?: string;
 }
 
 const DoubleTapHeart = () => (
@@ -69,6 +70,7 @@ const PostCard = memo(({
   onFollowChange,
   commentCount: initialCommentCount = 0,
   hasStory: hasStoryProp = false,
+  postType = "post",
 }: PostCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -211,9 +213,27 @@ const PostCard = memo(({
         <PostMenu postId={postId} postUserId={postUserId || ""} caption={caption} location={location} onDelete={onDelete} />
       </div>
 
-      {/* Image Carousel or Text-only post */}
+      {/* Image/Video or Text-only post */}
       {image ? (
-        <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
+        postType === "reel" && image.match(/\.(mp4|mov|webm|ogg)(\?|$)/i) ? (
+          <div className="relative" onDoubleClick={handleDoubleTap}>
+            <video
+              src={image}
+              className="w-full aspect-[9/16] object-cover"
+              muted
+              playsInline
+              loop
+            />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="h-14 w-14 rounded-full bg-black/30 flex items-center justify-center backdrop-blur-sm">
+                <PuffyIcon name="reels" size={24} className="!brightness-0 !invert" />
+              </div>
+            </div>
+            <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
+          </div>
+        ) : (
+          <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
+        )
       ) : (
         <div className="relative px-4 py-1.5" onDoubleClick={handleDoubleTap}>
           <p className="text-[15px] text-foreground leading-snug whitespace-pre-line">{caption}</p>

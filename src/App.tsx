@@ -56,6 +56,7 @@ import HelpSupportSettings from "./pages/HelpSupportSettings";
 import ActivitySettings from "./pages/ActivitySettings";
 import Reels from "./pages/Reels";
 import CreateReel from "./pages/CreateReel";
+import SoundPage from "./pages/SoundPage";
 
 const queryClient = new QueryClient();
 
@@ -115,6 +116,7 @@ const AppRoutes = () => {
       <Route path="/user-map" element={<ProtectedRoute><UserMap /></ProtectedRoute>} />
       <Route path="/reels" element={<ProtectedRoute><Reels /></ProtectedRoute>} />
       <Route path="/create-reel" element={<ProtectedRoute><CreateReel /></ProtectedRoute>} />
+      <Route path="/sound/:postId" element={<ProtectedRoute><SoundPage /></ProtectedRoute>} />
       <Route path="/nearby-users" element={<ProtectedRoute><NearbyUsers /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />

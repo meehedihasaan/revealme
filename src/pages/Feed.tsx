@@ -263,6 +263,7 @@ const Feed = () => {
                   isFollowing={followingIds.has(post.user_id)}
                   onFollowChange={handleFollowChange}
                   hasStory={storyUsers.some(su => su.user_id === post.user_id) || (post.user_id === user?.id && userHasStory)}
+                  postType={post.post_type}
                 />
               ))
             )
@@ -296,6 +297,7 @@ const Feed = () => {
                   isLiked={post.isLiked}
                   isSaved={post.isSaved}
                   onDelete={refetch}
+                  postType={post.post_type}
                 />
               ))
             )
@@ -326,6 +328,7 @@ const Feed = () => {
                   isLiked={post.isLiked}
                   isSaved={post.isSaved}
                   onDelete={refetch}
+                  postType={post.post_type}
                 />
               ))
             )
