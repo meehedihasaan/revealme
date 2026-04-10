@@ -164,6 +164,83 @@ const PostCard = memo(({
     }
   }, [hasStoryProp, navigate, postUserId, navigateToUser]);
 
+  // Reel-style card: Instagram overlay layout, click navigates to Reels page
+  if (postType === "reel" && image) {
+    const isVideo = image.match(/\.(mp4|mov|webm|ogg)(\?|$)/i);
+    return (
+      <div className="border-b border-border">
+        <button
+          onClick={() => navigate("/reels")}
+          className="relative w-full aspect-[9/16] overflow-hidden bg-black block"
+        >
+          {isVideo ? (
+            <video
+              src={image}
+              className="h-full w-full object-cover"
+              muted
+              playsInline
+              preload="metadata"
+            />
+          ) : (
+            <img src={image} alt="" className="h-full w-full object-cover" />
+          )}
+          {/* Gradient overlays */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
+
+          {/* Play icon center */}
+          {isVideo && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="h-14 w-14 rounded-full bg-black/30 flex items-center justify-center backdrop-blur-sm">
+                <PuffyIcon name="play" size={24} className="!brightness-0 !invert" />
+              </div>
+            </div>
+          )}
+
+          {/* Top: Reels icon */}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+            <PuffyIcon name="reels" size={16} className="!brightness-0 !invert" />
+          </div>
+
+          {/* Bottom overlay: avatar + username + caption */}
+          <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
+            <div className="flex items-center gap-2 mb-1.5">
+              {avatar ? (
+                <img src={avatar} alt={username} className="h-8 w-8 rounded-full object-cover border border-white/30" />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
+                  <PuffyIcon name="user" size={14} className="!brightness-0 !invert" />
+                </div>
+              )}
+              <div className="flex items-center gap-1">
+                <span className="text-white text-sm font-semibold">{displayName || username}</span>
+                {verified && <VerifiedBadge size={13} />}
+              </div>
+            </div>
+            {caption && (
+              <p className="text-white/80 text-xs line-clamp-2 leading-snug">{caption}</p>
+            )}
+          </div>
+
+          {/* Right side stats */}
+          <div className="absolute right-3 bottom-16 flex flex-col items-center gap-3 z-10">
+            <div className="flex flex-col items-center gap-0.5">
+              {liked ? (
+                <img src={heartFilledRedIcon} alt="liked" width={22} height={22} draggable={false} />
+              ) : (
+                <PuffyIcon name="heart" size={22} className="!brightness-0 !invert" />
+              )}
+              <span className="text-white text-[10px] font-semibold">{likeCount > 0 ? likeCount : ""}</span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <PuffyIcon name="message-circle" size={22} className="!brightness-0 !invert" />
+              <span className="text-white text-[10px] font-semibold">{commentCount > 0 ? commentCount : ""}</span>
+            </div>
+          </div>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="border-b border-border">
       {/* Header */}
@@ -215,25 +292,7 @@ const PostCard = memo(({
 
       {/* Image/Video or Text-only post */}
       {image ? (
-        postType === "reel" && image.match(/\.(mp4|mov|webm|ogg)(\?|$)/i) ? (
-          <div className="relative" onDoubleClick={handleDoubleTap}>
-            <video
-              src={image}
-              className="w-full aspect-[9/16] object-cover"
-              muted
-              playsInline
-              loop
-            />
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="h-14 w-14 rounded-full bg-black/30 flex items-center justify-center backdrop-blur-sm">
-                <PuffyIcon name="reels" size={24} className="!brightness-0 !invert" />
-              </div>
-            </div>
-            <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
-          </div>
-        ) : (
-          <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
-        )
+        <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
       ) : (
         <div className="relative px-4 py-1.5" onDoubleClick={handleDoubleTap}>
           <p className="text-[15px] text-foreground leading-snug whitespace-pre-line">{caption}</p>
