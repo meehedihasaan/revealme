@@ -9,6 +9,7 @@ const tabs = [
   { icon: "feed", path: "/feed", label: "Feed" },
   { icon: "search", path: "/explore", label: "Explore" },
   { icon: "plus", path: "/create-post", label: "Create", isCreate: true },
+  { icon: "play", path: "/reels", label: "Clips" },
   { icon: "bell", path: "/notifications", label: "Alerts", badgeKey: "notifications" },
   { icon: "user", path: "/profile", label: "Profile" },
 ];
