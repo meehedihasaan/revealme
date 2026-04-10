@@ -55,6 +55,7 @@ import DataStorageSettings from "./pages/DataStorageSettings";
 import HelpSupportSettings from "./pages/HelpSupportSettings";
 import ActivitySettings from "./pages/ActivitySettings";
 import Reels from "./pages/Reels";
+import CreateReel from "./pages/CreateReel";
 
 const queryClient = new QueryClient();
 
@@ -113,6 +114,7 @@ const AppRoutes = () => {
       <Route path="/post/:postId" element={<ProtectedRoute><PostDetail /></ProtectedRoute>} />
       <Route path="/user-map" element={<ProtectedRoute><UserMap /></ProtectedRoute>} />
       <Route path="/reels" element={<ProtectedRoute><Reels /></ProtectedRoute>} />
+      <Route path="/create-reel" element={<ProtectedRoute><CreateReel /></ProtectedRoute>} />
       <Route path="/nearby-users" element={<ProtectedRoute><NearbyUsers /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />
