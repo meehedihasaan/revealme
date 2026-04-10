@@ -13,7 +13,7 @@ const tabs = [
   { icon: "user", path: "/profile", label: "Profile" },
 ];
 
-const BottomNav = () => {
+const BottomNav = ({ darkMode = false }: { darkMode?: boolean }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
