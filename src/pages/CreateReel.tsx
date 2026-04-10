@@ -100,8 +100,8 @@ const CreateReel = () => {
             <div className="h-20 w-20 rounded-full bg-white/10 flex items-center justify-center">
               <PuffyIcon name="video" size={36} className="!brightness-0 !invert opacity-60" />
             </div>
-            <span className="text-sm font-medium">Tap to select photo or video</span>
-            <span className="text-xs text-white/30">Videos up to 60 seconds</span>
+            <span className="text-sm font-medium">Tap to select video</span>
+            <span className="text-xs text-white/30">Short video clips only</span>
           </button>
         )}
       </div>
@@ -123,7 +123,7 @@ const CreateReel = () => {
       <input
         ref={fileRef}
         type="file"
-        accept="image/*,video/*"
+        accept="video/*"
         className="hidden"
         onChange={handleFile}
       />
