@@ -140,10 +140,10 @@ const ReelItem = ({
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
 
-      {/* Video progress bar */}
+      {/* Video progress bar - at bottom above nav */}
       {isVideo && isActive && (
-        <div className="absolute top-12 left-0 right-0 h-[2px] bg-white/20 z-30">
-          <div className="h-full bg-white/80 transition-all duration-100" style={{ width: `${progress}%` }} />
+        <div className="absolute bottom-[3.5rem] left-0 right-0 h-[2.5px] bg-white/20 z-30">
+          <div className="h-full bg-white transition-all duration-100 rounded-full" style={{ width: `${progress}%` }} />
         </div>
       )}
 
@@ -253,7 +253,7 @@ const ReelItem = ({
           }}
           className="flex items-center gap-1.5 mt-1.5 max-w-full overflow-hidden"
         >
-          <PuffyIcon name="volume-2" size={12} className={`${W} opacity-70 shrink-0`} />
+          <PuffyIcon name="disc" size={12} className={`${W} opacity-70 shrink-0`} />
           <div className="overflow-hidden whitespace-nowrap">
             <span className="text-white/70 text-xs inline-block animate-marquee">{audioName}</span>
           </div>
