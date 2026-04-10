@@ -164,28 +164,45 @@ const PostCard = memo(({
     }
   }, [hasStoryProp, navigate, postUserId, navigateToUser]);
 
-  // Reel-style card: Instagram overlay layout, click navigates to Reels page
+  // Reel-style card: normal header + video with caption overlay + normal actions below
   if (postType === "reel" && image) {
     const isVideo = image.match(/\.(mp4|mov|webm|ogg)(\?|$)/i);
     return (
       <div className="border-b border-border">
+        {/* Normal header like other posts */}
+        <div className="flex items-center gap-3 px-4 py-2.5">
+          <button onClick={navigateToStoryOrUser} className={`rounded-full p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
+            <div className={`rounded-full overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
+              {avatar ? (
+                <img src={avatar} alt={username} className="h-9 w-9 rounded-full object-cover block" loading="lazy" />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+                  <PuffyIcon name="user" size={16} />
+                </div>
+              )}
+            </div>
+          </button>
+          <button onClick={navigateToUser} className="flex-1 min-w-0 text-left">
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-semibold text-foreground">{displayName || username}</span>
+              {verified && <VerifiedBadge size={15} />}
+            </div>
+            <p className="text-[11px] text-muted-foreground">{timeAgo}</p>
+          </button>
+          <PostMenu postId={postId} postUserId={postUserId || ""} caption={caption} location={location} onDelete={onDelete} />
+        </div>
+
+        {/* Video/Image area - tappable to go to Reels */}
         <button
           onClick={() => navigate("/reels")}
           className="relative w-full aspect-[9/16] overflow-hidden bg-black block"
         >
           {isVideo ? (
-            <video
-              src={image}
-              className="h-full w-full object-cover"
-              muted
-              playsInline
-              preload="metadata"
-            />
+            <video src={image} className="h-full w-full object-cover" muted playsInline preload="metadata" />
           ) : (
             <img src={image} alt="" className="h-full w-full object-cover" />
           )}
-          {/* Gradient overlays */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
           {/* Play icon center */}
           {isVideo && (
@@ -196,47 +213,51 @@ const PostCard = memo(({
             </div>
           )}
 
-          {/* Top: Reels icon */}
+          {/* Reels badge top-left */}
           <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
             <PuffyIcon name="reels" size={16} className="!brightness-0 !invert" />
           </div>
 
-          {/* Bottom overlay: avatar + username + caption */}
-          <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-            <div className="flex items-center gap-2 mb-1.5">
-              {avatar ? (
-                <img src={avatar} alt={username} className="h-8 w-8 rounded-full object-cover border border-white/30" />
-              ) : (
-                <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <PuffyIcon name="user" size={14} className="!brightness-0 !invert" />
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <span className="text-white text-sm font-semibold">{displayName || username}</span>
-                {verified && <VerifiedBadge size={13} />}
-              </div>
+          {/* Caption overlay at bottom */}
+          {caption && (
+            <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
+              <p className="text-white text-sm line-clamp-2 leading-snug">{caption}</p>
             </div>
-            {caption && (
-              <p className="text-white/80 text-xs line-clamp-2 leading-snug">{caption}</p>
-            )}
-          </div>
-
-          {/* Right side stats */}
-          <div className="absolute right-3 bottom-16 flex flex-col items-center gap-3 z-10">
-            <div className="flex flex-col items-center gap-0.5">
-              {liked ? (
-                <img src={heartFilledRedIcon} alt="liked" width={22} height={22} draggable={false} />
-              ) : (
-                <PuffyIcon name="heart" size={22} className="!brightness-0 !invert" />
-              )}
-              <span className="text-white text-[10px] font-semibold">{likeCount > 0 ? likeCount : ""}</span>
-            </div>
-            <div className="flex flex-col items-center gap-0.5">
-              <PuffyIcon name="message-circle" size={22} className="!brightness-0 !invert" />
-              <span className="text-white text-[10px] font-semibold">{commentCount > 0 ? commentCount : ""}</span>
-            </div>
-          </div>
+          )}
         </button>
+
+        {/* Normal actions bar like other posts */}
+        <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-1 active:scale-90 transition-transform duration-100" onClick={toggleLike}>
+              {liked ? (
+                <img src={heartFilledRedIcon} alt="liked" width={26} height={26} className="inline-block shrink-0" draggable={false} />
+              ) : (
+                <PuffyIcon name="heart" size={26} />
+              )}
+              <span className="text-sm font-semibold text-foreground" onClick={(e) => { e.stopPropagation(); openLikes(); }}>{likeCount > 0 ? likeCount.toLocaleString() : ""}</span>
+            </button>
+            <button className="flex items-center gap-1" onClick={openComment}>
+              <PuffyIcon name="message-circle" size={24} />
+              <span className="text-sm font-semibold text-foreground">{commentCount > 0 ? commentCount.toLocaleString() : ""}</span>
+            </button>
+            <button className="flex items-center gap-1" onClick={openShare}>
+              <PuffyIcon name="send" size={22} />
+            </button>
+          </div>
+          <button className="active:scale-90 transition-transform duration-100" onClick={toggleSave}>
+            <PuffyIcon name="bookmark" size={24} className={saved ? "opacity-100" : "opacity-70"} />
+          </button>
+        </div>
+
+        {/* Time */}
+        <div className="px-4 pt-0 pb-3">
+          <p className="text-[10px] uppercase text-muted-foreground">{timeAgo}</p>
+        </div>
+
+        {commentOpen && <CommentSheet postId={postId} isOpen={commentOpen} onClose={closeComment} />}
+        {shareOpen && <ShareSheet postId={postId} image={image} caption={caption} username={username} isOpen={shareOpen} onClose={closeShare} />}
+        {likesOpen && <LikesSheet postId={postId} isOpen={likesOpen} onClose={closeLikes} likesCount={likeCount} />}
       </div>
     );
   }
