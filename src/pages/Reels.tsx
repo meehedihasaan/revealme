@@ -76,6 +76,9 @@ const ReelItem = ({
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const [captionExpanded, setCaptionExpanded] = useState(false);
+  const [showHeartLocal, setShowHeartLocal] = useState(false);
+  const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTap = useRef(0);
 
   useEffect(() => {
     const vid = videoRef.current;
@@ -104,20 +107,34 @@ const ReelItem = ({
     return () => vid.removeEventListener("timeupdate", update);
   }, [isActive]);
 
+  // Unified tap handler: single tap = pause/play, double tap = like + heart
   const handleTap = () => {
-    onDoubleTap(index);
-  };
-
-  const handlePlayPause = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const vid = videoRef.current;
-    if (!vid) return;
-    if (vid.paused) {
-      vid.play().catch(() => {});
-      setIsPaused(false);
+    const now = Date.now();
+    if (now - lastTap.current < 300) {
+      // Double tap - like + heart animation
+      if (tapTimer.current) clearTimeout(tapTimer.current);
+      tapTimer.current = null;
+      onDoubleTap(index);
+      setShowHeartLocal(true);
+      setTimeout(() => setShowHeartLocal(false), 1000);
+      lastTap.current = 0;
     } else {
-      vid.pause();
-      setIsPaused(true);
+      // Single tap - wait to see if double tap follows
+      lastTap.current = now;
+      tapTimer.current = setTimeout(() => {
+        // Confirmed single tap - toggle play/pause
+        const vid = videoRef.current;
+        if (vid) {
+          if (vid.paused) {
+            vid.play().catch(() => {});
+            setIsPaused(false);
+          } else {
+            vid.pause();
+            setIsPaused(true);
+          }
+        }
+        tapTimer.current = null;
+      }, 300);
     }
   };
 
