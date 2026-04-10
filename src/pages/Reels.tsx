@@ -199,14 +199,10 @@ const ReelItem = ({
         </button>
       )}
 
-      {/* Play/Pause tap area */}
-      {isVideo && isActive && (
-        <button
-          onClick={handlePlayPause}
-          className="absolute inset-0 z-10"
-          style={{ background: "transparent" }}
-        />
-      )}
+      {/* Double tap heart animation */}
+      <AnimatePresence>
+        {showHeartLocal && <DoubleTapHeart />}
+      </AnimatePresence>
 
       {/* Right side actions */}
       <div className="absolute right-3 bottom-[4.5rem] flex flex-col items-center gap-5 z-20">
