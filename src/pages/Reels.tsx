@@ -268,22 +268,21 @@ const Reels = () => {
       </AnimatePresence>
 
       {/* Comment sheet */}
-      {commentOpen && (
-        <CommentSheet
-          postId={currentReel.id}
-          open={commentOpen}
-          onOpenChange={setCommentOpen}
-        />
-      )}
+      <CommentSheet
+        postId={currentReel.id}
+        isOpen={commentOpen}
+        onClose={() => setCommentOpen(false)}
+      />
 
       {/* Share sheet */}
-      {shareOpen && (
-        <ShareSheet
-          postId={currentReel.id}
-          open={shareOpen}
-          onOpenChange={setShareOpen}
-        />
-      )}
+      <ShareSheet
+        postId={currentReel.id}
+        image={currentReel.image_url}
+        caption={currentReel.caption}
+        username={currentReel.username}
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+      />
 
       <BottomNav />
     </div>
