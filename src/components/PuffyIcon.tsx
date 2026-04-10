@@ -8,6 +8,7 @@ import user from "@/assets/icons/user.png";
 import plus from "@/assets/icons/plus.png";
 import heart from "@/assets/icons/heart.png";
 import heartFilled from "@/assets/icons/heart-filled.png";
+import heartFilledRed from "@/assets/icons/heart-filled-red.png";
 import send from "@/assets/icons/send.png";
 import bookmark from "@/assets/icons/bookmark.png";
 import moreHorizontal from "@/assets/icons/more-horizontal.png";
@@ -112,7 +113,11 @@ const iconMap: Record<string, string> = {
   zap,
   "volume-2": volume2,
   mic,
+  "heart-filled-red": heartFilledRed,
 };
+
+// Icons that should NOT be inverted in dark mode (already colored)
+const noInvertIcons = new Set(["heart-filled-red"]);
 
 export type PuffyIconName = keyof typeof iconMap;
 
@@ -126,13 +131,14 @@ interface PuffyIconProps {
 const PuffyIcon = ({ name, size = 24, className = "", style }: PuffyIconProps) => {
   const src = iconMap[name];
   if (src) {
+    const adaptiveClass = noInvertIcons.has(name) ? "" : "icon-adaptive";
     return (
       <img
         src={src}
         alt={name}
         width={size}
         height={size}
-        className={`inline-block shrink-0 icon-adaptive ${className}`}
+        className={`inline-block shrink-0 ${adaptiveClass} ${className}`}
         style={style}
         draggable={false}
       />
