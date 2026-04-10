@@ -111,9 +111,9 @@ const LikesSheet = ({ postId, isOpen, onClose, likesCount }: LikesSheetProps) =>
                 users.map((u) => (
                   <div key={u.user_id} className="flex items-center gap-3 px-4 py-3">
                     {u.avatar_url ? (
-                      <img src={u.avatar_url} alt="" className="h-12 w-12 rounded-[40%] object-cover" />
+                      <img src={u.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover" />
                     ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-[40%] bg-secondary">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
                         <PuffyIcon name="user" size={20} />
                       </div>
                     )}

@@ -222,9 +222,9 @@ const ShareSheet = ({ postId, image, caption, username, isOpen, onClose }: Share
                       >
                         <div className="relative">
                           {f.avatar_url ? (
-                            <img src={f.avatar_url} alt={f.username} className="h-14 w-14 rounded-[40%] object-cover" />
+                            <img src={f.avatar_url} alt={f.username} className="h-14 w-14 rounded-full object-cover" />
                           ) : (
-                            <div className="flex h-14 w-14 items-center justify-center rounded-[40%] bg-secondary">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
                               <PuffyIcon name="user" size={22} />
                             </div>
                           )}

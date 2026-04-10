@@ -103,7 +103,7 @@ const Settings = () => {
           <PuffyIcon name="arrow-left" size={22} />
         </button>
         {profile?.avatar_url && (
-          <img src={profile.avatar_url} alt="" className="h-8 w-8 rounded-[40%] object-cover" />
+          <img src={profile.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
         )}
         <span className="text-sm text-muted-foreground">@{profile?.username || "user"}</span>
       </div>
