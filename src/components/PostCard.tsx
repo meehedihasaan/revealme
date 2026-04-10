@@ -215,10 +215,10 @@ const PostCard = memo(({
             </div>
           </div>
 
-          {/* Caption overlay at bottom */}
+          {/* Caption overlay at bottom - truncated to 1 line */}
           {caption && (
             <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-              <p className="text-white text-sm line-clamp-2 leading-snug">{caption}</p>
+              <p className="text-white text-sm line-clamp-1 leading-snug">{caption}</p>
             </div>
           )}
         </button>
@@ -290,7 +290,7 @@ const PostCard = memo(({
             disabled={followLoading}
             className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground transition-opacity disabled:opacity-50"
           >
-            <PuffyIcon name="plus" size={12} className="!filter-none" />
+            <PuffyIcon name="plus" size={12} className="!brightness-0 !invert" />
             Follow
           </motion.button>
         )}

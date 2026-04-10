@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { Volume2, VolumeX, Music } from "lucide-react";
 import Lottie from "lottie-react";
 import heartAnimation from "@/assets/heart-animation.json";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +26,7 @@ interface ReelPost {
   commentsCount: number;
   isLiked: boolean;
   viewCount: number;
+  isFollowing: boolean;
 }
 
 const DoubleTapHeart = () => (
@@ -52,6 +54,7 @@ const ReelItem = ({
   onToggleLike,
   onComment,
   onShare,
+  onFollow,
   navigate,
   userId,
 }: {
@@ -64,6 +67,7 @@ const ReelItem = ({
   onToggleLike: (reel: ReelPost) => void;
   onComment: (index: number) => void;
   onShare: (index: number) => void;
+  onFollow: (reel: ReelPost) => void;
   navigate: ReturnType<typeof useNavigate>;
   userId?: string;
 }) => {
@@ -71,6 +75,7 @@ const ReelItem = ({
   const isVideo = isVideoUrl(reel.image_url);
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [captionExpanded, setCaptionExpanded] = useState(false);
 
   useEffect(() => {
     const vid = videoRef.current;
@@ -89,7 +94,6 @@ const ReelItem = ({
     if (vid) vid.muted = isMuted;
   }, [isMuted]);
 
-  // Progress bar for video
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid || !isActive) return;
@@ -118,6 +122,7 @@ const ReelItem = ({
   };
 
   const audioName = `Original audio · ${reel.username}`;
+  const isOwnReel = reel.user_id === userId;
 
   return (
     <div
@@ -169,11 +174,10 @@ const ReelItem = ({
           onClick={(e) => { e.stopPropagation(); onToggleMute(); }}
           className="absolute top-14 right-4 z-30 h-8 w-8 rounded-full bg-black/40 flex items-center justify-center"
         >
-          <PuffyIcon name="volume-2" size={14} className={W} />
-          {isMuted && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-5 h-[1.5px] bg-white rotate-45 rounded-full" />
-            </div>
+          {isMuted ? (
+            <VolumeX size={16} className="text-white" />
+          ) : (
+            <Volume2 size={16} className="text-white" />
           )}
         </button>
       )}
@@ -189,12 +193,12 @@ const ReelItem = ({
 
       {/* Right side actions */}
       <div className="absolute right-3 bottom-[4.5rem] flex flex-col items-center gap-5 z-20">
-        {/* Avatar with follow */}
+        {/* Avatar with follow badge */}
         <div className="relative mb-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
-              navigate(reel.user_id === userId ? "/profile" : `/user/${reel.user_id}`);
+              navigate(isOwnReel ? "/profile" : `/user/${reel.user_id}`);
             }}
           >
             {reel.avatar_url ? (
@@ -205,6 +209,15 @@ const ReelItem = ({
               </div>
             )}
           </button>
+          {/* Follow button under avatar */}
+          {!isOwnReel && !reel.isFollowing && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onFollow(reel); }}
+              className="absolute -bottom-2 left-1/2 -translate-x-1/2 h-5 w-5 rounded-full bg-accent flex items-center justify-center border border-white"
+            >
+              <span className="text-white text-xs font-bold leading-none">+</span>
+            </button>
+          )}
         </div>
         <button onClick={(e) => { e.stopPropagation(); onToggleLike(reel); }} className="flex flex-col items-center gap-1">
           {reel.isLiked ? (
@@ -232,20 +245,37 @@ const ReelItem = ({
           <PuffyIcon name="eye" size={14} className={`${W} opacity-80`} />
           <span className="text-white/80 text-xs font-medium">{reel.viewCount}</span>
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(reel.user_id === userId ? "/profile" : `/user/${reel.user_id}`);
-          }}
-          className="flex items-center gap-2 mb-2"
-        >
-          <span className="text-white font-bold text-sm">{reel.username}</span>
-          {reel.is_verified && <VerifiedBadge size={14} />}
-        </button>
+        <div className="flex items-center gap-2 mb-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(isOwnReel ? "/profile" : `/user/${reel.user_id}`);
+            }}
+            className="flex items-center gap-2"
+          >
+            <span className="text-white font-bold text-sm">{reel.username}</span>
+            {reel.is_verified && <VerifiedBadge size={14} />}
+          </button>
+          {!isOwnReel && !reel.isFollowing && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onFollow(reel); }}
+              className="rounded-md bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm"
+            >
+              Follow
+            </button>
+          )}
+        </div>
         {reel.caption && (
-          <p className="text-white text-sm leading-snug line-clamp-2">{reel.caption}</p>
+          <button
+            onClick={(e) => { e.stopPropagation(); setCaptionExpanded(!captionExpanded); }}
+            className="text-left"
+          >
+            <p className={`text-white text-sm leading-snug ${captionExpanded ? "" : "line-clamp-1"}`}>
+              {reel.caption}
+            </p>
+          </button>
         )}
-        {/* Audio - tappable with marquee */}
+        {/* Audio - tappable with marquee & spinning disc */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -253,7 +283,7 @@ const ReelItem = ({
           }}
           className="flex items-center gap-1.5 mt-1.5 max-w-full overflow-hidden"
         >
-          <PuffyIcon name="disc" size={12} className={`${W} opacity-70 shrink-0`} />
+          <Music size={12} className={`text-white/70 shrink-0 ${isActive ? "animate-spin-slow" : ""}`} />
           <div className="overflow-hidden whitespace-nowrap">
             <span className="text-white/70 text-xs inline-block animate-marquee">{audioName}</span>
           </div>
@@ -313,9 +343,14 @@ const Reels = () => {
     (viewsData || []).forEach((v) => { viewsCounts[v.post_id] = (viewsCounts[v.post_id] || 0) + 1; });
 
     let userLikes = new Set<string>();
+    let userFollowing = new Set<string>();
     if (user?.id) {
-      const { data: myLikes } = await supabase.from("likes").select("post_id").eq("user_id", user.id).in("post_id", postIds);
+      const [{ data: myLikes }, { data: myFollows }] = await Promise.all([
+        supabase.from("likes").select("post_id").eq("user_id", user.id).in("post_id", postIds),
+        supabase.from("follows").select("following_id").eq("follower_id", user.id).in("following_id", userIds),
+      ]);
       userLikes = new Set((myLikes || []).map((l) => l.post_id));
+      userFollowing = new Set((myFollows || []).map((f) => f.following_id));
     }
 
     setReels(
@@ -332,6 +367,7 @@ const Reels = () => {
         commentsCount: commentsCount[p.id] || 0,
         isLiked: userLikes.has(p.id),
         viewCount: viewsCounts[p.id] || 0,
+        isFollowing: userFollowing.has(p.user_id),
       }))
     );
     setLoading(false);
@@ -351,7 +387,6 @@ const Reels = () => {
       { onConflict: "post_id,viewer_id" }
     ).then(() => {});
 
-    // Optimistically update view count
     setReels((prev) =>
       prev.map((r) => r.id === reel.id ? { ...r, viewCount: r.viewCount + 1 } : r)
     );
@@ -390,6 +425,22 @@ const Reels = () => {
       await supabase.from("likes").delete().eq("user_id", user.id).eq("post_id", reel.id);
     } else {
       await supabase.from("likes").insert({ user_id: user.id, post_id: reel.id });
+    }
+  }, [user]);
+
+  const toggleFollow = useCallback(async (reel: ReelPost) => {
+    if (!user) return;
+    const wasFollowing = reel.isFollowing;
+    // Optimistic update for ALL reels from this user
+    setReels((prev) =>
+      prev.map((r) =>
+        r.user_id === reel.user_id ? { ...r, isFollowing: !wasFollowing } : r
+      )
+    );
+    if (wasFollowing) {
+      await supabase.from("follows").delete().eq("follower_id", user.id).eq("following_id", reel.user_id);
+    } else {
+      await supabase.from("follows").insert({ follower_id: user.id, following_id: reel.user_id });
     }
   }, [user]);
 
@@ -473,6 +524,7 @@ const Reels = () => {
             onToggleMute={() => setIsMuted((m) => !m)}
             onDoubleTap={handleDoubleTap}
             onToggleLike={toggleLike}
+            onFollow={toggleFollow}
             onComment={(i) => { setCurrentIndex(i); setCommentOpen(true); }}
             onShare={(i) => { setCurrentIndex(i); setShareOpen(true); }}
             navigate={navigate}
