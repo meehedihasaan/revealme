@@ -218,7 +218,7 @@ const PostCard = memo(({
           {/* Caption overlay at bottom - truncated to 1 line */}
           {caption && (
             <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-              <p className="text-white text-sm line-clamp-1 leading-snug">{caption}</p>
+              <p className="text-white text-sm line-clamp-1 leading-snug text-left">{caption}</p>
             </div>
           )}
         </button>
