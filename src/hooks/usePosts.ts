@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
@@ -27,76 +27,118 @@ export const usePosts = (filterUserId?: string) => {
   const { blockedIds } = useBlockedUsers();
   const [posts, setPosts] = useState<PostWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
+  const hasLoadedOnce = useRef(false);
 
   const fetchPosts = useCallback(async () => {
-    setLoading(true);
+    if (!hasLoadedOnce.current) {
+      setLoading(true);
+    }
+
     let query = supabase.from("posts").select("*").order("created_at", { ascending: false });
     if (filterUserId) query = query.eq("user_id", filterUserId);
+
     const { data: postsData } = await query;
-    if (!postsData || postsData.length === 0) { setPosts([]); setLoading(false); return; }
 
-    // Filter out blocked users' posts
-    const filteredPosts = postsData.filter(p => !blockedIds.has(p.user_id));
-    if (filteredPosts.length === 0) { setPosts([]); setLoading(false); return; }
+    if (!postsData || postsData.length === 0) {
+      setPosts([]);
+      hasLoadedOnce.current = true;
+      setLoading(false);
+      return;
+    }
 
-    const userIds = [...new Set(filteredPosts.map(p => p.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, username, display_name, avatar_url, is_verified, is_private").in("user_id", userIds);
-    const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+    const filteredPosts = postsData.filter((post) => !blockedIds.has(post.user_id));
+    if (filteredPosts.length === 0) {
+      setPosts([]);
+      hasLoadedOnce.current = true;
+      setLoading(false);
+      return;
+    }
 
-    const postIds = filteredPosts.map(p => p.id);
+    const userIds = [...new Set(filteredPosts.map((post) => post.user_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, username, display_name, avatar_url, is_verified, is_private")
+      .in("user_id", userIds);
+
+    const profileMap = Object.fromEntries((profiles || []).map((profile) => [profile.user_id, profile]));
+
+    const postIds = filteredPosts.map((post) => post.id);
     const { data: likesData } = await supabase.from("likes").select("post_id").in("post_id", postIds);
     const likesCount: Record<string, number> = {};
-    (likesData || []).forEach(l => { likesCount[l.post_id] = (likesCount[l.post_id] || 0) + 1; });
+    (likesData || []).forEach((like) => {
+      likesCount[like.post_id] = (likesCount[like.post_id] || 0) + 1;
+    });
 
-    let userLikes: Set<string> = new Set();
-    let userSaves: Set<string> = new Set();
-    if (user) {
-      const { data: myLikes } = await supabase.from("likes").select("post_id").eq("user_id", user.id).in("post_id", postIds);
-      userLikes = new Set((myLikes || []).map(l => l.post_id));
-      const { data: mySaves } = await supabase.from("saved_posts").select("post_id").eq("user_id", user.id).in("post_id", postIds);
-      userSaves = new Set((mySaves || []).map(s => s.post_id));
+    let userLikes = new Set<string>();
+    let userSaves = new Set<string>();
+
+    if (user?.id) {
+      const { data: myLikes } = await supabase
+        .from("likes")
+        .select("post_id")
+        .eq("user_id", user.id)
+        .in("post_id", postIds);
+      userLikes = new Set((myLikes || []).map((like) => like.post_id));
+
+      const { data: mySaves } = await supabase
+        .from("saved_posts")
+        .select("post_id")
+        .eq("user_id", user.id)
+        .in("post_id", postIds);
+      userSaves = new Set((mySaves || []).map((saved) => saved.post_id));
     }
 
-    // Get who the user follows (for private profile filtering)
     let followingSet = new Set<string>();
-    if (user) {
-      const { data: follows } = await supabase.from("follows").select("following_id").eq("follower_id", user.id);
-      followingSet = new Set((follows || []).map(f => f.following_id));
+    if (user?.id) {
+      const { data: follows } = await supabase
+        .from("follows")
+        .select("following_id")
+        .eq("follower_id", user.id);
+      followingSet = new Set((follows || []).map((follow) => follow.following_id));
     }
 
-    const allPosts = filteredPosts.map(p => ({
-      id: p.id,
-      image_url: p.image_url,
-      caption: p.caption || "",
-      location: p.location || "",
-      created_at: p.created_at,
-      user_id: p.user_id,
-      username: profileMap[p.user_id]?.username || "user",
-      display_name: profileMap[p.user_id]?.display_name || profileMap[p.user_id]?.username || "User",
-      avatar_url: profileMap[p.user_id]?.avatar_url || null,
-      is_verified: profileMap[p.user_id]?.is_verified || false,
-      is_private: profileMap[p.user_id]?.is_private || false,
-      likesCount: likesCount[p.id] || 0,
-      isLiked: userLikes.has(p.id),
-      isSaved: userSaves.has(p.id),
-      timeAgo: formatDistanceToNow(new Date(p.created_at), { addSuffix: true }),
+    const allPosts = filteredPosts.map((post) => ({
+      id: post.id,
+      image_url: post.image_url,
+      caption: post.caption || "",
+      location: post.location || "",
+      created_at: post.created_at,
+      user_id: post.user_id,
+      username: profileMap[post.user_id]?.username || "user",
+      display_name: profileMap[post.user_id]?.display_name || profileMap[post.user_id]?.username || "User",
+      avatar_url: profileMap[post.user_id]?.avatar_url || null,
+      is_verified: profileMap[post.user_id]?.is_verified || false,
+      is_private: profileMap[post.user_id]?.is_private || false,
+      likesCount: likesCount[post.id] || 0,
+      isLiked: userLikes.has(post.id),
+      isSaved: userSaves.has(post.id),
+      timeAgo: formatDistanceToNow(new Date(post.created_at), { addSuffix: true }),
     }));
 
-    // Filter out private profiles' posts unless it's your own or you follow them
-    const visiblePosts = allPosts.filter(p => {
-      if (p.user_id === user?.id) return true;
-      if (p.is_private && !followingSet.has(p.user_id)) return false;
+    const visiblePosts = allPosts.filter((post) => {
+      if (post.user_id === user?.id) return true;
+      if (post.is_private && !followingSet.has(post.user_id)) return false;
       return true;
     });
 
     setPosts(visiblePosts);
+    hasLoadedOnce.current = true;
     setLoading(false);
-  }, [user, filterUserId, blockedIds]);
-
-  useEffect(() => { fetchPosts(); }, [fetchPosts]);
+  }, [blockedIds, filterUserId, user?.id]);
 
   useEffect(() => {
-    const onFocus = () => { fetchPosts(); };
+    hasLoadedOnce.current = false;
+    setPosts([]);
+    void fetchPosts();
+  }, [fetchPosts]);
+
+  useEffect(() => {
+    const onFocus = () => {
+      if (document.visibilityState === "visible") {
+        void fetchPosts();
+      }
+    };
+
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, [fetchPosts]);

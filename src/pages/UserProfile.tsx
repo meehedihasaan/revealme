@@ -8,7 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
 import HighlightsRow from "@/components/HighlightsRow";
 import { useAuth } from "@/contexts/AuthContext";
-
+import { ProfileShimmer, FeedShimmer } from "@/components/ShimmerLoader";
 import { usePosts } from "@/hooks/usePosts";
 import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";
@@ -261,7 +261,7 @@ const UserProfile = () => {
   if (profileLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <div className="min-h-screen bg-background pb-20" />
+        <ProfileShimmer />
         <BottomNav />
       </div>
     );
@@ -530,11 +530,7 @@ const UserProfile = () => {
           {/* Posts */}
           {activeTab === "grid" ? (
             loading ? (
-              <div className="mt-2">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="aspect-square w-full bg-muted animate-pulse mb-2" />
-                ))}
-              </div>
+              <FeedShimmer />
             ) : posts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                 <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
@@ -562,11 +558,7 @@ const UserProfile = () => {
               </div>
             )
           ) : taggedLoading ? (
-            <div className="mt-2">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="aspect-square w-full bg-muted animate-pulse mb-2" />
-              ))}
-            </div>
+            <FeedShimmer />
           ) : taggedPosts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
               <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />

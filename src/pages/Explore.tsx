@@ -7,8 +7,8 @@ import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
-
 import PullToRefresh from "@/components/PullToRefresh";
+import { ExploreShimmer, FollowersShimmer } from "@/components/ShimmerLoader";
 
 import explore1 from "@/assets/explore1.jpg";
 import explore2 from "@/assets/explore2.jpg";
@@ -209,18 +209,7 @@ const Explore = () => {
       {activeTab === "users" && search.trim() ? (
         <div>
           {searchLoading ? (
-            <div className="space-y-0">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center gap-3 px-4 py-3">
-                  <div className="h-12 w-12 rounded-full bg-muted animate-pulse" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-3.5 w-28 rounded bg-muted animate-pulse" />
-                    <div className="h-3 w-20 rounded bg-muted animate-pulse" />
-                  </div>
-                  <div className="h-8 w-20 rounded-lg bg-muted animate-pulse" />
-                </div>
-              ))}
-            </div>
+            <FollowersShimmer />
           ) : users.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
               <PuffyIcon name="search" size={48} className="opacity-30 mb-3" />
@@ -274,7 +263,7 @@ const Explore = () => {
       ) : (
         /* Content grid */
         loading ? (
-          null
+          <ExploreShimmer />
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
             <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />

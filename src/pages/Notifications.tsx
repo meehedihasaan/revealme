@@ -5,7 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
+import { NotificationsShimmer } from "@/components/ShimmerLoader";
 import { formatDistanceToNow } from "date-fns";
 import defaultAvatar from "@/assets/default-avatar.png";
 
@@ -229,7 +229,7 @@ const Notifications = () => {
 
       <PullToRefresh onRefresh={async () => { setLoading(true); await fetchNotifications(); }}>
       {loading ? (
-        null
+        <NotificationsShimmer />
       ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <PuffyIcon name="bell" size={48} className="opacity-30 mb-3" />

@@ -158,6 +158,38 @@
   .light-theme .icon-adaptive-inverted {
     filter: invert(1);
   }
+
+  @keyframes shimmer-slide {
+    0% {
+      transform: translateX(-120%);
+    }
+    100% {
+      transform: translateX(120%);
+    }
+  }
+
+  .shimmer-block {
+    position: relative;
+    overflow: hidden;
+    background: hsl(var(--muted) / 0.72);
+  }
+
+  .shimmer-block::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-120%);
+    will-change: transform;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(var(--foreground) / 0.04) 30%,
+      hsl(var(--foreground) / 0.14) 50%,
+      hsl(var(--foreground) / 0.04) 70%,
+      transparent 100%
+    );
+    animation: shimmer-slide 1.35s ease-in-out infinite;
+  }
 }
 
 @layer utilities {
