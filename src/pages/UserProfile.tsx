@@ -537,6 +537,12 @@ const UserProfile = () => {
               <PuffyIcon name="grid" size={22} />
             </button>
             <button
+              onClick={() => setActiveTab("clips")}
+              className={`flex-1 py-3 flex justify-center ${activeTab === "clips" ? "border-b-2 border-foreground" : "opacity-50"}`}
+            >
+              <PuffyIcon name="reels" size={22} />
+            </button>
+            <button
               onClick={() => setActiveTab("tagged")}
               className={`flex-1 py-3 flex justify-center ${activeTab === "tagged" ? "border-b-2 border-foreground" : "opacity-50"}`}
             >
