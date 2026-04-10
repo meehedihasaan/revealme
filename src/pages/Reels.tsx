@@ -546,10 +546,6 @@ const Reels = () => {
         ))}
       </div>
 
-      {/* Double tap heart overlay */}
-      <AnimatePresence>
-        {showHeart && <DoubleTapHeart />}
-      </AnimatePresence>
 
       <CommentSheet postId={reels[currentIndex]?.id} isOpen={commentOpen} onClose={() => setCommentOpen(false)} />
       <ShareSheet postId={reels[currentIndex]?.id} image={reels[currentIndex]?.image_url} caption={reels[currentIndex]?.caption} username={reels[currentIndex]?.username} isOpen={shareOpen} onClose={() => setShareOpen(false)} />
