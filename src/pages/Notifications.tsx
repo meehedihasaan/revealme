@@ -237,7 +237,9 @@ const Notifications = () => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.02 }}
-              className={`flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-secondary/50 ${!n.read ? "bg-primary/5" : ""}`}
+              className={`flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-secondary/50 transition-colors duration-700 ${initialUnreadIds.current.has(n.id) ? "bg-primary/10 border-l-[3px] border-l-primary" : ""}`}
+              onClick={() => handleNotifClick(n)}
+            >
               onClick={() => handleNotifClick(n)}
             >
               <button onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.actor_id}`); }} className="shrink-0">
