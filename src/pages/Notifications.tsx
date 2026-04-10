@@ -240,8 +240,6 @@ const Notifications = () => {
               className={`flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-secondary/50 transition-colors duration-700 ${initialUnreadIds.current.has(n.id) ? "bg-primary/10 border-l-[3px] border-l-primary" : ""}`}
               onClick={() => handleNotifClick(n)}
             >
-              onClick={() => handleNotifClick(n)}
-            >
               <button onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.actor_id}`); }} className="shrink-0">
                 {n.actor_avatar ? (
                   <img src={n.actor_avatar} alt={n.actor_username} className="h-12 w-12 rounded-full object-cover" />
