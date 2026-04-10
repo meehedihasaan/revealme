@@ -20,6 +20,7 @@ export interface PostWithDetails {
   isLiked: boolean;
   isSaved: boolean;
   timeAgo: string;
+  post_type: string;
 }
 
 export const usePosts = (filterUserId?: string) => {
@@ -113,6 +114,7 @@ export const usePosts = (filterUserId?: string) => {
       isLiked: userLikes.has(post.id),
       isSaved: userSaves.has(post.id),
       timeAgo: formatDistanceToNow(new Date(post.created_at), { addSuffix: true }),
+      post_type: (post as any).post_type || "post",
     }));
 
     const visiblePosts = allPosts.filter((post) => {
