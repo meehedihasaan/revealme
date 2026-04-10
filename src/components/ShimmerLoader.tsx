@@ -4,16 +4,6 @@ const ShimmerBlock = ({ className }: { className?: string }) => (
 
 export const FeedShimmer = () => (
   <div className="space-y-4 px-4 py-4">
-    {/* Story row */}
-    <div className="flex gap-4">
-      {[...Array(5)].map((_, i) => (
-        <div key={i} className="flex flex-col items-center gap-1.5">
-          <ShimmerBlock className="h-16 w-16 rounded-full" />
-          <ShimmerBlock className="h-2 w-12" />
-        </div>
-      ))}
-    </div>
-    {/* Posts */}
     {[...Array(2)].map((_, i) => (
       <div key={i} className="space-y-3">
         <div className="flex items-center gap-3">

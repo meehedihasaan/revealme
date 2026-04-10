@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import ThoughtBubble from "@/components/ThoughtBubble";
 import { useUploadProgress } from "@/hooks/useUploadProgress";
 import PullToRefresh from "@/components/PullToRefresh";
-import HighlightsRow from "@/components/HighlightsRow";
+
 
 const STORY_GRADIENT = "gradient-story-ring";
 
@@ -262,8 +262,6 @@ const Profile = () => {
         </motion.button>
       </div>
 
-      {/* Highlights */}
-      {user && <HighlightsRow userId={user.id} isOwnProfile />}
 
       {/* Tabs */}
       <div className="mt-2 flex border-b border-border">

@@ -6,7 +6,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
-import HighlightsRow from "@/components/HighlightsRow";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileShimmer, FeedShimmer } from "@/components/ShimmerLoader";
 import { usePosts } from "@/hooks/usePosts";
@@ -497,8 +497,6 @@ const UserProfile = () => {
         </div>
       </div>
 
-      {/* Highlights */}
-      {userId && <HighlightsRow userId={userId} />}
 
       {/* Private profile gate */}
       {profile.is_private && !isFollowing ? (
