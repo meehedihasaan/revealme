@@ -102,6 +102,10 @@ const AppRoutes = () => {
       <Route path="/settings/privacy" element={<ProtectedRoute><PrivacySettings /></ProtectedRoute>} />
       <Route path="/settings/verification" element={<ProtectedRoute><RequestVerification /></ProtectedRoute>} />
       <Route path="/settings/location" element={<ProtectedRoute><LocationSettings /></ProtectedRoute>} />
+      <Route path="/settings/notifications" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
+      <Route path="/settings/data-storage" element={<ProtectedRoute><DataStorageSettings /></ProtectedRoute>} />
+      <Route path="/settings/help" element={<ProtectedRoute><HelpSupportSettings /></ProtectedRoute>} />
+      <Route path="/settings/activity" element={<ProtectedRoute><ActivitySettings /></ProtectedRoute>} />
       <Route path="/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />
       <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
       <Route path="/story" element={<ProtectedRoute><StoryViewer /></ProtectedRoute>} />
