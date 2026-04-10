@@ -580,6 +580,34 @@ const UserProfile = () => {
                 ))}
               </div>
             )
+          ) : activeTab === "clips" ? (
+            clipsLoading ? (
+              <FeedShimmer />
+            ) : clipPosts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                <PuffyIcon name="reels" size={48} className="opacity-30 mb-3" />
+                <p className="text-sm">No clips yet</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-0.5 mt-0.5">
+                {clipPosts.map((post: any) => (
+                  <button
+                    key={post.id}
+                    onClick={() => navigate(`/post/${post.id}`)}
+                    className="relative aspect-[9/16] overflow-hidden bg-secondary"
+                  >
+                    {post.image_url?.match(/\.(mp4|mov|webm|ogg)(\?|$)/i) ? (
+                      <video src={post.image_url} className="h-full w-full object-cover" muted playsInline />
+                    ) : (
+                      <img src={post.image_url} alt="" className="h-full w-full object-cover" />
+                    )}
+                    <div className="absolute bottom-1 left-1 flex items-center gap-1">
+                      <PuffyIcon name="reels" size={10} className="!brightness-0 !invert opacity-80" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )
           ) : taggedLoading ? (
             <FeedShimmer />
           ) : taggedPosts.length === 0 ? (
