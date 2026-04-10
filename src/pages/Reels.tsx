@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, PanInfo } from "framer-motion";
-import { Heart, MessageCircle, Send, MoreHorizontal, Eye, Music, Camera, Plus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, MessageCircle, Send, Bookmark, MoreVertical, Eye, Music2, Video, Sparkles } from "lucide-react";
+import Lottie from "lottie-react";
+import heartAnimation from "@/assets/heart-animation.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
@@ -26,6 +28,17 @@ interface ReelPost {
   viewCount: number;
 }
 
+const DoubleTapHeart = () => (
+  <motion.div
+    className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0, transition: { duration: 0.15, delay: 0.6 } }}
+  >
+    <Lottie animationData={heartAnimation} loop={false} autoplay style={{ width: 200, height: 200 }} />
+  </motion.div>
+);
+
 const Reels = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -35,8 +48,9 @@ const Reels = () => {
   const [loading, setLoading] = useState(true);
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
   const isAnimating = useRef(false);
-  const dragY = useRef(0);
+  const lastTapTime = useRef(0);
 
   const fetchReels = useCallback(async () => {
     const { data: postsData } = await supabase
@@ -113,6 +127,22 @@ const Reels = () => {
     }
   };
 
+  const handleDoubleTap = useCallback(() => {
+    const now = Date.now();
+    if (now - lastTapTime.current < 300) {
+      // Double tap detected
+      const reel = reels[currentIndex];
+      if (reel && !reel.isLiked) {
+        toggleLike(reel);
+      }
+      setShowHeart(true);
+      setTimeout(() => setShowHeart(false), 1000);
+      lastTapTime.current = 0;
+    } else {
+      lastTapTime.current = now;
+    }
+  }, [reels, currentIndex, user]);
+
   const goTo = (direction: "next" | "prev") => {
     if (isAnimating.current) return;
     if (direction === "next" && currentIndex >= reels.length - 1) return;
@@ -122,16 +152,25 @@ const Reels = () => {
     setTimeout(() => { isAnimating.current = false; }, 400);
   };
 
-  // Touch-based swipe handling (no framer drag to avoid re-render issues)
   const touchStartY = useRef(0);
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
   };
   const handleTouchEnd = (e: React.TouchEvent) => {
     const diff = touchStartY.current - e.changedTouches[0].clientY;
-    if (diff > 60) goTo("next");
-    else if (diff < -60) goTo("prev");
+    if (Math.abs(diff) > 60) {
+      if (diff > 0) goTo("next");
+      else goTo("prev");
+    }
   };
+
+  // Scroll wheel for desktop
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (Math.abs(e.deltaY) > 30) {
+      if (e.deltaY > 0) goTo("next");
+      else goTo("prev");
+    }
+  }, [currentIndex, reels.length]);
 
   const currentReel = reels[currentIndex];
 
@@ -146,7 +185,7 @@ const Reels = () => {
   if (reels.length === 0) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-white/60 pb-20">
-        <PuffyIcon name="camera" size={48} className="mb-3 opacity-30 brightness-0 invert" />
+        <Video size={48} className="mb-3 opacity-30 text-white" />
         <p className="text-sm">No clips yet</p>
         <BottomNav />
       </div>
@@ -158,19 +197,17 @@ const Reels = () => {
       className="fixed inset-0 bg-black overflow-hidden select-none"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      onWheel={handleWheel}
     >
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-3 pb-2 safe-top">
-        <h1 className="text-white text-xl font-bold">Clips</h1>
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate("/create-post")} className="text-white">
-            <Camera size={22} />
+      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-3 pb-2 safe-top bg-gradient-to-b from-black/50 to-transparent">
+        <h1 className="text-white text-xl font-bold tracking-tight">Clips</h1>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/create-post")} className="text-white active:scale-90 transition-transform">
+            <Video size={22} />
           </button>
-          <button onClick={() => navigate("/create-post")} className="text-white">
-            <Plus size={22} />
-          </button>
-          <button onClick={() => navigate("/messages")} className="text-white">
-            <MessageCircle size={22} />
+          <button onClick={() => navigate("/messages")} className="text-white active:scale-90 transition-transform">
+            <Sparkles size={22} />
           </button>
         </div>
       </div>
@@ -178,103 +215,156 @@ const Reels = () => {
       {/* Current Reel */}
       <motion.div
         key={currentIndex}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.25 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         className="absolute inset-0"
+        onClick={handleDoubleTap}
       >
-        {/* Image */}
         <img
           src={currentReel.image_url}
           alt=""
           className="h-full w-full object-cover"
           draggable={false}
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
 
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
+        {/* Double tap heart animation */}
+        <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
       </motion.div>
 
-      {/* Right side actions — outside motion div to prevent flicker */}
-      <div className="absolute right-3 bottom-36 flex flex-col items-center gap-6 z-20">
+      {/* Progress indicator */}
+      <div className="absolute top-12 left-4 right-4 z-30 flex gap-1">
+        {reels.map((_, i) => (
+          <div key={i} className="flex-1 h-[2px] rounded-full overflow-hidden bg-white/20">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${i === currentIndex ? "bg-white w-full" : i < currentIndex ? "bg-white/60 w-full" : "w-0"}`}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Right side actions */}
+      <div className="absolute right-3 bottom-32 md:bottom-36 flex flex-col items-center gap-5 z-20">
         {/* Like */}
-        <button onClick={() => toggleLike(currentReel)} className="flex flex-col items-center gap-1">
-          <Heart
-            size={28}
-            className={currentReel.isLiked ? "text-red-500 fill-red-500" : "text-white"}
-          />
-          <span className="text-white text-xs font-semibold">{currentReel.likesCount}</span>
+        <button
+          onClick={(e) => { e.stopPropagation(); toggleLike(currentReel); }}
+          className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
+        >
+          <div className="bg-black/20 backdrop-blur-sm rounded-full p-2">
+            <Heart
+              size={26}
+              className={`transition-colors ${currentReel.isLiked ? "text-red-500 fill-red-500" : "text-white"}`}
+            />
+          </div>
+          <span className="text-white text-[11px] font-semibold drop-shadow">{currentReel.likesCount}</span>
         </button>
 
         {/* Comment */}
-        <button onClick={() => setCommentOpen(true)} className="flex flex-col items-center gap-1">
-          <MessageCircle size={28} className="text-white" />
-          <span className="text-white text-xs font-semibold">{currentReel.commentsCount}</span>
+        <button
+          onClick={(e) => { e.stopPropagation(); setCommentOpen(true); }}
+          className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
+        >
+          <div className="bg-black/20 backdrop-blur-sm rounded-full p-2">
+            <MessageCircle size={26} className="text-white" />
+          </div>
+          <span className="text-white text-[11px] font-semibold drop-shadow">{currentReel.commentsCount}</span>
         </button>
 
         {/* Share */}
-        <button onClick={() => setShareOpen(true)} className="flex flex-col items-center gap-1">
-          <Send size={26} className="text-white" />
+        <button
+          onClick={(e) => { e.stopPropagation(); setShareOpen(true); }}
+          className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
+        >
+          <div className="bg-black/20 backdrop-blur-sm rounded-full p-2">
+            <Send size={24} className="text-white" />
+          </div>
+        </button>
+
+        {/* Bookmark */}
+        <button
+          onClick={(e) => e.stopPropagation()}
+          className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
+        >
+          <div className="bg-black/20 backdrop-blur-sm rounded-full p-2">
+            <Bookmark size={24} className="text-white" />
+          </div>
         </button>
 
         {/* More */}
-        <button className="flex flex-col items-center gap-1">
-          <MoreHorizontal size={26} className="text-white" />
+        <button
+          onClick={(e) => e.stopPropagation()}
+          className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
+        >
+          <div className="bg-black/20 backdrop-blur-sm rounded-full p-2">
+            <MoreVertical size={24} className="text-white" />
+          </div>
+        </button>
+
+        {/* User avatar (spinning disc) */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(currentReel.user_id === user?.id ? "/profile" : `/user/${currentReel.user_id}`);
+          }}
+          className="mt-1"
+        >
+          {currentReel.avatar_url ? (
+            <img src={currentReel.avatar_url} alt="" className="h-9 w-9 rounded-[40%] object-cover border-2 border-white/50" />
+          ) : (
+            <div className="h-9 w-9 rounded-[40%] bg-white/20 border-2 border-white/50 flex items-center justify-center">
+              <PuffyIcon name="user" size={16} className="brightness-0 invert" />
+            </div>
+          )}
         </button>
       </div>
 
       {/* Bottom info */}
-      <div className="absolute bottom-24 left-0 right-16 px-4 z-20">
+      <div className="absolute bottom-20 md:bottom-24 left-0 right-20 px-4 z-20">
         {/* View count */}
         <div className="flex items-center gap-1.5 mb-2">
-          <Eye size={14} className="text-white/80" />
-          <span className="text-white/80 text-xs font-medium">{currentReel.viewCount}</span>
+          <Eye size={13} className="text-white/80" />
+          <span className="text-white/80 text-xs font-medium">{currentReel.viewCount} views</span>
         </div>
 
         {/* User info */}
         <button
-          onClick={() => navigate(currentReel.user_id === user?.id ? "/profile" : `/user/${currentReel.user_id}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(currentReel.user_id === user?.id ? "/profile" : `/user/${currentReel.user_id}`);
+          }}
           className="flex items-center gap-2 mb-2"
         >
           {currentReel.avatar_url ? (
-            <img src={currentReel.avatar_url} alt="" className="h-9 w-9 rounded-[40%] object-cover border border-white/30" />
+            <img src={currentReel.avatar_url} alt="" className="h-8 w-8 rounded-[40%] object-cover border border-white/30" />
           ) : (
-            <div className="h-9 w-9 rounded-[40%] bg-white/20 flex items-center justify-center">
-              <PuffyIcon name="user" size={16} className="brightness-0 invert" />
+            <div className="h-8 w-8 rounded-[40%] bg-white/20 flex items-center justify-center">
+              <PuffyIcon name="user" size={14} className="brightness-0 invert" />
             </div>
           )}
-          <span className="text-white font-bold text-sm">{currentReel.username}</span>
+          <span className="text-white font-bold text-sm drop-shadow">{currentReel.username}</span>
           {currentReel.is_verified && <VerifiedBadge size={14} />}
+          <span className="text-white/80 text-xs border border-white/30 rounded-md px-2 py-0.5 ml-1">Follow</span>
         </button>
 
         {/* Caption */}
         {currentReel.caption && (
-          <p className="text-white text-sm leading-snug line-clamp-2">{currentReel.caption}</p>
+          <p className="text-white text-[13px] leading-snug line-clamp-2 drop-shadow">{currentReel.caption}</p>
         )}
 
-        {/* Audio placeholder */}
+        {/* Audio */}
         <div className="flex items-center gap-1.5 mt-2">
-          <Music size={12} className="text-white/70" />
-          <span className="text-white/70 text-xs">Audio name · audio creator</span>
+          <Music2 size={12} className="text-white/70" />
+          <div className="overflow-hidden max-w-[200px]">
+            <span className="text-white/70 text-xs whitespace-nowrap inline-block animate-marquee">
+              Original Audio · {currentReel.username}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Comment sheet */}
-      <CommentSheet
-        postId={currentReel.id}
-        isOpen={commentOpen}
-        onClose={() => setCommentOpen(false)}
-      />
-
-      {/* Share sheet */}
-      <ShareSheet
-        postId={currentReel.id}
-        image={currentReel.image_url}
-        caption={currentReel.caption}
-        username={currentReel.username}
-        isOpen={shareOpen}
-        onClose={() => setShareOpen(false)}
-      />
+      <CommentSheet postId={currentReel.id} isOpen={commentOpen} onClose={() => setCommentOpen(false)} />
+      <ShareSheet postId={currentReel.id} image={currentReel.image_url} caption={currentReel.caption} username={currentReel.username} isOpen={shareOpen} onClose={() => setShareOpen(false)} />
 
       <BottomNav />
     </div>
