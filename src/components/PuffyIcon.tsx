@@ -56,6 +56,7 @@ import filter from "@/assets/icons/filter.png";
 import zap from "@/assets/icons/zap.png";
 import volume2 from "@/assets/icons/volume-2.png";
 import mic from "@/assets/icons/mic.png";
+import reels from "@/assets/icons/reels.png";
 
 const iconMap: Record<string, string> = {
   "arrow-left": arrowLeft,
@@ -114,6 +115,7 @@ const iconMap: Record<string, string> = {
   "volume-2": volume2,
   mic,
   "heart-filled-red": heartFilledRed,
+  reels,
 };
 
 // Icons that should NOT be inverted in dark mode (already colored)
