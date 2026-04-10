@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsShimmer } from "@/components/ShimmerLoader";
 import { formatDistanceToNow } from "date-fns";
+import defaultAvatar from "@/assets/default-avatar.png";
 
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -32,6 +33,8 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState<NotifItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
+  // Track IDs that were unread when page loaded — these get highlighted
+  const initialUnreadIds = useRef<Set<string>>(new Set());
 
   const fetchNotifications = async () => {
     if (!user) return;
@@ -69,6 +72,12 @@ const Notifications = () => {
       setFollowStates(states);
     }
 
+    // Track which notifications are unread at load time
+    const unreadIds = data.filter(n => !n.read).map(n => n.id);
+    if (initialUnreadIds.current.size === 0) {
+      initialUnreadIds.current = new Set(unreadIds);
+    }
+
     setNotifications(data.map(n => ({
       id: n.id,
       type: n.type as NotifType,
@@ -82,6 +91,18 @@ const Notifications = () => {
       actor_verified: profileMap[n.actor_id]?.is_verified || false,
     })));
     setLoading(false);
+
+    // Auto mark all unread as read after a short delay
+    if (unreadIds.length > 0) {
+      setTimeout(async () => {
+        await supabase
+          .from("notifications")
+          .update({ read: true })
+          .eq("user_id", user.id)
+          .eq("read", false);
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      }, 1500);
+    }
   };
 
   useEffect(() => {
@@ -118,7 +139,13 @@ const Notifications = () => {
           actor_avatar: prof?.avatar_url || null,
           actor_verified: prof?.is_verified || false,
         };
+        // Mark as highlighted (unread) since it arrived while viewing
+        initialUnreadIds.current.add(n.id);
         setNotifications(prev => [newNotif, ...prev]);
+        // Auto-mark this new one as read after a delay
+        setTimeout(async () => {
+          await supabase.from("notifications").update({ read: true }).eq("id", n.id);
+        }, 2000);
       })
       .subscribe();
 
@@ -216,7 +243,7 @@ const Notifications = () => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.02 }}
-              className={`flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-secondary/50 ${!n.read ? "bg-primary/5" : ""}`}
+              className={`flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-secondary/50 transition-colors duration-700 ${initialUnreadIds.current.has(n.id) ? "bg-primary/10 border-l-[3px] border-l-primary" : ""}`}
               onClick={() => handleNotifClick(n)}
             >
               <button onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.actor_id}`); }} className="shrink-0">
