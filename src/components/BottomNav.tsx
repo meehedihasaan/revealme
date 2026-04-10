@@ -8,7 +8,6 @@ import { useAuth } from "@/contexts/AuthContext";
 const tabs = [
   { icon: "feed", path: "/feed", label: "Feed" },
   { icon: "search", path: "/explore", label: "Explore" },
-  { icon: "plus", path: "/create-post", label: "Create", isCreate: true },
   { icon: "play", path: "/reels", label: "Clips" },
   { icon: "bell", path: "/notifications", label: "Alerts", badgeKey: "notifications" },
   { icon: "user", path: "/profile", label: "Profile" },
@@ -113,7 +112,7 @@ const BottomNav = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-bottom">
       <div className="mx-auto flex max-w-md items-center justify-around py-2">
-        {tabs.map(({ icon, path, label, badgeKey, isCreate }) => {
+        {tabs.map(({ icon, path, label, badgeKey }) => {
           const active = location.pathname === path || (path === "/feed" && location.pathname === "/");
           const badge = getBadge(badgeKey);
           return (
@@ -133,15 +132,11 @@ const BottomNav = () => {
                 navigate(path);
               }}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1 transition-opacity ${
-                isCreate ? "opacity-100" : active ? "opacity-100" : "opacity-50"
+                active ? "opacity-100" : "opacity-50"
               }`}
               aria-label={label}
             >
-              {isCreate ? (
-                <img src={createPostIcon} alt="Create" width={24} height={24} className="inline-block shrink-0 icon-adaptive" draggable={false} />
-              ) : (
-                <PuffyIcon name={icon} size={24} />
-              )}
+              <PuffyIcon name={icon} size={24} />
               {badge > 0 && (
                 <span className="absolute -top-0.5 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
                   {badge > 99 ? "99+" : badge}
