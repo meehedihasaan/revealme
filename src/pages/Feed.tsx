@@ -299,6 +299,10 @@ const Feed = () => {
                   onDelete={refetch}
                   postType={post.post_type}
                 />
+              ))
+            )
+          )}
+          {activeTab === "Favourites" && (
             isDataLoading ? (
               <FeedShimmer />
             ) : savedPosts.length === 0 ? (
