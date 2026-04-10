@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Send, MoreVertical, Eye, Music, Camera, Plus } from "lucide-react";
+import { Music } from "lucide-react";
 import Lottie from "lottie-react";
 import heartAnimation from "@/assets/heart-animation.json";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +38,8 @@ const DoubleTapHeart = () => (
     <Lottie animationData={heartAnimation} loop={false} autoplay style={{ width: 200, height: 200 }} />
   </motion.div>
 );
+
+const W = "brightness-0 invert"; // white filter for puffy icons on dark bg
 
 const Reels = () => {
   const navigate = useNavigate();
@@ -107,9 +109,7 @@ const Reels = () => {
     setLoading(false);
   }, [blockedIds, user?.id]);
 
-  useEffect(() => {
-    fetchReels();
-  }, [fetchReels]);
+  useEffect(() => { fetchReels(); }, [fetchReels]);
 
   const toggleLike = async (reel: ReelPost) => {
     if (!user) return;
@@ -131,9 +131,7 @@ const Reels = () => {
     const now = Date.now();
     if (now - lastTapTime.current < 300) {
       const reel = reels[currentIndex];
-      if (reel && !reel.isLiked) {
-        toggleLike(reel);
-      }
+      if (reel && !reel.isLiked) toggleLike(reel);
       setShowHeart(true);
       setTimeout(() => setShowHeart(false), 1000);
       lastTapTime.current = 0;
@@ -152,22 +150,13 @@ const Reels = () => {
   };
 
   const touchStartY = useRef(0);
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-  };
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
   const handleTouchEnd = (e: React.TouchEvent) => {
     const diff = touchStartY.current - e.changedTouches[0].clientY;
-    if (Math.abs(diff) > 60) {
-      if (diff > 0) goTo("next");
-      else goTo("prev");
-    }
+    if (Math.abs(diff) > 60) { diff > 0 ? goTo("next") : goTo("prev"); }
   };
-
   const handleWheel = useCallback((e: React.WheelEvent) => {
-    if (Math.abs(e.deltaY) > 30) {
-      if (e.deltaY > 0) goTo("next");
-      else goTo("prev");
-    }
+    if (Math.abs(e.deltaY) > 30) { e.deltaY > 0 ? goTo("next") : goTo("prev"); }
   }, [currentIndex, reels.length]);
 
   const currentReel = reels[currentIndex];
@@ -183,7 +172,7 @@ const Reels = () => {
   if (reels.length === 0) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-white/60 pb-20">
-        <Camera size={48} className="mb-3 opacity-30 text-white" />
+        <PuffyIcon name="camera" size={48} className={`mb-3 opacity-30 ${W}`} />
         <p className="text-sm">No clips yet</p>
         <BottomNav darkMode />
       </div>
@@ -201,14 +190,14 @@ const Reels = () => {
       <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-3 pb-2 safe-top">
         <h1 className="text-white text-lg font-bold">Clips</h1>
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate("/create-post")} className="text-white active:opacity-60">
-            <Camera size={22} />
+          <button onClick={() => navigate("/create-post")} className="active:opacity-60">
+            <PuffyIcon name="camera" size={22} className={W} />
           </button>
-          <button onClick={() => navigate("/create-post")} className="text-white active:opacity-60">
-            <Plus size={22} />
+          <button onClick={() => navigate("/create-post")} className="active:opacity-60">
+            <PuffyIcon name="plus" size={22} className={W} />
           </button>
-          <button onClick={() => navigate("/messages")} className="text-white active:opacity-60">
-            <MessageCircle size={22} />
+          <button onClick={() => navigate("/messages")} className="active:opacity-60">
+            <PuffyIcon name="message-circle" size={22} className={W} />
           </button>
         </div>
       </div>
@@ -222,12 +211,7 @@ const Reels = () => {
         className="absolute inset-0"
         onClick={handleDoubleTap}
       >
-        <img
-          src={currentReel.image_url}
-          alt=""
-          className="h-full w-full object-cover"
-          draggable={false}
-        />
+        <img src={currentReel.image_url} alt="" className="h-full w-full object-cover" draggable={false} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
         <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
       </motion.div>
@@ -235,40 +219,29 @@ const Reels = () => {
       {/* Right side actions */}
       <div className="absolute right-3 bottom-36 flex flex-col items-center gap-5 z-20">
         {/* Like */}
-        <button
-          onClick={(e) => { e.stopPropagation(); toggleLike(currentReel); }}
-          className="flex flex-col items-center gap-1"
-        >
-          <Heart
-            size={28}
-            className={currentReel.isLiked ? "text-red-500 fill-red-500" : "text-white"}
-          />
+        <button onClick={(e) => { e.stopPropagation(); toggleLike(currentReel); }} className="flex flex-col items-center gap-1">
+          {currentReel.isLiked ? (
+            <PuffyIcon name="heart-filled-red" size={28} />
+          ) : (
+            <PuffyIcon name="heart" size={28} className={W} />
+          )}
           <span className="text-white text-xs font-semibold">{currentReel.likesCount}</span>
         </button>
 
         {/* Comment */}
-        <button
-          onClick={(e) => { e.stopPropagation(); setCommentOpen(true); }}
-          className="flex flex-col items-center gap-1"
-        >
-          <MessageCircle size={28} className="text-white" />
+        <button onClick={(e) => { e.stopPropagation(); setCommentOpen(true); }} className="flex flex-col items-center gap-1">
+          <PuffyIcon name="message-circle" size={28} className={W} />
           <span className="text-white text-xs font-semibold">{currentReel.commentsCount}</span>
         </button>
 
         {/* Share */}
-        <button
-          onClick={(e) => { e.stopPropagation(); setShareOpen(true); }}
-          className="flex flex-col items-center gap-1"
-        >
-          <Send size={26} className="text-white" />
+        <button onClick={(e) => { e.stopPropagation(); setShareOpen(true); }} className="flex flex-col items-center gap-1">
+          <PuffyIcon name="send" size={26} className={W} />
         </button>
 
         {/* More */}
-        <button
-          onClick={(e) => e.stopPropagation()}
-          className="flex flex-col items-center gap-1"
-        >
-          <MoreVertical size={26} className="text-white" />
+        <button onClick={(e) => e.stopPropagation()} className="flex flex-col items-center gap-1">
+          <PuffyIcon name="more-horizontal" size={26} className={W} />
         </button>
       </div>
 
@@ -276,7 +249,7 @@ const Reels = () => {
       <div className="absolute bottom-24 left-0 right-16 px-4 z-20">
         {/* View count */}
         <div className="flex items-center gap-1.5 mb-2">
-          <Eye size={14} className="text-white/80" />
+          <PuffyIcon name="eye" size={14} className={`${W} opacity-80`} />
           <span className="text-white/80 text-xs font-medium">{currentReel.viewCount}</span>
         </div>
 
@@ -292,7 +265,7 @@ const Reels = () => {
             <img src={currentReel.avatar_url} alt="" className="h-9 w-9 rounded-[40%] object-cover border border-white/30" />
           ) : (
             <div className="h-9 w-9 rounded-[40%] bg-white/20 flex items-center justify-center">
-              <PuffyIcon name="user" size={16} className="brightness-0 invert" />
+              <PuffyIcon name="user" size={16} className={W} />
             </div>
           )}
           <span className="text-white font-bold text-sm">{currentReel.username}</span>
