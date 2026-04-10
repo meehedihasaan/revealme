@@ -69,24 +69,53 @@ const ReelItem = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const isVideo = isVideoUrl(reel.image_url);
+  const [isPaused, setIsPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-  // Auto-play/pause based on visibility
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
     if (isActive) {
       vid.currentTime = 0;
       vid.play().catch(() => {});
+      setIsPaused(false);
     } else {
       vid.pause();
     }
   }, [isActive]);
 
-  // Sync mute state
   useEffect(() => {
     const vid = videoRef.current;
     if (vid) vid.muted = isMuted;
   }, [isMuted]);
+
+  // Progress bar for video
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid || !isActive) return;
+    const update = () => {
+      if (vid.duration) setProgress((vid.currentTime / vid.duration) * 100);
+    };
+    vid.addEventListener("timeupdate", update);
+    return () => vid.removeEventListener("timeupdate", update);
+  }, [isActive]);
+
+  const handleTap = () => {
+    onDoubleTap(index);
+  };
+
+  const handlePlayPause = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const vid = videoRef.current;
+    if (!vid) return;
+    if (vid.paused) {
+      vid.play().catch(() => {});
+      setIsPaused(false);
+    } else {
+      vid.pause();
+      setIsPaused(true);
+    }
+  };
 
   const audioName = `Original audio · ${reel.username}`;
 
@@ -94,7 +123,7 @@ const ReelItem = ({
     <div
       data-index={index}
       className="relative h-full w-full snap-start snap-always shrink-0"
-      onClick={() => onDoubleTap(index)}
+      onClick={handleTap}
     >
       {isVideo ? (
         <video
@@ -111,13 +140,36 @@ const ReelItem = ({
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
 
+      {/* Video progress bar */}
+      {isVideo && isActive && (
+        <div className="absolute top-12 left-0 right-0 h-[2px] bg-white/20 z-30">
+          <div className="h-full bg-white/80 transition-all duration-100" style={{ width: `${progress}%` }} />
+        </div>
+      )}
+
+      {/* Pause indicator */}
+      <AnimatePresence>
+        {isPaused && isActive && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none"
+          >
+            <div className="h-16 w-16 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+              <PuffyIcon name="play" size={28} className={W} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Mute/Unmute button */}
       {isVideo && isActive && (
         <button
           onClick={(e) => { e.stopPropagation(); onToggleMute(); }}
           className="absolute top-14 right-4 z-30 h-8 w-8 rounded-full bg-black/40 flex items-center justify-center"
         >
-          <PuffyIcon name={isMuted ? "volume-2" : "volume-2"} size={14} className={W} />
+          <PuffyIcon name="volume-2" size={14} className={W} />
           {isMuted && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-5 h-[1.5px] bg-white rotate-45 rounded-full" />
@@ -126,8 +178,34 @@ const ReelItem = ({
         </button>
       )}
 
+      {/* Play/Pause tap area */}
+      {isVideo && isActive && (
+        <button
+          onClick={handlePlayPause}
+          className="absolute inset-0 z-10"
+          style={{ background: "transparent" }}
+        />
+      )}
+
       {/* Right side actions */}
       <div className="absolute right-3 bottom-[4.5rem] flex flex-col items-center gap-5 z-20">
+        {/* Avatar with follow */}
+        <div className="relative mb-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(reel.user_id === userId ? "/profile" : `/user/${reel.user_id}`);
+            }}
+          >
+            {reel.avatar_url ? (
+              <img src={reel.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover border-2 border-white" />
+            ) : (
+              <div className="h-11 w-11 rounded-full bg-white/20 flex items-center justify-center border-2 border-white">
+                <PuffyIcon name="user" size={18} className={W} />
+              </div>
+            )}
+          </button>
+        </div>
         <button onClick={(e) => { e.stopPropagation(); onToggleLike(reel); }} className="flex flex-col items-center gap-1">
           {reel.isLiked ? (
             <PuffyIcon name="heart-filled-red" size={28} />
@@ -161,13 +239,6 @@ const ReelItem = ({
           }}
           className="flex items-center gap-2 mb-2"
         >
-          {reel.avatar_url ? (
-            <img src={reel.avatar_url} alt="" className="h-9 w-9 rounded-[40%] object-cover border border-white/30" />
-          ) : (
-            <div className="h-9 w-9 rounded-[40%] bg-white/20 flex items-center justify-center">
-              <PuffyIcon name="user" size={16} className={W} />
-            </div>
-          )}
           <span className="text-white font-bold text-sm">{reel.username}</span>
           {reel.is_verified && <VerifiedBadge size={14} />}
         </button>
@@ -205,6 +276,7 @@ const Reels = () => {
   const [isMuted, setIsMuted] = useState(true);
   const lastTapTime = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const viewedReels = useRef(new Set<string>());
 
   const fetchReels = useCallback(async () => {
     const { data: postsData } = await supabase
@@ -225,10 +297,11 @@ const Reels = () => {
     const userIds = [...new Set(filtered.map((p) => p.user_id))];
     const postIds = filtered.map((p) => p.id);
 
-    const [{ data: profiles }, { data: likesData }, { data: commentsData }] = await Promise.all([
+    const [{ data: profiles }, { data: likesData }, { data: commentsData }, { data: viewsData }] = await Promise.all([
       supabase.from("profiles").select("user_id, username, display_name, avatar_url, is_verified").in("user_id", userIds),
       supabase.from("likes").select("post_id").in("post_id", postIds),
       supabase.from("comments").select("post_id").in("post_id", postIds),
+      supabase.from("reel_views").select("post_id").in("post_id", postIds),
     ]);
 
     const profileMap = Object.fromEntries((profiles || []).map((p) => [p.user_id, p]));
@@ -236,6 +309,8 @@ const Reels = () => {
     (likesData || []).forEach((l) => { likesCount[l.post_id] = (likesCount[l.post_id] || 0) + 1; });
     const commentsCount: Record<string, number> = {};
     (commentsData || []).forEach((c) => { commentsCount[c.post_id] = (commentsCount[c.post_id] || 0) + 1; });
+    const viewsCounts: Record<string, number> = {};
+    (viewsData || []).forEach((v) => { viewsCounts[v.post_id] = (viewsCounts[v.post_id] || 0) + 1; });
 
     let userLikes = new Set<string>();
     if (user?.id) {
@@ -256,13 +331,51 @@ const Reels = () => {
         likesCount: likesCount[p.id] || 0,
         commentsCount: commentsCount[p.id] || 0,
         isLiked: userLikes.has(p.id),
-        viewCount: Math.floor(Math.random() * 900) + 100,
+        viewCount: viewsCounts[p.id] || 0,
       }))
     );
     setLoading(false);
   }, [blockedIds, user?.id]);
 
   useEffect(() => { fetchReels(); }, [fetchReels]);
+
+  // Record view when reel becomes active
+  useEffect(() => {
+    if (!user || reels.length === 0) return;
+    const reel = reels[currentIndex];
+    if (!reel || viewedReels.current.has(reel.id)) return;
+    viewedReels.current.add(reel.id);
+
+    supabase.from("reel_views").upsert(
+      { post_id: reel.id, viewer_id: user.id },
+      { onConflict: "post_id,viewer_id" }
+    ).then(() => {});
+
+    // Optimistically update view count
+    setReels((prev) =>
+      prev.map((r) => r.id === reel.id ? { ...r, viewCount: r.viewCount + 1 } : r)
+    );
+  }, [currentIndex, user, reels.length]);
+
+  // Realtime view count subscription
+  useEffect(() => {
+    if (reels.length === 0) return;
+    const channel = supabase
+      .channel("reel-views-realtime")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "reel_views",
+      }, (payload) => {
+        const postId = (payload.new as any).post_id;
+        setReels((prev) =>
+          prev.map((r) => r.id === postId ? { ...r, viewCount: r.viewCount + 1 } : r)
+        );
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [reels.length]);
 
   const toggleLike = useCallback(async (reel: ReelPost) => {
     if (!user) return;
