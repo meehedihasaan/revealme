@@ -225,6 +225,9 @@ const Feed = () => {
           ))}
         </div>
 
+        {/* People you may know */}
+        {activeTab === "For you" && !isDataLoading && <PeopleYouMayKnow />}
+
         {/* Posts */}
         <div>
           {activeTab === "For you" && (
