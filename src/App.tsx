@@ -6,8 +6,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import PageLoader from "@/components/PageLoader";
-import PageLoadWrapper from "@/components/PageLoadWrapper";
 import { usePresence } from "@/hooks/usePresence";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
 import Welcome from "./pages/Welcome";
@@ -61,17 +59,16 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return <PageLoader />;
+  if (loading) return null;
   if (!user) return <Navigate to="/" replace />;
   return <>{children}</>;
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, profile, loading } = useAuth();
-  if (loading) return <PageLoader />;
-  if (user && profile === null) return <PageLoader />;
+  if (loading) return null;
   if (user && profile?.onboarding_completed) return <Navigate to="/feed" replace />;
-  if (user && !profile?.onboarding_completed) return <Navigate to="/onboarding/avatar" replace />;
+  if (user && profile && !profile.onboarding_completed) return <Navigate to="/onboarding/avatar" replace />;
   return <>{children}</>;
 };
 
