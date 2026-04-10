@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsShimmer } from "@/components/ShimmerLoader";
 import { formatDistanceToNow } from "date-fns";
+import defaultAvatar from "@/assets/default-avatar.png";
 
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PullToRefresh from "@/components/PullToRefresh";
