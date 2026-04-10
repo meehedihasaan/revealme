@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { Volume2, VolumeX, Music } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
@@ -40,9 +41,6 @@ const DoubleTapHeart = () => (
 );
 
 const W = "!brightness-0 !invert";
-
-// Volume on/off icons using Lucide
-import { Volume2, VolumeX, Music } from "lucide-react";
 
 const isVideoUrl = (url: string) => /\.(mp4|mov|webm|ogg)(\?|$)/i.test(url);
 
