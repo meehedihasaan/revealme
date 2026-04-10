@@ -111,7 +111,7 @@ const BottomNav = ({ darkMode = false }: { darkMode?: boolean }) => {
 
   return (
     <nav className={`fixed bottom-0 left-0 right-0 z-50 border-t safe-bottom ${darkMode ? "border-white/10 bg-black" : "border-border bg-background"}`}>
-      <div className="mx-auto flex max-w-md items-center justify-around py-2">
+      <div className="mx-auto flex max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl items-center justify-around py-2">
         {tabs.map(({ icon, path, label, badgeKey }) => {
           const active = location.pathname === path || (path === "/feed" && location.pathname === "/");
           const badge = getBadge(badgeKey);
