@@ -25,14 +25,15 @@ import logOut from "@/assets/icons/log-out.png";
 import chevronRight from "@/assets/icons/chevron-right.png";
 import chevronDown from "@/assets/icons/chevron-down.png";
 import check from "@/assets/icons/check.png";
-import feed from "@/assets/icons/feed.png";
+import feed from "@/assets/icons/home.png";
 import wave from "@/assets/icons/wave.png";
+import comments from "@/assets/icons/comments.png";
 
 const iconMap: Record<string, string> = {
   "arrow-left": arrowLeft,
   camera,
   search,
-  "message-circle": messageCircle,
+  "message-circle": comments,
   bell,
   user,
   plus,
