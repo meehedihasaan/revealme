@@ -51,7 +51,7 @@ const BottomNav = () => {
     };
     fetchCounts();
 
-    // Real-time notifications badge
+    // Real-time notifications badge - listen for INSERT and UPDATE
     const notifChannel = supabase
       .channel("bottomnav-notifs")
       .on("postgres_changes", {
@@ -61,6 +61,19 @@ const BottomNav = () => {
         filter: `user_id=eq.${user.id}`,
       }, () => {
         setUnreadNotifs(prev => prev + 1);
+      })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        const updated = payload.new as any;
+        const old = payload.old as any;
+        // If notification was marked as read, decrement
+        if (updated.read === true && old.read === false) {
+          setUnreadNotifs(prev => Math.max(0, prev - 1));
+        }
       })
       .subscribe();
 
