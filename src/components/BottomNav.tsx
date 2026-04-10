@@ -13,7 +13,7 @@ const tabs = [
   { icon: "user", path: "/profile", label: "Profile" },
 ];
 
-const BottomNav = () => {
+const BottomNav = ({ darkMode = false }: { darkMode?: boolean }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -110,7 +110,7 @@ const BottomNav = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-bottom">
+    <nav className={`fixed bottom-0 left-0 right-0 z-50 border-t safe-bottom ${darkMode ? "border-white/10 bg-black" : "border-border bg-background"}`}>
       <div className="mx-auto flex max-w-md items-center justify-around py-2">
         {tabs.map(({ icon, path, label, badgeKey }) => {
           const active = location.pathname === path || (path === "/feed" && location.pathname === "/");
@@ -136,7 +136,7 @@ const BottomNav = () => {
               }`}
               aria-label={label}
             >
-              <PuffyIcon name={icon} size={24} />
+              <PuffyIcon name={icon} size={24} className={darkMode ? "brightness-0 invert" : ""} />
               {badge > 0 && (
                 <span className="absolute -top-0.5 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
                   {badge > 99 ? "99+" : badge}
