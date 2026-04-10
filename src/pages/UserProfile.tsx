@@ -8,7 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
 import HighlightsRow from "@/components/HighlightsRow";
 import { useAuth } from "@/contexts/AuthContext";
-import { ProfileShimmer } from "@/components/ShimmerLoader";
+
 import { usePosts } from "@/hooks/usePosts";
 import { useTaggedPosts } from "@/hooks/usePostTags";
 import { supabase } from "@/integrations/supabase/client";

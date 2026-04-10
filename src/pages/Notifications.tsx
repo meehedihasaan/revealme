@@ -5,7 +5,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { NotificationsShimmer } from "@/components/ShimmerLoader";
+
 import { formatDistanceToNow } from "date-fns";
 import defaultAvatar from "@/assets/default-avatar.png";
 

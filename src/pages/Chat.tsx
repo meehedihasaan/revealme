@@ -6,7 +6,7 @@ import waveIcon from "@/assets/icons/wave-so-so.png";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import SharedPostCard, { parseSharedPost } from "@/components/SharedPostCard";
 import { supabase } from "@/integrations/supabase/client";
-import { ChatShimmer } from "@/components/ShimmerLoader";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserOnlineStatus, formatLastOnline } from "@/hooks/usePresence";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";

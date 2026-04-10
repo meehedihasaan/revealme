@@ -7,7 +7,7 @@ import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
-import { ExploreShimmer } from "@/components/ShimmerLoader";
+
 import PullToRefresh from "@/components/PullToRefresh";
 
 import explore1 from "@/assets/explore1.jpg";

@@ -6,7 +6,7 @@ import PostCard from "@/components/PostCard";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
-import { ProfileShimmer, FeedShimmer } from "@/components/ShimmerLoader";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { useTaggedPosts } from "@/hooks/usePostTags";

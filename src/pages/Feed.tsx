@@ -4,7 +4,7 @@ import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
 import PullToRefresh from "@/components/PullToRefresh";
-import { FeedShimmer } from "@/components/ShimmerLoader";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
