@@ -6,8 +6,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import PageLoader from "@/components/PageLoader";
-import PageLoadWrapper from "@/components/PageLoadWrapper";
 import { usePresence } from "@/hooks/usePresence";
 import { useScrollToTop } from "@/hooks/useScrollToTop";
 import Welcome from "./pages/Welcome";
