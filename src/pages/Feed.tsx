@@ -147,7 +147,7 @@ const Feed = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
         <button onClick={() => navigate("/create-post")} className="text-foreground">
-          <PuffyIcon name="plus-square" size={24} />
+          <PuffyIcon name="plus" size={24} />
         </button>
         <h1 className="text-reveal text-2xl text-foreground">Revealme.</h1>
         <div className="flex items-center gap-3">
