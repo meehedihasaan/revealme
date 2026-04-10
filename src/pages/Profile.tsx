@@ -292,9 +292,10 @@ const Profile = () => {
         </button>
         <button
           onClick={() => setActiveTab("clips")}
-          className={`flex-1 py-3 flex justify-center ${activeTab === "clips" ? "border-b-2 border-foreground" : "opacity-50"}`}
+          className={`flex-1 py-3 flex justify-center items-center gap-1.5 ${activeTab === "clips" ? "border-b-2 border-foreground" : "opacity-50"}`}
         >
           <PuffyIcon name="reels" size={22} />
+          <span className="text-xs font-semibold text-foreground">{clipPosts.length}</span>
         </button>
         <button
           onClick={() => setActiveTab("tagged")}
