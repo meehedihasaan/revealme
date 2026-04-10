@@ -79,7 +79,7 @@ const AppRoutes = () => {
   usePresence();
   useScrollToTop();
   return (
-  <div className="mx-auto w-full max-w-md min-h-screen lg:max-w-lg xl:max-w-xl">
+  <div className="mx-auto w-full max-w-md min-h-screen sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl">
     <Routes>
       <Route path="/" element={<PublicRoute><Welcome /></PublicRoute>} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
