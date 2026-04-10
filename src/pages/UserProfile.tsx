@@ -554,14 +554,14 @@ const UserProfile = () => {
           {activeTab === "grid" ? (
             loading ? (
               <FeedShimmer />
-            ) : posts.length === 0 ? (
+            ) : posts.filter(p => p.post_type !== "reel").length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                 <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
                 <p className="text-sm">No posts yet</p>
               </div>
             ) : (
               <div className="mt-2">
-                {posts.map((post) => (
+                {posts.filter(p => p.post_type !== "reel").map((post) => (
                   <PostCard
                     key={post.id}
                     postId={post.id}
