@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import PuffyIcon from "@/components/PuffyIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,12 +11,15 @@ const CreateReel = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [isVideo, setIsVideo] = useState(false);
   const [caption, setCaption] = useState("");
   const [posting, setPosting] = useState(false);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
+    const video = selected.type.startsWith("video/");
+    setIsVideo(video);
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
   };
@@ -71,9 +73,20 @@ const CreateReel = () => {
       <div className="flex-1 flex items-center justify-center overflow-hidden">
         {preview ? (
           <div className="relative h-full w-full">
-            <img src={preview} alt="" className="h-full w-full object-cover" />
+            {isVideo ? (
+              <video
+                src={preview}
+                className="h-full w-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            ) : (
+              <img src={preview} alt="" className="h-full w-full object-cover" />
+            )}
             <button
-              onClick={() => { setPreview(null); setFile(null); }}
+              onClick={() => { setPreview(null); setFile(null); setIsVideo(false); }}
               className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/60 flex items-center justify-center"
             >
               <PuffyIcon name="x" size={16} className="!brightness-0 !invert" />
@@ -85,16 +98,17 @@ const CreateReel = () => {
             className="flex flex-col items-center gap-4 text-white/60"
           >
             <div className="h-20 w-20 rounded-full bg-white/10 flex items-center justify-center">
-              <PuffyIcon name="camera" size={36} className="!brightness-0 !invert opacity-60" />
+              <PuffyIcon name="video" size={36} className="!brightness-0 !invert opacity-60" />
             </div>
-            <span className="text-sm font-medium">Tap to select photo</span>
+            <span className="text-sm font-medium">Tap to select photo or video</span>
+            <span className="text-xs text-white/30">Videos up to 60 seconds</span>
           </button>
         )}
       </div>
 
       {/* Caption input */}
       {preview && (
-        <div className="px-4 py-3 border-t border-white/10">
+        <div className="px-4 py-3 border-t border-white/10 safe-bottom">
           <input
             type="text"
             value={caption}
@@ -109,7 +123,7 @@ const CreateReel = () => {
       <input
         ref={fileRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         className="hidden"
         onChange={handleFile}
       />

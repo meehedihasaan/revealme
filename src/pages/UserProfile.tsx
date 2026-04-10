@@ -57,7 +57,9 @@ const UserProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followsBack, setFollowsBack] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
+  const [activeTab, setActiveTab] = useState<"grid" | "clips" | "tagged">("grid");
+  const [clipPosts, setClipPosts] = useState<any[]>([]);
+  const [clipsLoading, setClipsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
