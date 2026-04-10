@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-
 import Lottie from "lottie-react";
 import heartAnimation from "@/assets/heart-animation.json";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,8 +50,8 @@ const Reels = () => {
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
-  const isAnimating = useRef(false);
   const lastTapTime = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const fetchReels = useCallback(async () => {
     const { data: postsData } = await supabase
@@ -127,39 +126,42 @@ const Reels = () => {
     }
   };
 
-  const handleDoubleTap = useCallback(() => {
+  const handleDoubleTap = useCallback((index: number) => {
     const now = Date.now();
     if (now - lastTapTime.current < 300) {
-      const reel = reels[currentIndex];
+      const reel = reels[index];
       if (reel && !reel.isLiked) toggleLike(reel);
       setShowHeart(true);
+      setCurrentIndex(index);
       setTimeout(() => setShowHeart(false), 1000);
       lastTapTime.current = 0;
     } else {
       lastTapTime.current = now;
     }
-  }, [reels, currentIndex, user]);
+  }, [reels, user]);
 
-  const goTo = (direction: "next" | "prev") => {
-    if (isAnimating.current) return;
-    if (direction === "next" && currentIndex >= reels.length - 1) return;
-    if (direction === "prev" && currentIndex <= 0) return;
-    isAnimating.current = true;
-    setCurrentIndex((i) => direction === "next" ? i + 1 : i - 1);
-    setTimeout(() => { isAnimating.current = false; }, 400);
-  };
+  // Snap scroll observer to detect current reel
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || reels.length === 0) return;
 
-  const touchStartY = useRef(0);
-  const handleTouchStart = (e: React.TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const diff = touchStartY.current - e.changedTouches[0].clientY;
-    if (Math.abs(diff) > 60) { diff > 0 ? goTo("next") : goTo("prev"); }
-  };
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    if (Math.abs(e.deltaY) > 30) { e.deltaY > 0 ? goTo("next") : goTo("prev"); }
-  }, [currentIndex, reels.length]);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number(entry.target.getAttribute("data-index"));
+            if (!isNaN(idx)) setCurrentIndex(idx);
+          }
+        });
+      },
+      { root: container, threshold: 0.6 }
+    );
 
-  const currentReel = reels[currentIndex];
+    const items = container.querySelectorAll("[data-index]");
+    items.forEach((item) => observer.observe(item));
+
+    return () => observer.disconnect();
+  }, [reels]);
 
   if (loading) {
     return (
@@ -180,12 +182,7 @@ const Reels = () => {
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-black overflow-hidden select-none"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onWheel={handleWheel}
-    >
+    <div className="fixed inset-0 bg-black overflow-hidden select-none">
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-3 pb-2 safe-top">
         <h1 className="text-white text-lg font-bold">Clips</h1>
@@ -202,90 +199,101 @@ const Reels = () => {
         </div>
       </div>
 
-      {/* Current Reel */}
-      <motion.div
-        key={currentIndex}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.25 }}
-        className="absolute inset-0"
-        onClick={handleDoubleTap}
+      {/* Snap scroll container */}
+      <div
+        ref={containerRef}
+        className="h-full w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+        style={{ scrollSnapType: "y mandatory", WebkitOverflowScrolling: "touch" }}
       >
-        <img src={currentReel.image_url} alt="" className="h-full w-full object-cover" draggable={false} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
-        <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
-      </motion.div>
+        {reels.map((reel, index) => (
+          <div
+            key={reel.id}
+            data-index={index}
+            className="relative h-full w-full snap-start snap-always shrink-0"
+            onClick={() => handleDoubleTap(index)}
+          >
+            {/* Image */}
+            <img src={reel.image_url} alt="" className="h-full w-full object-cover" draggable={false} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
 
-      {/* Right side actions */}
-      <div className="absolute right-3 bottom-28 flex flex-col items-center gap-5 z-20">
-        {/* Like */}
-        <button onClick={(e) => { e.stopPropagation(); toggleLike(currentReel); }} className="flex flex-col items-center gap-1">
-          {currentReel.isLiked ? (
-            <PuffyIcon name="heart-filled-red" size={28} />
-          ) : (
-            <PuffyIcon name="heart" size={28} className={W} />
-          )}
-          <span className="text-white text-xs font-semibold">{currentReel.likesCount}</span>
-        </button>
+            {/* Double tap heart */}
+            <AnimatePresence>
+              {showHeart && currentIndex === index && <DoubleTapHeart />}
+            </AnimatePresence>
 
-        {/* Comment */}
-        <button onClick={(e) => { e.stopPropagation(); setCommentOpen(true); }} className="flex flex-col items-center gap-1">
-          <PuffyIcon name="message-circle" size={28} className={W} />
-          <span className="text-white text-xs font-semibold">{currentReel.commentsCount}</span>
-        </button>
+            {/* Right side actions */}
+            <div className="absolute right-3 bottom-20 flex flex-col items-center gap-5 z-20">
+              {/* Like */}
+              <button onClick={(e) => { e.stopPropagation(); toggleLike(reel); }} className="flex flex-col items-center gap-1">
+                {reel.isLiked ? (
+                  <PuffyIcon name="heart-filled-red" size={28} />
+                ) : (
+                  <PuffyIcon name="heart" size={28} className={W} />
+                )}
+                <span className="text-white text-xs font-semibold">{reel.likesCount}</span>
+              </button>
 
-        {/* Share */}
-        <button onClick={(e) => { e.stopPropagation(); setShareOpen(true); }} className="flex flex-col items-center gap-1">
-          <PuffyIcon name="send" size={26} className={W} />
-        </button>
+              {/* Comment */}
+              <button onClick={(e) => { e.stopPropagation(); setCurrentIndex(index); setCommentOpen(true); }} className="flex flex-col items-center gap-1">
+                <PuffyIcon name="message-circle" size={28} className={W} />
+                <span className="text-white text-xs font-semibold">{reel.commentsCount}</span>
+              </button>
 
-        {/* More */}
-        <button onClick={(e) => e.stopPropagation()} className="flex flex-col items-center gap-1">
-          <PuffyIcon name="more-horizontal" size={26} className={W} />
-        </button>
-      </div>
+              {/* Share */}
+              <button onClick={(e) => { e.stopPropagation(); setCurrentIndex(index); setShareOpen(true); }} className="flex flex-col items-center gap-1">
+                <PuffyIcon name="send" size={26} className={W} />
+              </button>
 
-      {/* Bottom info */}
-      <div className="absolute bottom-16 left-0 right-16 px-4 z-20 pb-1">
-        {/* View count */}
-        <div className="flex items-center gap-1.5 mb-2">
-          <PuffyIcon name="eye" size={14} className={`${W} opacity-80`} />
-          <span className="text-white/80 text-xs font-medium">{currentReel.viewCount}</span>
-        </div>
-
-        {/* User info */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(currentReel.user_id === user?.id ? "/profile" : `/user/${currentReel.user_id}`);
-          }}
-          className="flex items-center gap-2 mb-2"
-        >
-          {currentReel.avatar_url ? (
-            <img src={currentReel.avatar_url} alt="" className="h-9 w-9 rounded-[40%] object-cover border border-white/30" />
-          ) : (
-            <div className="h-9 w-9 rounded-[40%] bg-white/20 flex items-center justify-center">
-              <PuffyIcon name="user" size={16} className={W} />
+              {/* More */}
+              <button onClick={(e) => e.stopPropagation()} className="flex flex-col items-center gap-1">
+                <PuffyIcon name="more-horizontal" size={26} className={W} />
+              </button>
             </div>
-          )}
-          <span className="text-white font-bold text-sm">{currentReel.username}</span>
-          {currentReel.is_verified && <VerifiedBadge size={14} />}
-        </button>
 
-        {/* Caption */}
-        {currentReel.caption && (
-          <p className="text-white text-sm leading-snug line-clamp-2">{currentReel.caption}</p>
-        )}
+            {/* Bottom info */}
+            <div className="absolute bottom-16 left-0 right-16 px-4 z-20 pb-1">
+              {/* View count */}
+              <div className="flex items-center gap-1.5 mb-2">
+                <PuffyIcon name="eye" size={14} className={`${W} opacity-80`} />
+                <span className="text-white/80 text-xs font-medium">{reel.viewCount}</span>
+              </div>
 
-        {/* Audio */}
-        <div className="flex items-center gap-1.5 mt-1.5">
-          <PuffyIcon name="music" size={12} className={`${W} opacity-70`} />
-          <span className="text-white/70 text-xs">Audio name · audio creator</span>
-        </div>
+              {/* User info */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(reel.user_id === user?.id ? "/profile" : `/user/${reel.user_id}`);
+                }}
+                className="flex items-center gap-2 mb-2"
+              >
+                {reel.avatar_url ? (
+                  <img src={reel.avatar_url} alt="" className="h-9 w-9 rounded-[40%] object-cover border border-white/30" />
+                ) : (
+                  <div className="h-9 w-9 rounded-[40%] bg-white/20 flex items-center justify-center">
+                    <PuffyIcon name="user" size={16} className={W} />
+                  </div>
+                )}
+                <span className="text-white font-bold text-sm">{reel.username}</span>
+                {reel.is_verified && <VerifiedBadge size={14} />}
+              </button>
+
+              {/* Caption */}
+              {reel.caption && (
+                <p className="text-white text-sm leading-snug line-clamp-2">{reel.caption}</p>
+              )}
+
+              {/* Audio */}
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <PuffyIcon name="volume-2" size={12} className={`${W} opacity-70`} />
+                <span className="text-white/70 text-xs">Audio name · audio creator</span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <CommentSheet postId={currentReel.id} isOpen={commentOpen} onClose={() => setCommentOpen(false)} />
-      <ShareSheet postId={currentReel.id} image={currentReel.image_url} caption={currentReel.caption} username={currentReel.username} isOpen={shareOpen} onClose={() => setShareOpen(false)} />
+      <CommentSheet postId={reels[currentIndex]?.id} isOpen={commentOpen} onClose={() => setCommentOpen(false)} />
+      <ShareSheet postId={reels[currentIndex]?.id} image={reels[currentIndex]?.image_url} caption={reels[currentIndex]?.caption} username={reels[currentIndex]?.username} isOpen={shareOpen} onClose={() => setShareOpen(false)} />
 
       <BottomNav darkMode />
     </div>

@@ -23,7 +23,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { profile, user } = useAuth();
   const { posts, loading, refetch } = usePosts(user?.id);
-  const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
+  const [activeTab, setActiveTab] = useState<"grid" | "clips" | "tagged">("grid");
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -272,6 +272,12 @@ const Profile = () => {
           <PuffyIcon name="grid" size={22} />
         </button>
         <button
+          onClick={() => setActiveTab("clips")}
+          className={`flex-1 py-3 flex justify-center ${activeTab === "clips" ? "border-b-2 border-foreground" : "opacity-50"}`}
+        >
+          <PuffyIcon name="reels" size={22} />
+        </button>
+        <button
           onClick={() => setActiveTab("tagged")}
           className={`flex-1 py-3 flex justify-center ${activeTab === "tagged" ? "border-b-2 border-foreground" : "opacity-50"}`}
         >
@@ -359,6 +365,36 @@ const Profile = () => {
             ))}
           </div>
         )
+      ) : activeTab === "clips" ? (
+        loading ? (
+          <FeedShimmer />
+        ) : (() => {
+          const clipPosts = posts.filter((p) => p.image_url);
+          return clipPosts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <PuffyIcon name="reels" size={48} className="opacity-30 mb-3" />
+              <p className="text-sm">No clips yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-0.5 mt-0.5">
+              {clipPosts.map((post) => (
+                <button
+                  key={post.id}
+                  onClick={() => navigate(`/post/${post.id}`)}
+                  className="relative aspect-[9/16] overflow-hidden bg-secondary"
+                >
+                  <img src={post.image_url!} alt="" className="h-full w-full object-cover" />
+                  <div className="absolute bottom-1 left-1 flex items-center gap-1">
+                    <PuffyIcon name="eye" size={10} className="!brightness-0 !invert opacity-80" />
+                    <span className="text-white text-[10px] font-medium drop-shadow-lg">
+                      {Math.floor(Math.random() * 900) + 100}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          );
+        })()
       ) : taggedLoading ? (
         <FeedShimmer />
       ) : taggedPosts.length === 0 ? (
