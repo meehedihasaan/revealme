@@ -132,11 +132,11 @@ const BottomNav = ({ darkMode = false }: { darkMode?: boolean }) => {
                 navigate(path);
               }}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1 transition-opacity ${
-                active ? "opacity-100" : "opacity-50"
-              }`}
+                active ? "opacity-100" : "opacity-60"
+              } ${darkMode ? "text-white" : ""}`}
               aria-label={label}
             >
-              <PuffyIcon name={icon} size={24} className={darkMode ? "brightness-0 invert" : ""} />
+              <PuffyIcon name={icon} size={24} className={darkMode ? "brightness-0 invert !text-white" : ""} />
               {badge > 0 && (
                 <span className="absolute -top-0.5 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
                   {badge > 99 ? "99+" : badge}
