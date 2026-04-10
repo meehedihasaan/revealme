@@ -94,6 +94,23 @@ const UserProfile = () => {
     checkStory();
   }, [userId, user, isFollowing]);
 
+  // Fetch clips (reels) for this user
+  useEffect(() => {
+    if (!userId) return;
+    setClipsLoading(true);
+    supabase
+      .from("posts")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("post_type", "reel")
+      .not("image_url", "is", null)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        setClipPosts(data || []);
+        setClipsLoading(false);
+      });
+  }, [userId]);
+
   useEffect(() => {
     if (taggedPostIds.length === 0) { setTaggedPosts([]); return; }
     const fetchTagged = async () => {
