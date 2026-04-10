@@ -98,9 +98,8 @@ const BottomNav = () => {
     };
   }, [user]);
 
-  // Reset badge when visiting the page
+  // Reset message badge when visiting messages page
   useEffect(() => {
-    if (location.pathname === "/notifications") setUnreadNotifs(0);
     if (location.pathname === "/messages") setUnreadMessages(0);
   }, [location.pathname]);
 
