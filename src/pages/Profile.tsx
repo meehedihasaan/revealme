@@ -31,6 +31,8 @@ const Profile = () => {
   const avatarLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const avatarDidLongPress = useRef(false);
   const upload = useUploadProgress();
+  const [clipPosts, setClipPosts] = useState<any[]>([]);
+  const [clipsLoading, setClipsLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -41,6 +43,23 @@ const Profile = () => {
       .eq("user_id", user.id)
       .gte("created_at", since)
       .then(({ count }) => setHasStory((count || 0) > 0));
+  }, [user]);
+
+  // Fetch clips (reels)
+  useEffect(() => {
+    if (!user) return;
+    setClipsLoading(true);
+    supabase
+      .from("posts")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("post_type", "reel")
+      .not("image_url", "is", null)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        setClipPosts(data || []);
+        setClipsLoading(false);
+      });
   }, [user]);
 
   const { postIds: taggedPostIds, loading: taggedLoading } = useTaggedPosts(user?.id);
