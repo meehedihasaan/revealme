@@ -187,17 +187,9 @@ const Reels = () => {
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-3 pb-2 safe-top">
         <h1 className="text-white text-lg font-bold">Clips</h1>
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate("/create-reel")} className="active:opacity-60">
-            <PuffyIcon name="camera" size={22} className={W} />
-          </button>
-          <button onClick={() => navigate("/create-reel")} className="active:opacity-60">
-            <PuffyIcon name="plus" size={22} className={W} />
-          </button>
-          <button onClick={() => navigate("/messages")} className="active:opacity-60">
-            <PuffyIcon name="message-circle" size={22} className={W} />
-          </button>
-        </div>
+        <button onClick={() => navigate("/create-reel")} className="active:opacity-60">
+          <PuffyIcon name="camera" size={22} className={W} />
+        </button>
       </div>
 
       {/* Snap scroll container */}
@@ -213,8 +205,20 @@ const Reels = () => {
             className="relative h-full w-full snap-start snap-always shrink-0"
             onClick={() => handleDoubleTap(index)}
           >
-            {/* Image */}
-            <img src={reel.image_url} alt="" className="h-full w-full object-cover" draggable={false} />
+            {/* Media */}
+            {reel.image_url.match(/\.(mp4|mov|webm|ogg)(\?|$)/i) ? (
+              <video
+                src={reel.image_url}
+                className="h-full w-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                draggable={false}
+              />
+            ) : (
+              <img src={reel.image_url} alt="" className="h-full w-full object-cover" draggable={false} />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
 
             {/* Double tap heart */}

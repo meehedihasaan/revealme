@@ -57,7 +57,9 @@ const UserProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followsBack, setFollowsBack] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
+  const [activeTab, setActiveTab] = useState<"grid" | "clips" | "tagged">("grid");
+  const [clipPosts, setClipPosts] = useState<any[]>([]);
+  const [clipsLoading, setClipsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -91,6 +93,23 @@ const UserProfile = () => {
     };
     checkStory();
   }, [userId, user, isFollowing]);
+
+  // Fetch clips (reels) for this user
+  useEffect(() => {
+    if (!userId) return;
+    setClipsLoading(true);
+    supabase
+      .from("posts")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("post_type", "reel")
+      .not("image_url", "is", null)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        setClipPosts(data || []);
+        setClipsLoading(false);
+      });
+  }, [userId]);
 
   useEffect(() => {
     if (taggedPostIds.length === 0) { setTaggedPosts([]); return; }
@@ -518,6 +537,12 @@ const UserProfile = () => {
               <PuffyIcon name="grid" size={22} />
             </button>
             <button
+              onClick={() => setActiveTab("clips")}
+              className={`flex-1 py-3 flex justify-center ${activeTab === "clips" ? "border-b-2 border-foreground" : "opacity-50"}`}
+            >
+              <PuffyIcon name="reels" size={22} />
+            </button>
+            <button
               onClick={() => setActiveTab("tagged")}
               className={`flex-1 py-3 flex justify-center ${activeTab === "tagged" ? "border-b-2 border-foreground" : "opacity-50"}`}
             >
@@ -552,6 +577,34 @@ const UserProfile = () => {
                     isLiked={post.isLiked}
                     isSaved={post.isSaved}
                   />
+                ))}
+              </div>
+            )
+          ) : activeTab === "clips" ? (
+            clipsLoading ? (
+              <FeedShimmer />
+            ) : clipPosts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                <PuffyIcon name="reels" size={48} className="opacity-30 mb-3" />
+                <p className="text-sm">No clips yet</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-0.5 mt-0.5">
+                {clipPosts.map((post: any) => (
+                  <button
+                    key={post.id}
+                    onClick={() => navigate(`/post/${post.id}`)}
+                    className="relative aspect-[9/16] overflow-hidden bg-secondary"
+                  >
+                    {post.image_url?.match(/\.(mp4|mov|webm|ogg)(\?|$)/i) ? (
+                      <video src={post.image_url} className="h-full w-full object-cover" muted playsInline />
+                    ) : (
+                      <img src={post.image_url} alt="" className="h-full w-full object-cover" />
+                    )}
+                    <div className="absolute bottom-1 left-1 flex items-center gap-1">
+                      <PuffyIcon name="reels" size={10} className="!brightness-0 !invert opacity-80" />
+                    </div>
+                  </button>
                 ))}
               </div>
             )
