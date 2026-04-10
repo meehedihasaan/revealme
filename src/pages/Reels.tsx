@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { motion, PanInfo } from "framer-motion";
+import { Heart, MessageCircle, Send, MoreHorizontal, Eye, Music, Camera, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBlockedUsers } from "@/hooks/useBlockedUsers";
-import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import BottomNav from "@/components/BottomNav";
 import CommentSheet from "@/components/CommentSheet";
 import ShareSheet from "@/components/ShareSheet";
+import PuffyIcon from "@/components/PuffyIcon";
 
 interface ReelPost {
   id: string;
@@ -34,8 +35,8 @@ const Reels = () => {
   const [loading, setLoading] = useState(true);
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const isAnimating = useRef(false);
+  const dragY = useRef(0);
 
   const fetchReels = useCallback(async () => {
     const { data: postsData } = await supabase
@@ -62,10 +63,8 @@ const Reels = () => {
     ]);
 
     const profileMap = Object.fromEntries((profiles || []).map((p) => [p.user_id, p]));
-
     const likesCount: Record<string, number> = {};
     (likesData || []).forEach((l) => { likesCount[l.post_id] = (likesCount[l.post_id] || 0) + 1; });
-
     const commentsCount: Record<string, number> = {};
     (commentsData || []).forEach((c) => { commentsCount[c.post_id] = (commentsCount[c.post_id] || 0) + 1; });
 
@@ -114,23 +113,24 @@ const Reels = () => {
     }
   };
 
-  const goNext = () => {
-    if (isAnimating.current || currentIndex >= reels.length - 1) return;
+  const goTo = (direction: "next" | "prev") => {
+    if (isAnimating.current) return;
+    if (direction === "next" && currentIndex >= reels.length - 1) return;
+    if (direction === "prev" && currentIndex <= 0) return;
     isAnimating.current = true;
-    setCurrentIndex((i) => i + 1);
-    setTimeout(() => { isAnimating.current = false; }, 350);
+    setCurrentIndex((i) => direction === "next" ? i + 1 : i - 1);
+    setTimeout(() => { isAnimating.current = false; }, 400);
   };
 
-  const goPrev = () => {
-    if (isAnimating.current || currentIndex <= 0) return;
-    isAnimating.current = true;
-    setCurrentIndex((i) => i - 1);
-    setTimeout(() => { isAnimating.current = false; }, 350);
+  // Touch-based swipe handling (no framer drag to avoid re-render issues)
+  const touchStartY = useRef(0);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
   };
-
-  const handleDragEnd = (_: any, info: PanInfo) => {
-    if (info.offset.y < -60) goNext();
-    else if (info.offset.y > 60) goPrev();
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const diff = touchStartY.current - e.changedTouches[0].clientY;
+    if (diff > 60) goTo("next");
+    else if (diff < -60) goTo("prev");
   };
 
   const currentReel = reels[currentIndex];
@@ -146,7 +146,7 @@ const Reels = () => {
   if (reels.length === 0) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center text-white/60 pb-20">
-        <PuffyIcon name="film" size={48} className="mb-3 opacity-30" />
+        <PuffyIcon name="camera" size={48} className="mb-3 opacity-30 brightness-0 invert" />
         <p className="text-sm">No clips yet</p>
         <BottomNav />
       </div>
@@ -154,118 +154,110 @@ const Reels = () => {
   }
 
   return (
-    <div ref={containerRef} className="fixed inset-0 bg-black overflow-hidden select-none">
+    <div
+      className="fixed inset-0 bg-black overflow-hidden select-none"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-3 pb-2 safe-top">
         <h1 className="text-white text-xl font-bold">Clips</h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button onClick={() => navigate("/create-post")} className="text-white">
-            <PuffyIcon name="camera" size={22} />
+            <Camera size={22} />
           </button>
           <button onClick={() => navigate("/create-post")} className="text-white">
-            <PuffyIcon name="plus-circle" size={22} />
+            <Plus size={22} />
           </button>
           <button onClick={() => navigate("/messages")} className="text-white">
-            <PuffyIcon name="message-circle" size={22} />
+            <MessageCircle size={22} />
           </button>
         </div>
       </div>
 
-      {/* Reel content */}
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.div
-          key={currentReel.id}
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "-100%" }}
-          transition={{ type: "tween", duration: 0.3 }}
-          drag="y"
-          dragConstraints={{ top: 0, bottom: 0 }}
-          dragElastic={0.2}
-          onDragEnd={handleDragEnd}
-          className="absolute inset-0"
-        >
-          {/* Image */}
-          <img
-            src={currentReel.image_url}
-            alt=""
-            className="h-full w-full object-cover"
-            draggable={false}
+      {/* Current Reel */}
+      <motion.div
+        key={currentIndex}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.25 }}
+        className="absolute inset-0"
+      >
+        {/* Image */}
+        <img
+          src={currentReel.image_url}
+          alt=""
+          className="h-full w-full object-cover"
+          draggable={false}
+        />
+
+        {/* Gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
+      </motion.div>
+
+      {/* Right side actions — outside motion div to prevent flicker */}
+      <div className="absolute right-3 bottom-36 flex flex-col items-center gap-6 z-20">
+        {/* Like */}
+        <button onClick={() => toggleLike(currentReel)} className="flex flex-col items-center gap-1">
+          <Heart
+            size={28}
+            className={currentReel.isLiked ? "text-red-500 fill-red-500" : "text-white"}
           />
+          <span className="text-white text-xs font-semibold">{currentReel.likesCount}</span>
+        </button>
 
-          {/* Gradient overlays */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
+        {/* Comment */}
+        <button onClick={() => setCommentOpen(true)} className="flex flex-col items-center gap-1">
+          <MessageCircle size={28} className="text-white" />
+          <span className="text-white text-xs font-semibold">{currentReel.commentsCount}</span>
+        </button>
 
-          {/* Right side actions */}
-          <div className="absolute right-3 bottom-32 flex flex-col items-center gap-5 z-20">
-            {/* Like */}
-            <button onClick={() => toggleLike(currentReel)} className="flex flex-col items-center gap-1">
-              <div className={`${currentReel.isLiked ? "text-red-500" : "text-white"}`}>
-                <PuffyIcon name="heart" size={28} />
-              </div>
-              <span className="text-white text-xs font-semibold">{currentReel.likesCount}</span>
-            </button>
+        {/* Share */}
+        <button onClick={() => setShareOpen(true)} className="flex flex-col items-center gap-1">
+          <Send size={26} className="text-white" />
+        </button>
 
-            {/* Comment */}
-            <button onClick={() => setCommentOpen(true)} className="flex flex-col items-center gap-1">
-              <div className="text-white">
-                <PuffyIcon name="message-circle" size={28} />
-              </div>
-              <span className="text-white text-xs font-semibold">{currentReel.commentsCount}</span>
-            </button>
+        {/* More */}
+        <button className="flex flex-col items-center gap-1">
+          <MoreHorizontal size={26} className="text-white" />
+        </button>
+      </div>
 
-            {/* Share */}
-            <button onClick={() => setShareOpen(true)} className="flex flex-col items-center gap-1">
-              <div className="text-white">
-                <PuffyIcon name="send" size={26} />
-              </div>
-            </button>
+      {/* Bottom info */}
+      <div className="absolute bottom-24 left-0 right-16 px-4 z-20">
+        {/* View count */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <Eye size={14} className="text-white/80" />
+          <span className="text-white/80 text-xs font-medium">{currentReel.viewCount}</span>
+        </div>
 
-            {/* More */}
-            <button className="flex flex-col items-center gap-1">
-              <div className="text-white">
-                <PuffyIcon name="more-horizontal" size={26} />
-              </div>
-            </button>
-          </div>
-
-          {/* Bottom info */}
-          <div className="absolute bottom-20 left-0 right-16 px-4 z-20">
-            {/* View count */}
-            <div className="flex items-center gap-1.5 mb-2">
-              <PuffyIcon name="eye" size={14} className="text-white/80" />
-              <span className="text-white/80 text-xs font-medium">{currentReel.viewCount}</span>
+        {/* User info */}
+        <button
+          onClick={() => navigate(currentReel.user_id === user?.id ? "/profile" : `/user/${currentReel.user_id}`)}
+          className="flex items-center gap-2 mb-2"
+        >
+          {currentReel.avatar_url ? (
+            <img src={currentReel.avatar_url} alt="" className="h-9 w-9 rounded-[40%] object-cover border border-white/30" />
+          ) : (
+            <div className="h-9 w-9 rounded-[40%] bg-white/20 flex items-center justify-center">
+              <PuffyIcon name="user" size={16} className="brightness-0 invert" />
             </div>
+          )}
+          <span className="text-white font-bold text-sm">{currentReel.username}</span>
+          {currentReel.is_verified && <VerifiedBadge size={14} />}
+        </button>
 
-            {/* User info */}
-            <button
-              onClick={() => navigate(currentReel.user_id === user?.id ? "/profile" : `/user/${currentReel.user_id}`)}
-              className="flex items-center gap-2 mb-2"
-            >
-              {currentReel.avatar_url ? (
-                <img src={currentReel.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover border border-white/30" />
-              ) : (
-                <div className="h-9 w-9 rounded-full bg-white/20 flex items-center justify-center">
-                  <PuffyIcon name="user" size={16} className="text-white" />
-                </div>
-              )}
-              <span className="text-white font-bold text-sm">{currentReel.username}</span>
-              {currentReel.is_verified && <VerifiedBadge size={14} />}
-            </button>
+        {/* Caption */}
+        {currentReel.caption && (
+          <p className="text-white text-sm leading-snug line-clamp-2">{currentReel.caption}</p>
+        )}
 
-            {/* Caption */}
-            {currentReel.caption && (
-              <p className="text-white text-sm leading-snug line-clamp-2">{currentReel.caption}</p>
-            )}
-
-            {/* Audio placeholder */}
-            <div className="flex items-center gap-1.5 mt-2">
-              <PuffyIcon name="music" size={12} className="text-white/70" />
-              <span className="text-white/70 text-xs">Audio name · audio creator</span>
-            </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+        {/* Audio placeholder */}
+        <div className="flex items-center gap-1.5 mt-2">
+          <Music size={12} className="text-white/70" />
+          <span className="text-white/70 text-xs">Audio name · audio creator</span>
+        </div>
+      </div>
 
       {/* Comment sheet */}
       <CommentSheet
