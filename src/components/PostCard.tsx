@@ -36,6 +36,7 @@ interface PostCardProps {
   onFollowChange?: (userId: string, isNowFollowing: boolean) => void;
   commentCount?: number;
   hasStory?: boolean;
+  postType?: string;
 }
 
 const DoubleTapHeart = () => (
