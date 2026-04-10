@@ -39,7 +39,7 @@ const DoubleTapHeart = () => (
   </motion.div>
 );
 
-const W = "brightness-0 invert"; // white filter for puffy icons on dark bg
+const W = "!brightness-0 !invert"; // force white for puffy icons on dark bg
 
 const Reels = () => {
   const navigate = useNavigate();
