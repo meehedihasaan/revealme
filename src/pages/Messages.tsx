@@ -357,7 +357,7 @@ const Messages = () => {
       <PullToRefresh onRefresh={async () => { setLoading(true); await fetchConversations(); }}>
       <div>
         {loading ? (
-          <MessagesShimmer />
+          null
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <PuffyIcon name="message-circle" size={40} className="opacity-30 mb-3" />

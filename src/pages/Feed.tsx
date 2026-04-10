@@ -228,7 +228,7 @@ const Feed = () => {
         <div>
           {activeTab === "For you" && (
             isDataLoading ? (
-              <FeedShimmer />
+              null
             ) : forYouPosts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                 <PuffyIcon name="camera" size={48} className="opacity-30 mb-3" />
@@ -262,7 +262,7 @@ const Feed = () => {
           )}
           {activeTab === "Following" && (
             isDataLoading ? (
-              <FeedShimmer />
+              null
             ) : followingPosts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                 <PuffyIcon name="heart" size={48} className="opacity-30 mb-3" />
@@ -295,7 +295,7 @@ const Feed = () => {
           )}
           {activeTab === "Favourites" && (
             isDataLoading ? (
-              <FeedShimmer />
+              null
             ) : savedPosts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                 <PuffyIcon name="bookmark" size={48} className="opacity-30 mb-3" />

@@ -261,7 +261,7 @@ const UserProfile = () => {
   if (profileLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <ProfileShimmer />
+        <div className="min-h-screen bg-background pb-20" />
         <BottomNav />
       </div>
     );

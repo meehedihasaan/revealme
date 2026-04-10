@@ -411,7 +411,7 @@ const Chat = () => {
           <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
           <div className="h-4 w-24 rounded bg-muted animate-pulse" />
         </div>
-        <ChatShimmer />
+        <div className="flex-1" />
       </div>
     );
   }

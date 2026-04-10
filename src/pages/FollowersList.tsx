@@ -127,7 +127,7 @@ const FollowersList = () => {
 
       {/* List */}
       {loading ? (
-        <FollowersShimmer />
+        null
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <PuffyIcon name="user" size={48} className="opacity-30 mb-3" />

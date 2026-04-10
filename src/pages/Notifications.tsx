@@ -229,7 +229,7 @@ const Notifications = () => {
 
       <PullToRefresh onRefresh={async () => { setLoading(true); await fetchNotifications(); }}>
       {loading ? (
-        <NotificationsShimmer />
+        null
       ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <PuffyIcon name="bell" size={48} className="opacity-30 mb-3" />
