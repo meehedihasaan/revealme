@@ -223,33 +223,25 @@ const PostCard = memo(({
 
       {/* Actions */}
       <div className="flex items-center justify-between px-4 py-2">
-        <div className="flex items-center gap-4">
-          <button className="active:scale-90 transition-transform duration-100" onClick={toggleLike}>
+        <div className="flex items-center gap-3">
+          <button className="flex items-center gap-1 active:scale-90 transition-transform duration-100" onClick={toggleLike}>
             {liked ? (
               <img src={heartFilledRedIcon} alt="liked" width={26} height={26} className="inline-block shrink-0" draggable={false} />
             ) : (
               <PuffyIcon name="heart" size={26} />
             )}
+            <span className="text-sm font-semibold text-foreground" onClick={(e) => { e.stopPropagation(); openLikes(); }}>{likeCount > 0 ? likeCount.toLocaleString() : ""}</span>
           </button>
-          <button onClick={openComment}>
+          <button className="flex items-center gap-1" onClick={openComment}>
             <PuffyIcon name="message-circle" size={24} />
+            <span className="text-sm font-semibold text-foreground">{commentCount > 0 ? commentCount.toLocaleString() : ""}</span>
           </button>
-          <button onClick={openShare}>
+          <button className="flex items-center gap-1" onClick={openShare}>
             <PuffyIcon name="send" size={22} />
           </button>
         </div>
         <button className="active:scale-90 transition-transform duration-100" onClick={toggleSave}>
           <PuffyIcon name="bookmark" size={24} className={saved ? "opacity-100" : "opacity-70"} />
-        </button>
-      </div>
-
-      {/* Likes & Comments count */}
-      <div className="px-4 pt-0.5 flex items-center gap-3">
-        <button onClick={openLikes} className="text-sm font-semibold text-foreground">
-          {likeCount.toLocaleString()} likes
-        </button>
-        <button onClick={openComment} className="text-sm font-semibold text-foreground">
-          {commentCount.toLocaleString()} comments
         </button>
       </div>
 
