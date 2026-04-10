@@ -139,7 +139,13 @@ const Notifications = () => {
           actor_avatar: prof?.avatar_url || null,
           actor_verified: prof?.is_verified || false,
         };
+        // Mark as highlighted (unread) since it arrived while viewing
+        initialUnreadIds.current.add(n.id);
         setNotifications(prev => [newNotif, ...prev]);
+        // Auto-mark this new one as read after a delay
+        setTimeout(async () => {
+          await supabase.from("notifications").update({ read: true }).eq("id", n.id);
+        }, 2000);
       })
       .subscribe();
 
