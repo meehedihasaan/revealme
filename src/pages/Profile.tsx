@@ -23,7 +23,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { profile, user } = useAuth();
   const { posts, loading, refetch } = usePosts(user?.id);
-  const [activeTab, setActiveTab] = useState<"grid" | "tagged">("grid");
+  const [activeTab, setActiveTab] = useState<"grid" | "clips" | "tagged">("grid");
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -270,6 +270,12 @@ const Profile = () => {
           className={`flex-1 py-3 flex justify-center ${activeTab === "grid" ? "border-b-2 border-foreground" : "opacity-50"}`}
         >
           <PuffyIcon name="grid" size={22} />
+        </button>
+        <button
+          onClick={() => setActiveTab("clips")}
+          className={`flex-1 py-3 flex justify-center ${activeTab === "clips" ? "border-b-2 border-foreground" : "opacity-50"}`}
+        >
+          <PuffyIcon name="reels" size={22} />
         </button>
         <button
           onClick={() => setActiveTab("tagged")}
