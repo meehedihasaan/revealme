@@ -94,21 +94,31 @@ const UserProfile = () => {
     checkStory();
   }, [userId, user, isFollowing]);
 
-  // Fetch clips (reels) for this user
+  // Fetch clips (reels) for this user with view counts
   useEffect(() => {
     if (!userId) return;
     setClipsLoading(true);
-    supabase
-      .from("posts")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("post_type", "reel")
-      .not("image_url", "is", null)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setClipPosts(data || []);
-        setClipsLoading(false);
-      });
+    const fetchClips = async () => {
+      const { data } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("post_type", "reel")
+        .not("image_url", "is", null)
+        .order("created_at", { ascending: false });
+      const clips = data || [];
+      if (clips.length > 0) {
+        const postIds = clips.map(c => c.id);
+        const { data: views } = await supabase.from("reel_views").select("post_id").in("post_id", postIds);
+        const viewCounts: Record<string, number> = {};
+        (views || []).forEach(v => { viewCounts[v.post_id] = (viewCounts[v.post_id] || 0) + 1; });
+        setClipPosts(clips.map(c => ({ ...c, viewCount: viewCounts[c.id] || 0 })));
+      } else {
+        setClipPosts([]);
+      }
+      setClipsLoading(false);
+    };
+    fetchClips();
   }, [userId]);
 
   useEffect(() => {
@@ -538,10 +548,9 @@ const UserProfile = () => {
             </button>
             <button
               onClick={() => setActiveTab("clips")}
-              className={`flex-1 py-3 flex justify-center items-center gap-1.5 ${activeTab === "clips" ? "border-b-2 border-foreground" : "opacity-50"}`}
+              className={`flex-1 py-3 flex justify-center ${activeTab === "clips" ? "border-b-2 border-foreground" : "opacity-50"}`}
             >
               <PuffyIcon name="reels" size={22} />
-              <span className="text-xs font-semibold text-foreground">{clipPosts.length}</span>
             </button>
             <button
               onClick={() => setActiveTab("tagged")}
@@ -605,6 +614,7 @@ const UserProfile = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
                     <div className="absolute bottom-1 left-1 flex items-center gap-1">
                       <PuffyIcon name="reels" size={10} className="!brightness-0 !invert opacity-80" />
+                      <span className="text-white text-[10px] font-semibold">{(post as any).viewCount || 0}</span>
                     </div>
                   </button>
                 ))}
