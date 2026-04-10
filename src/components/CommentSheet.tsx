@@ -256,7 +256,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
       {/* Heart like button */}
       <button onClick={() => toggleLike(comment.id, isReply ? comment.parent_id : null)} className="shrink-0 pt-2">
         <motion.div animate={comment.is_liked ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.25 }}>
-          <PuffyIcon name={comment.is_liked ? "heart-filled" : "heart"} size={14} />
+          <PuffyIcon name={comment.is_liked ? "heart-filled-red" : "heart"} size={14} />
         </motion.div>
       </button>
     </motion.div>
