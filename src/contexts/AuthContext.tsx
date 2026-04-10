@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -43,42 +43,69 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const initialized = useRef(false);
+  const profileCache = useRef<Record<string, Profile | null>>({});
 
   const fetchProfile = async (userId: string) => {
+    // Use cache to avoid re-fetching on every auth event
+    if (profileCache.current[userId]) {
+      setProfile(profileCache.current[userId]);
+      return;
+    }
     const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userId)
       .single();
-    setProfile(data as Profile | null);
+    const prof = data as Profile | null;
+    if (prof) profileCache.current[userId] = prof;
+    setProfile(prof);
   };
 
   const refreshProfile = async () => {
-    if (user) await fetchProfile(user.id);
+    if (user) {
+      // Clear cache to force fresh fetch
+      delete profileCache.current[user.id];
+      await fetchProfile(user.id);
+    }
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          setTimeout(() => fetchProfile(session.user.id), 0);
-        } else {
-          setProfile(null);
-        }
+    // Get initial session first
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      setUser(s?.user ?? null);
+      if (s?.user) {
+        fetchProfile(s.user.id).then(() => {
+          initialized.current = true;
+          setLoading(false);
+        });
+      } else {
+        initialized.current = true;
         setLoading(false);
       }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
-      setLoading(false);
     });
+
+    // Then listen for changes (sign in, sign out, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, s) => {
+        // Skip if this is the initial event before getSession resolves
+        if (!initialized.current) return;
+
+        setSession(s);
+        setUser(s?.user ?? null);
+        if (s?.user) {
+          // Only refetch profile on actual auth changes, not token refreshes
+          if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+            delete profileCache.current[s.user.id];
+            await fetchProfile(s.user.id);
+          }
+        } else {
+          setProfile(null);
+          profileCache.current = {};
+        }
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, []);
@@ -88,6 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setSession(null);
     setProfile(null);
+    profileCache.current = {};
   };
 
   return (
