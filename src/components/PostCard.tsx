@@ -169,29 +169,6 @@ const PostCard = memo(({
     const isVideo = image.match(/\.(mp4|mov|webm|ogg)(\?|$)/i);
     return (
       <div className="border-b border-border">
-        {/* Normal header like other posts */}
-        <div className="flex items-center gap-3 px-4 py-2.5">
-          <button onClick={navigateToStoryOrUser} className={`rounded-full p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
-            <div className={`rounded-full overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
-              {avatar ? (
-                <img src={avatar} alt={username} className="h-9 w-9 rounded-full object-cover block" loading="lazy" />
-              ) : (
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
-                  <PuffyIcon name="user" size={16} />
-                </div>
-              )}
-            </div>
-          </button>
-          <button onClick={navigateToUser} className="flex-1 min-w-0 text-left">
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-semibold text-foreground">{displayName || username}</span>
-              {verified && <VerifiedBadge size={15} />}
-            </div>
-            <p className="text-[11px] text-muted-foreground">{timeAgo}</p>
-          </button>
-          <PostMenu postId={postId} postUserId={postUserId || ""} caption={caption} location={location} onDelete={onDelete} />
-        </div>
-
         {/* Video/Image area - tappable to go to Reels */}
         <button
           onClick={() => navigate("/reels")}
@@ -202,7 +179,7 @@ const PostCard = memo(({
           ) : (
             <img src={image} alt="" className="h-full w-full object-cover" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 pointer-events-none" />
 
           {/* Play icon center */}
           {isVideo && (
@@ -213,9 +190,29 @@ const PostCard = memo(({
             </div>
           )}
 
-          {/* Reels badge top-left */}
-          <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
-            <PuffyIcon name="reels" size={16} className="!brightness-0 !invert" />
+          {/* Header overlay at top */}
+          <div className="absolute top-0 left-0 right-0 flex items-center gap-3 px-4 py-2.5 z-10">
+            <div className={`rounded-full p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
+              <div className={`rounded-full overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
+                {avatar ? (
+                  <img src={avatar} alt={username} className="h-9 w-9 rounded-full object-cover block" loading="lazy" />
+                ) : (
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
+                    <PuffyIcon name="user" size={16} className="!brightness-0 !invert" />
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <div className="flex items-center gap-1">
+                <span className="text-sm font-semibold text-white">{displayName || username}</span>
+                {verified && <VerifiedBadge size={15} />}
+              </div>
+              <p className="text-[11px] text-white/60">{timeAgo}</p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <PuffyIcon name="reels" size={16} className="!brightness-0 !invert" />
+            </div>
           </div>
 
           {/* Caption overlay at bottom */}
