@@ -328,6 +328,7 @@ const Feed = () => {
                   isLiked={post.isLiked}
                   isSaved={post.isSaved}
                   onDelete={refetch}
+                  postType={post.post_type}
                 />
               ))
             )
