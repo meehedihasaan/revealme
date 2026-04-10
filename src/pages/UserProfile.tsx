@@ -244,6 +244,20 @@ const UserProfile = () => {
   const displayName = profile?.display_name || profile?.username || "User";
   const joinDate = profile?.created_at ? format(new Date(profile.created_at), "MMMM yyyy") : "";
 
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (headerRef.current) {
+        const bottom = headerRef.current.getBoundingClientRect().bottom;
+        setShowStickyHeader(bottom < 0);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   if (profileLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
@@ -265,8 +279,34 @@ const UserProfile = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      {/* Sticky header - appears on scroll */}
+      <AnimatePresence>
+        {showStickyHeader && (
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border"
+          >
+            <div className="flex items-center justify-between px-4 py-2.5 mx-auto max-w-md">
+              <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-foreground">
+                <PuffyIcon name="arrow-left" size={20} />
+                <div className="flex flex-col items-start">
+                  <span className="text-base font-bold leading-tight">{profile.username || "user"}</span>
+                  <span className="text-[11px] text-muted-foreground leading-tight">{posts.length} Posts</span>
+                </div>
+              </button>
+              <button onClick={() => setMenuOpen(true)} className="text-foreground p-1">
+                <PuffyIcon name="more-horizontal" size={22} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2">
+      <div ref={headerRef} className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="text-foreground">
             <PuffyIcon name="arrow-left" size={20} />
