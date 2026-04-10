@@ -33,6 +33,8 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState<NotifItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
+  // Track IDs that were unread when page loaded — these get highlighted
+  const initialUnreadIds = useRef<Set<string>>(new Set());
 
   const fetchNotifications = async () => {
     if (!user) return;
@@ -70,6 +72,12 @@ const Notifications = () => {
       setFollowStates(states);
     }
 
+    // Track which notifications are unread at load time
+    const unreadIds = data.filter(n => !n.read).map(n => n.id);
+    if (initialUnreadIds.current.size === 0) {
+      initialUnreadIds.current = new Set(unreadIds);
+    }
+
     setNotifications(data.map(n => ({
       id: n.id,
       type: n.type as NotifType,
@@ -83,6 +91,18 @@ const Notifications = () => {
       actor_verified: profileMap[n.actor_id]?.is_verified || false,
     })));
     setLoading(false);
+
+    // Auto mark all unread as read after a short delay
+    if (unreadIds.length > 0) {
+      setTimeout(async () => {
+        await supabase
+          .from("notifications")
+          .update({ read: true })
+          .eq("user_id", user.id)
+          .eq("read", false);
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      }, 1500);
+    }
   };
 
   useEffect(() => {
