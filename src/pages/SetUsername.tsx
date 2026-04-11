@@ -66,7 +66,7 @@ const SetUsername = () => {
     await refreshProfile();
     setLoading(false);
     toast.success("Welcome to Reveal!");
-    navigate("/onboarding/discover");
+    navigate("/feed");
   };
 
   return (

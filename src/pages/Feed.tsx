@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import cameraIcon from "@/assets/icons/camera.png";
 import PeopleYouMayKnow from "@/components/PeopleYouMayKnow";
 
-
 const STORY_GRADIENT = "gradient-story-ring";
 
 interface StoryUser {
@@ -22,6 +21,87 @@ interface StoryUser {
 }
 
 const tabs = ["For you", "Following", "Favourites"];
+
+// Highlight Clips component for feed
+const HighlightClips = () => {
+  const navigate = useNavigate();
+  const [clips, setClips] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchClips = async () => {
+      const { data } = await supabase
+        .from("posts")
+        .select("id, image_url, user_id, caption")
+        .eq("post_type", "reel")
+        .not("image_url", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      
+      if (!data || data.length === 0) return;
+      
+      const userIds = [...new Set(data.map(p => p.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, username, avatar_url")
+        .in("user_id", userIds);
+      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+      
+      setClips(data.map(p => ({
+        ...p,
+        username: profileMap[p.user_id]?.username || "user",
+        avatar_url: profileMap[p.user_id]?.avatar_url || null,
+      })));
+    };
+    fetchClips();
+  }, []);
+
+  if (clips.length === 0) return null;
+
+  return (
+    <div className="py-3 border-b border-border">
+      <div className="flex items-center justify-between px-4 mb-2">
+        <h3 className="text-sm font-bold text-foreground">Clips</h3>
+        <button onClick={() => navigate("/reels")} className="text-xs font-semibold text-primary">
+          See all
+        </button>
+      </div>
+      <div className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide">
+        {clips.map((clip) => {
+          const isVideo = clip.image_url?.match(/\.(mp4|mov|webm|ogg)(\?|$)/i);
+          return (
+            <button
+              key={clip.id}
+              onClick={() => navigate("/reels")}
+              className="relative shrink-0 w-[100px] aspect-[9/16] rounded-xl overflow-hidden bg-secondary"
+            >
+              {isVideo ? (
+                <video src={clip.image_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
+              ) : (
+                <img src={clip.image_url} alt="" className="h-full w-full object-cover" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute bottom-1.5 left-1.5 right-1.5">
+                <div className="flex items-center gap-1">
+                  {clip.avatar_url ? (
+                    <img src={clip.avatar_url} alt="" className="h-4 w-4 rounded-full object-cover border border-white/50" />
+                  ) : (
+                    <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
+                      <PuffyIcon name="user" size={8} className="!brightness-0 !invert" />
+                    </div>
+                  )}
+                  <span className="text-white text-[9px] font-semibold truncate">{clip.username}</span>
+                </div>
+              </div>
+              <div className="absolute top-1.5 right-1.5">
+                <PuffyIcon name="reels" size={12} className="!brightness-0 !invert opacity-80" />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const Feed = () => {
   const [activeTab, setActiveTab] = useState("For you");
@@ -73,6 +153,21 @@ const Feed = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  // Realtime feed update - refetch when new posts are created
+  useEffect(() => {
+    const channel = supabase
+      .channel("feed-realtime")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "posts",
+      }, () => {
+        refetch();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [refetch]);
+
   useEffect(() => {
     const handler = () => refetch();
     window.addEventListener("pull-to-refresh", handler);
@@ -88,7 +183,6 @@ const Feed = () => {
         .gte("created_at", since);
       if (!data) return;
 
-      // Get viewed story IDs
       let viewedIds = new Set<string>();
       if (user) {
         const { data: views } = await supabase
@@ -101,12 +195,10 @@ const Feed = () => {
       const uniqueIds = [...new Set(data.map(s => s.user_id))];
       if (user && uniqueIds.includes(user.id)) setUserHasStory(true);
 
-      // Only show stories from users the current user follows
       const otherIds = uniqueIds.filter(id => id !== user?.id && followingIds.has(id));
       if (otherIds.length > 0) {
         const { data: profiles } = await supabase.from("profiles").select("user_id, username, avatar_url").in("user_id", otherIds);
 
-        // For each user, check if ALL their stories are seen
         const userStories: Record<string, string[]> = {};
         for (const s of data) {
           if (!userStories[s.user_id]) userStories[s.user_id] = [];
@@ -141,6 +233,47 @@ const Feed = () => {
   };
 
   const isDataLoading = loading || followingLoading;
+
+  // Render posts with highlight clips inserted after 5-6 posts
+  const renderPostsWithClips = (postList: typeof posts, showFollow = false) => {
+    const elements: React.ReactNode[] = [];
+    let clipInserted = false;
+
+    postList.forEach((post, i) => {
+      // Insert highlight clips after 5th post
+      if (i === 5 && !clipInserted) {
+        elements.push(<HighlightClips key="highlight-clips" />);
+        clipInserted = true;
+      }
+
+      elements.push(
+        <PostCard
+          key={post.id}
+          postId={post.id}
+          postUserId={post.user_id}
+          username={post.username}
+          displayName={post.display_name}
+          avatar={post.avatar_url || ""}
+          verified={post.is_verified}
+          image={post.image_url}
+          caption={post.caption}
+          likesCount={post.likesCount}
+          timeAgo={post.timeAgo}
+          location={post.location}
+          isLiked={post.isLiked}
+          isSaved={post.isSaved}
+          onDelete={refetch}
+          showFollowButton={showFollow && post.user_id !== user?.id && !followingIds.has(post.user_id)}
+          isFollowing={followingIds.has(post.user_id)}
+          onFollowChange={handleFollowChange}
+          hasStory={storyUsers.some(su => su.user_id === post.user_id) || (post.user_id === user?.id && userHasStory)}
+          postType={post.post_type}
+        />
+      );
+    });
+
+    return elements;
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -180,7 +313,6 @@ const Feed = () => {
       <PullToRefresh onRefresh={handleRefresh}>
         {/* Stories */}
         <div className="flex gap-4 overflow-x-auto px-4 pb-4 pt-1">
-          {/* Your story */}
           <div className="flex shrink-0 flex-col items-center gap-1 relative">
             <button
               onClick={() => userHasStory ? navigate(`/story?user=${user?.id}`) : navigate("/create-story")}
@@ -242,30 +374,7 @@ const Feed = () => {
                 <p className="text-sm">No posts yet. Be the first!</p>
               </div>
             ) : (
-              forYouPosts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  postId={post.id}
-                  postUserId={post.user_id}
-                  username={post.username}
-                  displayName={post.display_name}
-                  avatar={post.avatar_url || ""}
-                  verified={post.is_verified}
-                  image={post.image_url}
-                  caption={post.caption}
-                  likesCount={post.likesCount}
-                  timeAgo={post.timeAgo}
-                  location={post.location}
-                  isLiked={post.isLiked}
-                  isSaved={post.isSaved}
-                  onDelete={refetch}
-                  showFollowButton={post.user_id !== user?.id && !followingIds.has(post.user_id)}
-                  isFollowing={followingIds.has(post.user_id)}
-                  onFollowChange={handleFollowChange}
-                  hasStory={storyUsers.some(su => su.user_id === post.user_id) || (post.user_id === user?.id && userHasStory)}
-                  postType={post.post_type}
-                />
-              ))
+              renderPostsWithClips(forYouPosts, true)
             )
           )}
           {activeTab === "Following" && (
@@ -280,26 +389,7 @@ const Feed = () => {
                 </button>
               </div>
             ) : (
-              followingPosts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  postId={post.id}
-                  postUserId={post.user_id}
-                  username={post.username}
-                  displayName={post.display_name}
-                  avatar={post.avatar_url || ""}
-                  verified={post.is_verified}
-                  image={post.image_url}
-                  caption={post.caption}
-                  likesCount={post.likesCount}
-                  timeAgo={post.timeAgo}
-                  location={post.location}
-                  isLiked={post.isLiked}
-                  isSaved={post.isSaved}
-                  onDelete={refetch}
-                  postType={post.post_type}
-                />
-              ))
+              renderPostsWithClips(followingPosts)
             )
           )}
           {activeTab === "Favourites" && (

@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsShimmer } from "@/components/ShimmerLoader";
 import { formatDistanceToNow } from "date-fns";
-import defaultAvatar from "@/assets/default-avatar.png";
 
 import VerifiedBadge from "@/components/VerifiedBadge";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -25,6 +24,9 @@ interface NotifItem {
   actor_username: string;
   actor_avatar: string | null;
   actor_verified: boolean;
+  post_type?: string;
+  grouped_actors?: { username: string; avatar: string | null; verified: boolean }[];
+  grouped_count?: number;
 }
 
 const Notifications = () => {
@@ -33,7 +35,6 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState<NotifItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [followStates, setFollowStates] = useState<Record<string, boolean>>({});
-  // Track IDs that were unread when page loaded — these get highlighted
   const initialUnreadIds = useRef<Set<string>>(new Set());
 
   const fetchNotifications = async () => {
@@ -43,7 +44,7 @@ const Notifications = () => {
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(100);
 
     if (!data || data.length === 0) {
       setNotifications([]);
@@ -57,6 +58,17 @@ const Notifications = () => {
       .select("user_id, username, avatar_url, is_verified")
       .in("user_id", actorIds);
     const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
+
+    // Get post types for like/comment notifications
+    const postIds = [...new Set(data.filter(n => n.post_id).map(n => n.post_id!))];
+    let postTypeMap: Record<string, string> = {};
+    if (postIds.length > 0) {
+      const { data: postsData } = await supabase
+        .from("posts")
+        .select("id, post_type")
+        .in("id", postIds);
+      postTypeMap = Object.fromEntries((postsData || []).map(p => [p.id, p.post_type]));
+    }
 
     // Check follow states
     const followActors = data.filter(n => n.type === "follow").map(n => n.actor_id);
@@ -72,27 +84,75 @@ const Notifications = () => {
       setFollowStates(states);
     }
 
-    // Track which notifications are unread at load time
     const unreadIds = data.filter(n => !n.read).map(n => n.id);
     if (initialUnreadIds.current.size === 0) {
       initialUnreadIds.current = new Set(unreadIds);
     }
 
-    setNotifications(data.map(n => ({
-      id: n.id,
-      type: n.type as NotifType,
-      actor_id: n.actor_id,
-      post_id: n.post_id,
-      comment_text: n.comment_text,
-      read: n.read,
-      created_at: n.created_at,
-      actor_username: profileMap[n.actor_id]?.username || "user",
-      actor_avatar: profileMap[n.actor_id]?.avatar_url || null,
-      actor_verified: profileMap[n.actor_id]?.is_verified || false,
-    })));
+    // Group like notifications by post_id
+    const likesByPost: Record<string, any[]> = {};
+    const otherNotifs: any[] = [];
+    
+    data.forEach(n => {
+      if (n.type === "like" && n.post_id) {
+        if (!likesByPost[n.post_id]) likesByPost[n.post_id] = [];
+        likesByPost[n.post_id].push(n);
+      } else {
+        otherNotifs.push(n);
+      }
+    });
+
+    const processedNotifs: NotifItem[] = [];
+
+    // Process grouped likes
+    Object.entries(likesByPost).forEach(([postId, likes]) => {
+      const latest = likes[0]; // already sorted by created_at desc
+      const actors = likes.map(l => ({
+        username: profileMap[l.actor_id]?.username || "user",
+        avatar: profileMap[l.actor_id]?.avatar_url || null,
+        verified: profileMap[l.actor_id]?.is_verified || false,
+      }));
+
+      processedNotifs.push({
+        id: latest.id,
+        type: "like",
+        actor_id: latest.actor_id,
+        post_id: postId,
+        comment_text: latest.comment_text,
+        read: latest.read,
+        created_at: latest.created_at,
+        actor_username: profileMap[latest.actor_id]?.username || "user",
+        actor_avatar: profileMap[latest.actor_id]?.avatar_url || null,
+        actor_verified: profileMap[latest.actor_id]?.is_verified || false,
+        post_type: postTypeMap[postId] || "post",
+        grouped_actors: actors,
+        grouped_count: likes.length,
+      });
+    });
+
+    // Process other notifications
+    otherNotifs.forEach(n => {
+      processedNotifs.push({
+        id: n.id,
+        type: n.type as NotifType,
+        actor_id: n.actor_id,
+        post_id: n.post_id,
+        comment_text: n.comment_text,
+        read: n.read,
+        created_at: n.created_at,
+        actor_username: profileMap[n.actor_id]?.username || "user",
+        actor_avatar: profileMap[n.actor_id]?.avatar_url || null,
+        actor_verified: profileMap[n.actor_id]?.is_verified || false,
+        post_type: n.post_id ? postTypeMap[n.post_id] || "post" : undefined,
+      });
+    });
+
+    // Sort by created_at desc
+    processedNotifs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    setNotifications(processedNotifs);
     setLoading(false);
 
-    // Auto mark all unread as read after a short delay
     if (unreadIds.length > 0) {
       setTimeout(async () => {
         await supabase
@@ -109,7 +169,6 @@ const Notifications = () => {
     fetchNotifications();
   }, [user]);
 
-  // Real-time subscription
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -139,10 +198,8 @@ const Notifications = () => {
           actor_avatar: prof?.avatar_url || null,
           actor_verified: prof?.is_verified || false,
         };
-        // Mark as highlighted (unread) since it arrived while viewing
         initialUnreadIds.current.add(n.id);
         setNotifications(prev => [newNotif, ...prev]);
-        // Auto-mark this new one as read after a delay
         setTimeout(async () => {
           await supabase.from("notifications").update({ read: true }).eq("id", n.id);
         }, 2000);
@@ -176,9 +233,18 @@ const Notifications = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const getNotifText = (n: NotifItem) => {
+    const isClip = n.post_type === "reel";
+    const contentType = isClip ? "clip" : "post";
+    
     switch (n.type) {
-      case "like": return "liked your post.";
-      case "comment": return "commented on your post.";
+      case "like": {
+        if (n.grouped_count && n.grouped_count > 1) {
+          const othersCount = n.grouped_count - 1;
+          return `and ${othersCount} ${othersCount === 1 ? "other" : "others"} liked your ${contentType}.`;
+        }
+        return `liked your ${contentType}.`;
+      }
+      case "comment": return `commented on your ${contentType}.`;
       case "follow": return "started following you.";
       case "story_react": return `reacted ${n.comment_text || "❤️"} to your story.`;
       default: return "";
@@ -186,19 +252,28 @@ const Notifications = () => {
   };
 
   const handleNotifClick = async (n: NotifItem) => {
-    // Mark as read
     if (!n.read) {
       setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
       await supabase.from("notifications").update({ read: true }).eq("id", n.id);
     }
     
-    // Navigate based on notification type
     if (n.type === "follow" || n.type === "story_react") {
       navigate(`/user/${n.actor_id}`);
-    } else if (n.type === "comment" && n.post_id) {
-      navigate(`/post/${n.post_id}?openComments=true`);
-    } else if (n.type === "like" && n.post_id) {
-      navigate(`/post/${n.post_id}`);
+    } else if (n.post_id) {
+      const isClip = n.post_type === "reel";
+      if (isClip) {
+        if (n.type === "comment") {
+          navigate(`/post/${n.post_id}?openComments=true`);
+        } else {
+          navigate(`/post/${n.post_id}`);
+        }
+      } else {
+        if (n.type === "comment") {
+          navigate(`/post/${n.post_id}?openComments=true`);
+        } else {
+          navigate(`/post/${n.post_id}`);
+        }
+      }
     }
   };
 
@@ -246,7 +321,7 @@ const Notifications = () => {
               className={`flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-secondary/50 transition-colors duration-700 ${initialUnreadIds.current.has(n.id) ? "bg-primary/10 border-l-[3px] border-l-primary" : ""}`}
               onClick={() => handleNotifClick(n)}
             >
-              <button onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.actor_id}`); }} className="shrink-0">
+              <button onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.actor_id}`); }} className="shrink-0 relative">
                 {n.actor_avatar ? (
                   <img src={n.actor_avatar} alt={n.actor_username} className="h-12 w-12 rounded-full object-cover" />
                 ) : (
@@ -254,15 +329,25 @@ const Notifications = () => {
                     <PuffyIcon name="user" size={20} />
                   </div>
                 )}
+                {/* Show stacked avatars for grouped likes */}
+                {n.grouped_actors && n.grouped_actors.length > 1 && n.grouped_actors[1]?.avatar && (
+                  <img
+                    src={n.grouped_actors[1].avatar}
+                    alt=""
+                    className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full object-cover border-2 border-background"
+                  />
+                )}
               </button>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-foreground">
-                  <span className="font-bold">{n.actor_username}</span>{n.actor_verified && <VerifiedBadge size={13} className="ml-0.5" />} {getNotifText(n)}
+                  <span className="font-bold">{n.actor_username}</span>
+                  {n.actor_verified && <VerifiedBadge size={13} className="ml-0.5" />}
+                  {" "}{getNotifText(n)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
                 </p>
-                {n.comment_text && (
+                {n.type === "comment" && n.comment_text && (
                   <p className="mt-0.5 text-sm text-muted-foreground truncate">"{n.comment_text}"</p>
                 )}
               </div>

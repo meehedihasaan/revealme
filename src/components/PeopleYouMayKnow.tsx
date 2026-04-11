@@ -15,26 +15,44 @@ interface SuggestedUser {
   mutualCount: number;
 }
 
+const PYMKShimmer = () => (
+  <div className="py-4">
+    <div className="flex items-center justify-between px-4 mb-3">
+      <div className="h-4 w-36 shimmer-block rounded" />
+      <div className="h-3 w-12 shimmer-block rounded" />
+    </div>
+    <div className="flex gap-3 overflow-hidden px-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="flex shrink-0 w-[140px] flex-col items-center rounded-2xl border border-border bg-card p-3">
+          <div className="h-16 w-16 rounded-full shimmer-block mb-2" />
+          <div className="h-3 w-20 shimmer-block rounded mb-1" />
+          <div className="h-2.5 w-14 shimmer-block rounded mb-2" />
+          <div className="h-7 w-full shimmer-block rounded-lg" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const PeopleYouMayKnow = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [suggestions, setSuggestions] = useState<SuggestedUser[]>([]);
   const [followedIds, setFollowedIds] = useState<Set<string>>(new Set());
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const fetch = async () => {
-      // Get who I follow
+      setLoading(true);
       const { data: myFollows } = await supabase
         .from("follows")
         .select("following_id")
         .eq("follower_id", user.id);
       const followingSet = new Set((myFollows || []).map((f) => f.following_id));
 
-      // Get followers of people I follow (friends of friends)
       if (followingSet.size === 0) {
-        // Fallback: show random users
         const { data: randomUsers } = await supabase
           .from("profiles")
           .select("user_id, username, display_name, avatar_url, is_verified")
@@ -43,6 +61,7 @@ const PeopleYouMayKnow = () => {
         setSuggestions(
           (randomUsers || []).map((u) => ({ ...u, display_name: u.display_name || u.username || "User", mutualCount: 0 }))
         );
+        setLoading(false);
         return;
       }
 
@@ -53,7 +72,6 @@ const PeopleYouMayKnow = () => {
         .in("follower_id", followingArr)
         .not("following_id", "eq", user.id);
 
-      // Count mutual connections
       const countMap: Record<string, number> = {};
       (fofData || []).forEach((f) => {
         if (!followingSet.has(f.following_id) && f.following_id !== user.id) {
@@ -75,6 +93,7 @@ const PeopleYouMayKnow = () => {
         setSuggestions(
           (randomUsers || []).map((u) => ({ ...u, display_name: u.display_name || u.username || "User", mutualCount: 0 }))
         );
+        setLoading(false);
         return;
       }
 
@@ -91,6 +110,7 @@ const PeopleYouMayKnow = () => {
           mutualCount: countMap[p.user_id] || 0,
         })).sort((a, b) => b.mutualCount - a.mutualCount)
       );
+      setLoading(false);
     };
     fetch();
   }, [user]);
@@ -104,6 +124,8 @@ const PeopleYouMayKnow = () => {
   const handleDismiss = (userId: string) => {
     setDismissed((prev) => new Set([...prev, userId]));
   };
+
+  if (loading) return <PYMKShimmer />;
 
   const visible = suggestions.filter((s) => !dismissed.has(s.user_id) && !followedIds.has(s.user_id));
 

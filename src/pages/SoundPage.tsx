@@ -1,12 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import BottomNav from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
-const W = "!brightness-0 !invert";
 
 const SoundPage = () => {
   const navigate = useNavigate();
@@ -21,7 +19,6 @@ const SoundPage = () => {
     if (!postId) return;
 
     const fetchSound = async () => {
-      // Get the original post
       const { data: post } = await supabase
         .from("posts")
         .select("*")
@@ -31,7 +28,6 @@ const SoundPage = () => {
       if (!post) { setLoading(false); return; }
       setOriginalPost(post);
 
-      // Get the creator's profile
       const { data: prof } = await supabase
         .from("profiles")
         .select("user_id, username, display_name, avatar_url, is_verified")
@@ -39,7 +35,6 @@ const SoundPage = () => {
         .single();
       setProfile(prof);
 
-      // Get all reels (for now, show reels by same user as "using this audio")
       const { data: allReels } = await supabase
         .from("posts")
         .select("*")
@@ -77,10 +72,9 @@ const SoundPage = () => {
         </div>
       </div>
 
-      {/* Audio info */}
+      {/* Audio info - no spinning animation */}
       <div className="px-4 py-4 flex items-center gap-4">
-        {/* Spinning disc */}
-        <div className="relative h-16 w-16 rounded-full bg-gradient-to-br from-foreground/20 to-foreground/5 flex items-center justify-center shrink-0 animate-spin-slow">
+        <div className="relative h-16 w-16 rounded-full bg-gradient-to-br from-foreground/20 to-foreground/5 flex items-center justify-center shrink-0">
           <div className="h-6 w-6 rounded-full bg-background" />
           {profile?.avatar_url && (
             <img
@@ -130,9 +124,6 @@ const SoundPage = () => {
             )}
             <div className="absolute bottom-1 left-1 flex items-center gap-1">
               <PuffyIcon name="reels" size={10} className="!brightness-0 !invert opacity-80" />
-              <span className="text-white text-[10px] font-medium drop-shadow-lg">
-                {Math.floor(Math.random() * 900) + 100}
-              </span>
             </div>
           </button>
         ))}
