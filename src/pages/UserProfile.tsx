@@ -705,6 +705,7 @@ const UserProfile = () => {
         )}
       </AnimatePresence>
 
+      </PullToRefresh>
       <BottomNav />
     </div>
   );
