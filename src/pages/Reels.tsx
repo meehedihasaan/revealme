@@ -11,7 +11,9 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import BottomNav from "@/components/BottomNav";
 import CommentSheet from "@/components/CommentSheet";
 import ShareSheet from "@/components/ShareSheet";
+import PostMenu from "@/components/PostMenu";
 import PuffyIcon from "@/components/PuffyIcon";
+import { toast } from "sonner";
 
 interface ReelPost {
   id: string;
@@ -27,6 +29,7 @@ interface ReelPost {
   isLiked: boolean;
   viewCount: number;
   isFollowing: boolean;
+  isSaved: boolean;
 }
 
 const DoubleTapHeart = () => (
@@ -55,6 +58,8 @@ const ReelItem = ({
   onComment,
   onShare,
   onFollow,
+  onSave,
+  onDelete,
   navigate,
   userId,
 }: {
@@ -68,6 +73,8 @@ const ReelItem = ({
   onComment: (index: number) => void;
   onShare: (index: number) => void;
   onFollow: (reel: ReelPost) => void;
+  onSave: (reel: ReelPost) => void;
+  onDelete?: () => void;
   navigate: ReturnType<typeof useNavigate>;
   userId?: string;
 }) => {
@@ -77,6 +84,7 @@ const ReelItem = ({
   const [progress, setProgress] = useState(0);
   const [captionExpanded, setCaptionExpanded] = useState(false);
   const [showHeartLocal, setShowHeartLocal] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTap = useRef(0);
 
@@ -107,22 +115,21 @@ const ReelItem = ({
     return () => vid.removeEventListener("timeupdate", update);
   }, [isActive]);
 
-  // Unified tap handler: single tap = pause/play, double tap = like + heart
   const handleTap = () => {
     const now = Date.now();
     if (now - lastTap.current < 300) {
-      // Double tap - like + heart animation
       if (tapTimer.current) clearTimeout(tapTimer.current);
       tapTimer.current = null;
-      onDoubleTap(index);
+      // Double tap - like
+      if (!reel.isLiked) {
+        onToggleLike(reel);
+      }
       setShowHeartLocal(true);
       setTimeout(() => setShowHeartLocal(false), 1000);
       lastTap.current = 0;
     } else {
-      // Single tap - wait to see if double tap follows
       lastTap.current = now;
       tapTimer.current = setTimeout(() => {
-        // Confirmed single tap - toggle play/pause
         const vid = videoRef.current;
         if (vid) {
           if (vid.paused) {
@@ -162,7 +169,7 @@ const ReelItem = ({
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
 
-      {/* Video progress bar - at bottom above nav */}
+      {/* Video progress bar */}
       {isVideo && isActive && (
         <div className="absolute bottom-[3.5rem] left-0 right-0 h-[2.5px] bg-white/20 z-30">
           <div className="h-full bg-white transition-all duration-100 rounded-full" style={{ width: `${progress}%` }} />
@@ -222,7 +229,6 @@ const ReelItem = ({
               </div>
             )}
           </button>
-          {/* Follow button under avatar */}
           {!isOwnReel && !reel.isFollowing && (
             <button
               onClick={(e) => { e.stopPropagation(); onFollow(reel); }}
@@ -247,10 +253,112 @@ const ReelItem = ({
         <button onClick={(e) => { e.stopPropagation(); onShare(index); }} className="flex flex-col items-center gap-1">
           <PuffyIcon name="send" size={26} className={W} />
         </button>
-        <button onClick={(e) => e.stopPropagation()} className="flex flex-col items-center gap-1">
+        <button onClick={(e) => { e.stopPropagation(); setMenuOpen(true); }} className="flex flex-col items-center gap-1">
           <PuffyIcon name="more-horizontal" size={26} className={W} />
         </button>
       </div>
+
+      {/* Three dot menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }}
+            />
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 350 }}
+              className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md rounded-t-3xl bg-card border-t border-border"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="h-1 w-10 rounded-full bg-muted-foreground/20" />
+              </div>
+              <div className="py-2 space-y-1">
+                <button
+                  onClick={() => { onSave(reel); setMenuOpen(false); }}
+                  className="flex w-full items-center gap-3 px-5 py-3 text-left"
+                >
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary">
+                    <PuffyIcon name="bookmark" size={18} />
+                  </div>
+                  <span className="text-sm font-medium text-foreground">{reel.isSaved ? "Unsave" : "Save"}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/post/${reel.id}`;
+                    navigator.clipboard.writeText(url);
+                    toast.success("Link copied!");
+                    setMenuOpen(false);
+                  }}
+                  className="flex w-full items-center gap-3 px-5 py-3 text-left"
+                >
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary">
+                    <PuffyIcon name="copy" size={18} />
+                  </div>
+                  <span className="text-sm font-medium text-foreground">Copy link</span>
+                </button>
+                {!isOwnReel && (
+                  <button
+                    onClick={() => {
+                      navigate(`/user/${reel.user_id}`);
+                      setMenuOpen(false);
+                    }}
+                    className="flex w-full items-center gap-3 px-5 py-3 text-left"
+                  >
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary">
+                      <PuffyIcon name="user" size={18} />
+                    </div>
+                    <span className="text-sm font-medium text-foreground">View profile</span>
+                  </button>
+                )}
+                {!isOwnReel && (
+                  <button
+                    onClick={() => {
+                      toast.success("Report submitted");
+                      setMenuOpen(false);
+                    }}
+                    className="flex w-full items-center gap-3 px-5 py-3 text-left"
+                  >
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10">
+                      <PuffyIcon name="info" size={18} />
+                    </div>
+                    <span className="text-sm font-medium text-destructive">Report</span>
+                  </button>
+                )}
+                {isOwnReel && (
+                  <button
+                    onClick={() => {
+                      if (onDelete) onDelete();
+                      setMenuOpen(false);
+                    }}
+                    className="flex w-full items-center gap-3 px-5 py-3 text-left"
+                  >
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10">
+                      <PuffyIcon name="trash" size={18} />
+                    </div>
+                    <span className="text-sm font-medium text-destructive">Delete clip</span>
+                  </button>
+                )}
+              </div>
+              <div className="px-5 pt-1 pb-5 safe-bottom">
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full rounded-2xl bg-secondary py-3.5 text-sm font-bold text-secondary-foreground"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Bottom info */}
       <div className="absolute bottom-16 left-0 right-16 px-4 z-20 pb-1">
@@ -288,7 +396,7 @@ const ReelItem = ({
             </p>
           </button>
         )}
-        {/* Audio - tappable with marquee & spinning disc */}
+        {/* Audio */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -296,7 +404,7 @@ const ReelItem = ({
           }}
           className="flex items-center gap-1.5 mt-1.5 max-w-full overflow-hidden"
         >
-          <Music size={12} className={`text-white/70 shrink-0 ${isActive ? "animate-spin-slow" : ""}`} />
+          <Music size={12} className="text-white/70 shrink-0" />
           <div className="overflow-hidden whitespace-nowrap">
             <span className="text-white/70 text-xs inline-block animate-marquee">{audioName}</span>
           </div>
@@ -315,9 +423,7 @@ const Reels = () => {
   const [loading, setLoading] = useState(true);
   const [commentOpen, setCommentOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [showHeart, setShowHeart] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const lastTapTime = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const viewedReels = useRef(new Set<string>());
 
@@ -357,13 +463,16 @@ const Reels = () => {
 
     let userLikes = new Set<string>();
     let userFollowing = new Set<string>();
+    let userSaves = new Set<string>();
     if (user?.id) {
-      const [{ data: myLikes }, { data: myFollows }] = await Promise.all([
+      const [{ data: myLikes }, { data: myFollows }, { data: mySaves }] = await Promise.all([
         supabase.from("likes").select("post_id").eq("user_id", user.id).in("post_id", postIds),
         supabase.from("follows").select("following_id").eq("follower_id", user.id).in("following_id", userIds),
+        supabase.from("saved_posts").select("post_id").eq("user_id", user.id).in("post_id", postIds),
       ]);
       userLikes = new Set((myLikes || []).map((l) => l.post_id));
       userFollowing = new Set((myFollows || []).map((f) => f.following_id));
+      userSaves = new Set((mySaves || []).map((s) => s.post_id));
     }
 
     setReels(
@@ -381,6 +490,7 @@ const Reels = () => {
         isLiked: userLikes.has(p.id),
         viewCount: viewsCounts[p.id] || 0,
         isFollowing: userFollowing.has(p.user_id),
+        isSaved: userSaves.has(p.id),
       }))
     );
     setLoading(false);
@@ -388,7 +498,7 @@ const Reels = () => {
 
   useEffect(() => { fetchReels(); }, [fetchReels]);
 
-  // Record view when reel becomes active
+  // Record view
   useEffect(() => {
     if (!user || reels.length === 0) return;
     const reel = reels[currentIndex];
@@ -405,7 +515,7 @@ const Reels = () => {
     );
   }, [currentIndex, user, reels.length]);
 
-  // Realtime view count subscription
+  // Realtime view count
   useEffect(() => {
     if (reels.length === 0) return;
     const channel = supabase
@@ -444,7 +554,6 @@ const Reels = () => {
   const toggleFollow = useCallback(async (reel: ReelPost) => {
     if (!user) return;
     const wasFollowing = reel.isFollowing;
-    // Optimistic update for ALL reels from this user
     setReels((prev) =>
       prev.map((r) =>
         r.user_id === reel.user_id ? { ...r, isFollowing: !wasFollowing } : r
@@ -457,19 +566,28 @@ const Reels = () => {
     }
   }, [user]);
 
-  const handleDoubleTap = useCallback((index: number) => {
-    const now = Date.now();
-    if (now - lastTapTime.current < 300) {
-      const reel = reels[index];
-      if (reel && !reel.isLiked) toggleLike(reel);
-      setShowHeart(true);
-      setCurrentIndex(index);
-      setTimeout(() => setShowHeart(false), 1000);
-      lastTapTime.current = 0;
+  const toggleSave = useCallback(async (reel: ReelPost) => {
+    if (!user) return;
+    setReels((prev) =>
+      prev.map((r) =>
+        r.id === reel.id ? { ...r, isSaved: !r.isSaved } : r
+      )
+    );
+    if (reel.isSaved) {
+      await supabase.from("saved_posts").delete().eq("user_id", user.id).eq("post_id", reel.id);
+      toast.success("Removed from saved");
     } else {
-      lastTapTime.current = now;
+      await supabase.from("saved_posts").insert({ user_id: user.id, post_id: reel.id });
+      toast.success("Saved!");
     }
-  }, [reels, toggleLike]);
+  }, [user]);
+
+  const deleteReel = useCallback(async (reelId: string) => {
+    if (!user) return;
+    await supabase.from("posts").delete().eq("id", reelId).eq("user_id", user.id);
+    setReels((prev) => prev.filter((r) => r.id !== reelId));
+    toast.success("Clip deleted");
+  }, [user]);
 
   // Snap scroll observer
   useEffect(() => {
@@ -535,9 +653,11 @@ const Reels = () => {
             isActive={currentIndex === index}
             isMuted={isMuted}
             onToggleMute={() => setIsMuted((m) => !m)}
-            onDoubleTap={handleDoubleTap}
+            onDoubleTap={() => {}}
             onToggleLike={toggleLike}
             onFollow={toggleFollow}
+            onSave={toggleSave}
+            onDelete={() => deleteReel(reel.id)}
             onComment={(i) => { setCurrentIndex(i); setCommentOpen(true); }}
             onShare={(i) => { setCurrentIndex(i); setShareOpen(true); }}
             navigate={navigate}
@@ -545,7 +665,6 @@ const Reels = () => {
           />
         ))}
       </div>
-
 
       <CommentSheet postId={reels[currentIndex]?.id} isOpen={commentOpen} onClose={() => setCommentOpen(false)} />
       <ShareSheet postId={reels[currentIndex]?.id} image={reels[currentIndex]?.image_url} caption={reels[currentIndex]?.caption} username={reels[currentIndex]?.username} isOpen={shareOpen} onClose={() => setShareOpen(false)} />
