@@ -6,6 +6,7 @@ import VerifiedBadge from "@/components/VerifiedBadge";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
+import PullToRefresh from "@/components/PullToRefresh";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { ProfileShimmer, FeedShimmer } from "@/components/ShimmerLoader";
@@ -306,8 +307,24 @@ const UserProfile = () => {
     );
   }
 
+  const handleRefresh = async () => {
+    setProfileLoading(true);
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("user_id, username, display_name, avatar_url, cover_url, bio, location, is_private, is_verified, created_at")
+      .eq("user_id", userId!)
+      .single();
+    setProfile(prof);
+    const { count: followers } = await supabase.from("follows").select("*", { count: "exact", head: true }).eq("following_id", userId!);
+    const { count: following } = await supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", userId!);
+    setFollowersCount(followers || 0);
+    setFollowingCount(following || 0);
+    setProfileLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
+      <PullToRefresh onRefresh={handleRefresh}>
       {/* Sticky header - appears on scroll */}
       <AnimatePresence>
         {showStickyHeader && (
