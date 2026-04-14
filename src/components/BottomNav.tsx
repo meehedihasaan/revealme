@@ -18,8 +18,13 @@ const BottomNav = ({ darkMode = false }: { darkMode?: boolean }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const lastFeedTapRef = useRef(0);
+
+  // Hide on desktop
+  if (!isMobile) return null;
   const lastFeedTapRef = useRef(0);
 
   // Fetch unread counts
