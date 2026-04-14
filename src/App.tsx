@@ -133,7 +133,7 @@ const AppRoutes = () => {
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
-  </div>
+  </DesktopLayout>
   );
 };
 
