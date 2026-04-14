@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import PuffyIcon from "@/components/PuffyIcon";
-import { Bell, Plus, Search, MessageCircle } from "lucide-react";
+import { Bell, Plus, Search, MessageCircle, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 
