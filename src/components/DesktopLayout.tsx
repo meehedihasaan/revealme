@@ -160,23 +160,6 @@ const RightSidebar = () => {
 
   return (
     <aside className="fixed right-0 top-16 bottom-0 w-[300px] border-l border-border bg-background z-40 p-4 overflow-y-auto scrollbar-hide">
-      {/* Profile card */}
-      <div className="rounded-2xl border border-border bg-card p-4 mb-4">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/profile")} className="w-10 h-10 rounded-full overflow-hidden border border-border shrink-0">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-secondary" />
-            )}
-          </button>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground truncate">{profile?.username || "User"}</p>
-            <p className="text-xs text-muted-foreground truncate">{profile?.display_name || ""}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Suggested users */}
       <div className="rounded-2xl border border-border bg-card p-4 mb-4">
         <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3">Suggested for you</h3>
