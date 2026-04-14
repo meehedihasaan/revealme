@@ -44,6 +44,14 @@ const DesktopSidebar = () => {
         <Plus size={24} />
         <span className="hidden xl:inline text-sm">Create</span>
       </button>
+      <div className="flex-1" />
+      <button
+        onClick={() => navigate("/settings")}
+        className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-secondary/50 mb-2"
+      >
+        <Settings size={24} />
+        <span className="hidden xl:inline text-sm">Settings</span>
+      </button>
     </aside>
   );
 };
