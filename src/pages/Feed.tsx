@@ -277,8 +277,8 @@ const Feed = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3">
+      {/* Header - mobile only */}
+      <div className="flex items-center justify-between px-4 py-3 md:hidden">
         <button onClick={() => navigate("/create-post")} className="text-foreground">
           <PuffyIcon name="plus" size={24} />
         </button>

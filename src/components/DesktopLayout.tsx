@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import PuffyIcon from "@/components/PuffyIcon";
-import { Bell, Plus } from "lucide-react";
+import { Bell, Plus, Search, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 
@@ -50,14 +50,71 @@ const DesktopSidebar = () => {
 
 const DesktopTopBar = () => {
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchUnread = async () => {
+      const { data: participations } = await supabase
+        .from("conversation_participants")
+        .select("conversation_id")
+        .eq("user_id", user.id);
+      if (!participations || participations.length === 0) { setUnreadCount(0); return; }
+      const convIds = participations.map(p => p.conversation_id);
+      const { count } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .in("conversation_id", convIds)
+        .neq("sender_id", user.id)
+        .eq("read", false);
+      setUnreadCount(count || 0);
+    };
+    fetchUnread();
+    const channel = supabase
+      .channel("desktop-unread-msgs")
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => fetchUnread())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 border-b border-border bg-background z-50 flex items-center justify-between px-6">
-      <button onClick={() => navigate("/feed")} className="text-reveal text-xl tracking-wide text-foreground">
-        Revealme.
-      </button>
+      <div className="flex items-center gap-4 flex-1">
+        <button onClick={() => navigate("/feed")} className="text-reveal text-xl tracking-wide text-foreground shrink-0">
+          Revealme.
+        </button>
+        <form onSubmit={handleSearch} className="relative max-w-xs w-full hidden lg:block">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search..."
+            className="w-full rounded-full bg-secondary border border-border pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+        </form>
+      </div>
       <div className="flex items-center gap-4">
+        <button onClick={() => navigate("/notifications")} className="relative text-foreground">
+          <Bell size={20} />
+        </button>
+        <button onClick={() => navigate("/messages")} className="relative text-foreground">
+          <MessageCircle size={20} />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </button>
         <button
           onClick={() => navigate("/profile")}
           className="w-8 h-8 rounded-full overflow-hidden border border-border"
@@ -69,15 +126,6 @@ const DesktopTopBar = () => {
               <PuffyIcon name="user" size={16} />
             </div>
           )}
-        </button>
-        <button onClick={() => navigate("/notifications")} className="relative text-foreground">
-          <Bell size={20} />
-        </button>
-        <button
-          onClick={() => navigate("/messages")}
-          className="px-4 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-semibold"
-        >
-          Messages
         </button>
       </div>
     </header>
