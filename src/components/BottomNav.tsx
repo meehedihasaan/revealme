@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 import PuffyIcon from "@/components/PuffyIcon";
 import createPostIcon from "@/assets/icons/create-post.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +18,7 @@ const BottomNav = ({ darkMode = false }: { darkMode?: boolean }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const lastFeedTapRef = useRef(0);
@@ -108,6 +110,8 @@ const BottomNav = ({ darkMode = false }: { darkMode?: boolean }) => {
     if (badgeKey === "messages" && unreadMessages > 0) return unreadMessages;
     return 0;
   };
+
+  if (!isMobile) return null;
 
   return (
     <nav className={`fixed bottom-0 left-0 right-0 z-50 border-t safe-bottom ${darkMode ? "border-white/10 bg-black" : "border-border bg-background"}`}>
