@@ -75,7 +75,7 @@ const DesktopTopBar = () => {
         </button>
         <button
           onClick={() => navigate("/messages")}
-          className="px-4 py-1.5 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-semibold"
+          className="px-4 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-semibold"
         >
           Messages
         </button>
