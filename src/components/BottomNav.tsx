@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 import PuffyIcon from "@/components/PuffyIcon";
 import createPostIcon from "@/assets/icons/create-post.png";
 import { supabase } from "@/integrations/supabase/client";
