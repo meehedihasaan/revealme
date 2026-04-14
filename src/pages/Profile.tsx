@@ -380,6 +380,7 @@ const Profile = () => {
                 postId={post.id}
                 postUserId={post.user_id}
                 username={post.username}
+                displayName={post.display_name}
                 avatar={post.avatar_url || ""}
                 image={post.image_url}
                 caption={post.caption}
@@ -390,6 +391,8 @@ const Profile = () => {
                 isLiked={post.isLiked}
                 isSaved={post.isSaved}
                 onDelete={refetch}
+                postType={post.post_type}
+                hasStory={hasStory && post.user_id === user?.id}
               />
             ))}
           </div>

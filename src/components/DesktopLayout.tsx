@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import PuffyIcon from "@/components/PuffyIcon";
-import { Bell, Plus, Search, MessageCircle } from "lucide-react";
+import { Bell, Plus, Search, MessageCircle, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 
@@ -43,6 +43,14 @@ const DesktopSidebar = () => {
       >
         <Plus size={24} />
         <span className="hidden xl:inline text-sm">Create</span>
+      </button>
+      <div className="flex-1" />
+      <button
+        onClick={() => navigate("/settings")}
+        className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-secondary/50 mb-2"
+      >
+        <Settings size={24} />
+        <span className="hidden xl:inline text-sm">Settings</span>
       </button>
     </aside>
   );
@@ -152,23 +160,6 @@ const RightSidebar = () => {
 
   return (
     <aside className="fixed right-0 top-16 bottom-0 w-[300px] border-l border-border bg-background z-40 p-4 overflow-y-auto scrollbar-hide">
-      {/* Profile card */}
-      <div className="rounded-2xl border border-border bg-card p-4 mb-4">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/profile")} className="w-10 h-10 rounded-full overflow-hidden border border-border shrink-0">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-secondary" />
-            )}
-          </button>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground truncate">{profile?.username || "User"}</p>
-            <p className="text-xs text-muted-foreground truncate">{profile?.display_name || ""}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Suggested users */}
       <div className="rounded-2xl border border-border bg-card p-4 mb-4">
         <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3">Suggested for you</h3>
