@@ -57,6 +57,7 @@ import ActivitySettings from "./pages/ActivitySettings";
 import Reels from "./pages/Reels";
 import CreateReel from "./pages/CreateReel";
 import SoundPage from "./pages/SoundPage";
+import DesktopLayout from "./components/DesktopLayout";
 
 const queryClient = new QueryClient();
 
