@@ -153,21 +153,6 @@ const Feed = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  // Realtime feed update - refetch when new posts are created
-  useEffect(() => {
-    const channel = supabase
-      .channel("feed-realtime")
-      .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "posts",
-      }, () => {
-        refetch();
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [refetch]);
-
   useEffect(() => {
     const handler = () => refetch();
     window.addEventListener("pull-to-refresh", handler);
