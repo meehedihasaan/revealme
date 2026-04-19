@@ -134,16 +134,5 @@ export const usePosts = (filterUserId?: string) => {
     void fetchPosts();
   }, [fetchPosts]);
 
-  useEffect(() => {
-    const onFocus = () => {
-      if (document.visibilityState === "visible") {
-        void fetchPosts();
-      }
-    };
-
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [fetchPosts]);
-
   return { posts, loading, refetch: fetchPosts };
 };
