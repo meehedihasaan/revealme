@@ -326,6 +326,27 @@ const Feed = () => {
         ))}
       </div>
 
+      {/* New posts available pill */}
+      <AnimatePresence>
+        {newPostsCount > 0 && (
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="sticky top-14 md:top-28 z-30 flex justify-center px-4 pb-2"
+          >
+            <button
+              onClick={handleLoadNewPosts}
+              className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg shadow-primary/30 hover:scale-105 transition-transform"
+            >
+              <ArrowUp size={14} />
+              {newPostsCount} new {newPostsCount === 1 ? "post" : "posts"}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <PullToRefresh onRefresh={handleRefresh}>
         {/* Stories */}
         <div className="flex gap-4 overflow-x-auto px-4 pb-4 pt-1">
