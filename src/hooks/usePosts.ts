@@ -56,47 +56,36 @@ export const usePosts = (filterUserId?: string) => {
     }
 
     const userIds = [...new Set(filteredPosts.map((post) => post.user_id))];
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("user_id, username, display_name, avatar_url, is_verified, is_private")
-      .in("user_id", userIds);
-
-    const profileMap = Object.fromEntries((profiles || []).map((profile) => [profile.user_id, profile]));
-
     const postIds = filteredPosts.map((post) => post.id);
-    const { data: likesData } = await supabase.from("likes").select("post_id").in("post_id", postIds);
+
+    // Run all independent queries in parallel
+    const [profilesRes, likesRes, myLikesRes, mySavesRes, followsRes] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("user_id, username, display_name, avatar_url, is_verified, is_private")
+        .in("user_id", userIds),
+      supabase.from("likes").select("post_id").in("post_id", postIds),
+      user?.id
+        ? supabase.from("likes").select("post_id").eq("user_id", user.id).in("post_id", postIds)
+        : Promise.resolve({ data: [] as { post_id: string }[] }),
+      user?.id
+        ? supabase.from("saved_posts").select("post_id").eq("user_id", user.id).in("post_id", postIds)
+        : Promise.resolve({ data: [] as { post_id: string }[] }),
+      user?.id
+        ? supabase.from("follows").select("following_id").eq("follower_id", user.id)
+        : Promise.resolve({ data: [] as { following_id: string }[] }),
+    ]);
+
+    const profileMap = Object.fromEntries((profilesRes.data || []).map((profile) => [profile.user_id, profile]));
+
     const likesCount: Record<string, number> = {};
-    (likesData || []).forEach((like) => {
+    (likesRes.data || []).forEach((like) => {
       likesCount[like.post_id] = (likesCount[like.post_id] || 0) + 1;
     });
 
-    let userLikes = new Set<string>();
-    let userSaves = new Set<string>();
-
-    if (user?.id) {
-      const { data: myLikes } = await supabase
-        .from("likes")
-        .select("post_id")
-        .eq("user_id", user.id)
-        .in("post_id", postIds);
-      userLikes = new Set((myLikes || []).map((like) => like.post_id));
-
-      const { data: mySaves } = await supabase
-        .from("saved_posts")
-        .select("post_id")
-        .eq("user_id", user.id)
-        .in("post_id", postIds);
-      userSaves = new Set((mySaves || []).map((saved) => saved.post_id));
-    }
-
-    let followingSet = new Set<string>();
-    if (user?.id) {
-      const { data: follows } = await supabase
-        .from("follows")
-        .select("following_id")
-        .eq("follower_id", user.id);
-      followingSet = new Set((follows || []).map((follow) => follow.following_id));
-    }
+    const userLikes = new Set((myLikesRes.data || []).map((like) => like.post_id));
+    const userSaves = new Set((mySavesRes.data || []).map((saved) => saved.post_id));
+    const followingSet = new Set((followsRes.data || []).map((follow) => follow.following_id));
 
     const allPosts = filteredPosts.map((post) => ({
       id: post.id,
