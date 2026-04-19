@@ -157,10 +157,37 @@ const Feed = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  // Track known post IDs to detect new posts via realtime
+  useEffect(() => {
+    posts.forEach(p => knownPostIds.current.add(p.id));
+  }, [posts]);
+
+  // Realtime: detect new posts but don't auto-refetch — show button instead
+  useEffect(() => {
+    const channel = supabase
+      .channel("feed-new-posts")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" }, (payload) => {
+        const newId = (payload.new as any)?.id;
+        const newUserId = (payload.new as any)?.user_id;
+        if (!newId || knownPostIds.current.has(newId)) return;
+        if (newUserId === user?.id) return; // ignore own posts
+        knownPostIds.current.add(newId);
+        setNewPostsCount((c) => c + 1);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id]);
+
   useEffect(() => {
     const handler = () => refetch();
     window.addEventListener("pull-to-refresh", handler);
     return () => window.removeEventListener("pull-to-refresh", handler);
+  }, [refetch]);
+
+  const handleLoadNewPosts = useCallback(async () => {
+    setNewPostsCount(0);
+    await refetch();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [refetch]);
 
   useEffect(() => {
