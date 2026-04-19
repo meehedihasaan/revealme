@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
@@ -113,6 +115,8 @@ const Feed = () => {
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [followingLoading, setFollowingLoading] = useState(true);
   const [unreadMsgCount, setUnreadMsgCount] = useState(0);
+  const [newPostsCount, setNewPostsCount] = useState(0);
+  const knownPostIds = useRef<Set<string>>(new Set());
 
   // Fetch who the current user follows
   const fetchFollowing = useCallback(async () => {
@@ -153,10 +157,37 @@ const Feed = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  // Track known post IDs to detect new posts via realtime
+  useEffect(() => {
+    posts.forEach(p => knownPostIds.current.add(p.id));
+  }, [posts]);
+
+  // Realtime: detect new posts but don't auto-refetch — show button instead
+  useEffect(() => {
+    const channel = supabase
+      .channel("feed-new-posts")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" }, (payload) => {
+        const newId = (payload.new as any)?.id;
+        const newUserId = (payload.new as any)?.user_id;
+        if (!newId || knownPostIds.current.has(newId)) return;
+        if (newUserId === user?.id) return; // ignore own posts
+        knownPostIds.current.add(newId);
+        setNewPostsCount((c) => c + 1);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id]);
+
   useEffect(() => {
     const handler = () => refetch();
     window.addEventListener("pull-to-refresh", handler);
     return () => window.removeEventListener("pull-to-refresh", handler);
+  }, [refetch]);
+
+  const handleLoadNewPosts = useCallback(async () => {
+    setNewPostsCount(0);
+    await refetch();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [refetch]);
 
   useEffect(() => {
@@ -294,6 +325,27 @@ const Feed = () => {
           </button>
         ))}
       </div>
+
+      {/* New posts available pill */}
+      <AnimatePresence>
+        {newPostsCount > 0 && (
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="sticky top-14 md:top-28 z-30 flex justify-center px-4 pb-2"
+          >
+            <button
+              onClick={handleLoadNewPosts}
+              className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg shadow-primary/30 hover:scale-105 transition-transform"
+            >
+              <ArrowUp size={14} />
+              {newPostsCount} new {newPostsCount === 1 ? "post" : "posts"}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <PullToRefresh onRefresh={handleRefresh}>
         {/* Stories */}
