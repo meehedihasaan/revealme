@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PuffyIcon from "@/components/PuffyIcon";
 import BottomNav from "@/components/BottomNav";
@@ -113,6 +115,8 @@ const Feed = () => {
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [followingLoading, setFollowingLoading] = useState(true);
   const [unreadMsgCount, setUnreadMsgCount] = useState(0);
+  const [newPostsCount, setNewPostsCount] = useState(0);
+  const knownPostIds = useRef<Set<string>>(new Set());
 
   // Fetch who the current user follows
   const fetchFollowing = useCallback(async () => {
