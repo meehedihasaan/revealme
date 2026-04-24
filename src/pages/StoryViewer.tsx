@@ -465,9 +465,9 @@ const StoryViewer = () => {
           className="flex items-center gap-2.5"
         >
           {currentGroup.avatar_url ? (
-            <img src={currentGroup.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover ring-2 ring-white/30" />
+            <img src={currentGroup.avatar_url} alt="" className="h-9 w-9 avatar-leaf object-cover ring-2 ring-white/30" />
           ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 ring-2 ring-white/30">
+            <div className="flex h-9 w-9 items-center justify-center avatar-leaf bg-white/20 ring-2 ring-white/30">
               <PuffyIcon name="user" size={16} className="invert" />
             </div>
           )}
@@ -666,9 +666,9 @@ const StoryViewer = () => {
                       className="flex w-full items-center gap-3 px-5 py-3 text-left active:bg-secondary/50"
                     >
                       {v.avatar_url ? (
-                        <img src={v.avatar_url} className="h-10 w-10 rounded-full object-cover" />
+                        <img src={v.avatar_url} className="h-10 w-10 avatar-leaf object-cover" />
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                        <div className="flex h-10 w-10 items-center justify-center avatar-leaf bg-secondary">
                           <PuffyIcon name="user" size={18} />
                         </div>
                       )}

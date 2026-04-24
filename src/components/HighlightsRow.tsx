@@ -66,7 +66,7 @@ const HighlightsRow = ({ userId, isOwnProfile = false }: HighlightsRowProps) => 
             onClick={() => setShowCreateDialog(true)}
             className="flex shrink-0 flex-col items-center gap-1"
           >
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30">
+            <div className="flex h-16 w-16 items-center justify-center avatar-leaf border-2 border-dashed border-muted-foreground/30">
               <Plus size={24} className="text-muted-foreground" />
             </div>
             <span className="text-[10px] text-muted-foreground max-w-[64px] truncate">New</span>
@@ -78,7 +78,7 @@ const HighlightsRow = ({ userId, isOwnProfile = false }: HighlightsRowProps) => 
             onClick={() => { setViewingHighlight(h); setViewIndex(0); }}
             className="flex shrink-0 flex-col items-center gap-1 group relative"
           >
-            <div className="h-16 w-16 rounded-full border-2 border-border overflow-hidden bg-secondary">
+            <div className="h-16 w-16 avatar-leaf border-2 border-border overflow-hidden bg-secondary">
               {h.cover_image_url ? (
                 <img src={h.cover_image_url} alt={h.title} className="h-full w-full object-cover" />
               ) : (
