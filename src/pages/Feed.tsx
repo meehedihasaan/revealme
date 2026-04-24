@@ -85,7 +85,7 @@ const HighlightClips = () => {
               <div className="absolute bottom-1.5 left-1.5 right-1.5">
                 <div className="flex items-center gap-1">
                   {clip.avatar_url ? (
-                    <img src={clip.avatar_url} alt="" className="h-4 w-4 rounded-full object-cover border border-white/50" />
+                    <img src={clip.avatar_url} alt="" className="h-4 w-4 avatar-leaf object-cover border border-white/50" />
                   ) : (
                     <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
                       <PuffyIcon name="user" size={8} className="!brightness-0 !invert" />

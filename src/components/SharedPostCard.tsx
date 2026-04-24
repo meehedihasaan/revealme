@@ -107,7 +107,7 @@ const SharedPostCard = ({ postId, isMine }: SharedPostCardProps) => {
           {post.avatar_url ? (
             <img src={post.avatar_url} alt="" className="h-5 w-5 avatar-leaf object-cover ring-1 ring-border/50" />
           ) : (
-            <div className="h-5 w-5 rounded-full bg-secondary flex items-center justify-center ring-1 ring-border/50">
+            <div className="h-5 w-5 avatar-leaf bg-secondary flex items-center justify-center ring-1 ring-border/50">
               <span className="text-[8px] text-muted-foreground">👤</span>
             </div>
           )}
