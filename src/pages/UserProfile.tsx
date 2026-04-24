@@ -389,9 +389,9 @@ const UserProfile = () => {
               {/* User info */}
               <div className="flex items-center gap-3 px-5 pb-4 border-b border-border/50">
                 {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" />
+                  <img src={profile.avatar_url} alt="" className="h-10 w-10 avatar-leaf object-cover" />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                  <div className="flex h-10 w-10 items-center justify-center avatar-leaf bg-secondary">
                     <PuffyIcon name="user" size={18} />
                   </div>
                 )}
@@ -467,9 +467,9 @@ const UserProfile = () => {
               >
                 <div className={`rounded-full ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
                   {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 rounded-full object-cover block" draggable={false} />
+                    <img src={profile.avatar_url} alt={displayName} className="h-20 w-20 avatar-leaf object-cover block" draggable={false} />
                   ) : (
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
+                    <div className="flex h-20 w-20 items-center justify-center avatar-leaf bg-secondary">
                       <PuffyIcon name="user" size={32} />
                     </div>
                   )}
@@ -547,7 +547,7 @@ const UserProfile = () => {
       {/* Private profile gate */}
       {profile.is_private && !isFollowing ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary mb-4">
+          <div className="flex h-16 w-16 items-center justify-center avatar-leaf bg-secondary mb-4">
             <PuffyIcon name="shield" size={32} />
           </div>
           <p className="text-base font-bold text-foreground mb-1">This account is private</p>

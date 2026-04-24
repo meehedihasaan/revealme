@@ -323,9 +323,9 @@ const Notifications = () => {
             >
               <button onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.actor_id}`); }} className="shrink-0 relative">
                 {n.actor_avatar ? (
-                  <img src={n.actor_avatar} alt={n.actor_username} className="h-12 w-12 rounded-full object-cover" />
+                  <img src={n.actor_avatar} alt={n.actor_username} className="h-12 w-12 avatar-leaf object-cover" />
                 ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                  <div className="flex h-12 w-12 items-center justify-center avatar-leaf bg-secondary">
                     <PuffyIcon name="user" size={20} />
                   </div>
                 )}
@@ -334,7 +334,7 @@ const Notifications = () => {
                   <img
                     src={n.grouped_actors[1].avatar}
                     alt=""
-                    className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full object-cover border-2 border-background"
+                    className="absolute -bottom-1 -right-1 h-6 w-6 avatar-leaf object-cover border-2 border-background"
                   />
                 )}
               </button>

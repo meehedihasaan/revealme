@@ -222,7 +222,7 @@ const ReelItem = ({
             }}
           >
             {reel.avatar_url ? (
-              <img src={reel.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover border-2 border-white" />
+              <img src={reel.avatar_url} alt="" className="h-11 w-11 avatar-leaf object-cover border-2 border-white" />
             ) : (
               <div className="h-11 w-11 rounded-full bg-white/20 flex items-center justify-center border-2 border-white">
                 <PuffyIcon name="user" size={18} className={W} />
