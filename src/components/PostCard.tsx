@@ -192,7 +192,7 @@ const PostCard = memo(({
 
           {/* Header overlay at top */}
           <div className="absolute top-0 left-0 right-0 flex items-center gap-3 px-4 py-2.5 z-10">
-            <div className={`rounded-full p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
+            <div className={`avatar-leaf-ring p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
               <div className={`rounded-full overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
                 {avatar ? (
                   <img src={avatar} alt={username} className="h-9 w-9 rounded-full object-cover block" loading="lazy" />
@@ -263,7 +263,7 @@ const PostCard = memo(({
     <div className="border-b border-border">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-2.5">
-        <button onClick={navigateToStoryOrUser} className={`rounded-full p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
+        <button onClick={navigateToStoryOrUser} className={`avatar-leaf-ring p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
           <div className={`rounded-full overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
             {avatar ? (
               <img src={avatar} alt={username} className="h-9 w-9 rounded-full object-cover block" loading="lazy" />

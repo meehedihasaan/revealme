@@ -463,7 +463,7 @@ const UserProfile = () => {
                   if (avatarLongPressTimer.current) clearTimeout(avatarLongPressTimer.current);
                 }}
                 onContextMenu={(e) => e.preventDefault()}
-                className={`inline-block rounded-full p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
+                className={`inline-block avatar-leaf-ring p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
               >
                 <div className={`rounded-full ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
                   {profile.avatar_url ? (
