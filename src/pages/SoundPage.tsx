@@ -80,7 +80,7 @@ const SoundPage = () => {
             <img
               src={profile.avatar_url}
               alt=""
-              className="absolute inset-2 rounded-full object-cover"
+              className="absolute inset-2 avatar-leaf object-cover"
             />
           )}
         </div>

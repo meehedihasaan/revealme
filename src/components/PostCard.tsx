@@ -195,7 +195,7 @@ const PostCard = memo(({
             <div className={`avatar-leaf-ring p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
               <div className={`rounded-full overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
                 {avatar ? (
-                  <img src={avatar} alt={username} className="h-9 w-9 rounded-full object-cover block" loading="lazy" />
+                  <img src={avatar} alt={username} className="h-9 w-9 avatar-leaf object-cover block" loading="lazy" />
                 ) : (
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
                     <PuffyIcon name="user" size={16} className="!brightness-0 !invert" />
@@ -266,7 +266,7 @@ const PostCard = memo(({
         <button onClick={navigateToStoryOrUser} className={`avatar-leaf-ring p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
           <div className={`rounded-full overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
             {avatar ? (
-              <img src={avatar} alt={username} className="h-9 w-9 rounded-full object-cover block" loading="lazy" />
+              <img src={avatar} alt={username} className="h-9 w-9 avatar-leaf object-cover block" loading="lazy" />
             ) : (
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
                 <PuffyIcon name="user" size={16} />
