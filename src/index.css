@@ -193,8 +193,14 @@
 }
 
 @layer utilities {
-  .avatar-squircle {
-    border-radius: 40%;
+  /* Leaf shape: two opposite corners heavily rounded, two opposite corners sharp.
+     Used for ALL avatars (and their story rings) across the app. */
+  .avatar-squircle,
+  .avatar-leaf {
+    border-radius: 65% 15% 65% 15%;
+  }
+  .avatar-leaf-ring {
+    border-radius: 68% 18% 68% 18%;
   }
   .scrollbar-hide {
     -ms-overflow-style: none;
