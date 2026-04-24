@@ -70,7 +70,7 @@ const SetAvatar = () => {
 
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="relative mb-8 flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-border bg-secondary transition-colors hover:border-primary"
+          className="relative mb-8 flex h-36 w-36 items-center justify-center overflow-hidden avatar-leaf border-2 border-dashed border-border bg-secondary transition-colors hover:border-primary"
         >
           {avatarPreview ? (
             <img src={avatarPreview} alt="Avatar" className="h-full w-full object-contain" />

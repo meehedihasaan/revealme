@@ -230,11 +230,11 @@ const Profile = () => {
                 onContextMenu={(e) => e.preventDefault()}
                 className={`inline-block avatar-leaf-ring p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
               >
-                <div className={`rounded-full ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
+                <div className={`avatar-leaf ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt={displayName} className="h-20 w-20 rounded-full object-cover block" draggable={false} />
+                    <img src={avatarUrl} alt={displayName} className="h-20 w-20 avatar-leaf object-cover block" draggable={false} />
                   ) : (
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
+                    <div className="flex h-20 w-20 items-center justify-center avatar-leaf bg-secondary">
                       <PuffyIcon name="user" size={32} />
                     </div>
                   )}

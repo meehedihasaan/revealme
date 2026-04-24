@@ -95,9 +95,9 @@ const SwipeableConversationRow = ({
       >
         <div className="relative shrink-0">
           {conv.avatar_url ? (
-            <img src={conv.avatar_url} alt={conv.username} className="h-12 w-12 rounded-full object-cover" />
+            <img src={conv.avatar_url} alt={conv.username} className="h-12 w-12 avatar-leaf object-cover" />
           ) : (
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+            <div className="flex h-12 w-12 items-center justify-center avatar-leaf bg-secondary">
               <PuffyIcon name="user" size={20} />
             </div>
           )}

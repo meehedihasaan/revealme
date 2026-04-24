@@ -24,7 +24,7 @@ const PYMKShimmer = () => (
     <div className="flex gap-3 overflow-hidden px-4">
       {[...Array(4)].map((_, i) => (
         <div key={i} className="flex shrink-0 w-[140px] flex-col items-center rounded-2xl border border-border bg-card p-3">
-          <div className="h-16 w-16 rounded-full shimmer-block mb-2" />
+          <div className="h-16 w-16 avatar-leaf shimmer-block mb-2" />
           <div className="h-3 w-20 shimmer-block rounded mb-1" />
           <div className="h-2.5 w-14 shimmer-block rounded mb-2" />
           <div className="h-7 w-full shimmer-block rounded-lg" />
@@ -156,9 +156,9 @@ const PeopleYouMayKnow = () => {
             </button>
             <button onClick={() => navigate(`/user/${s.user_id}`)}>
               {s.avatar_url ? (
-                <img src={s.avatar_url} alt={s.username} className="h-16 w-16 rounded-full object-cover mb-2" />
+                <img src={s.avatar_url} alt={s.username} className="h-16 w-16 avatar-leaf object-cover mb-2" />
               ) : (
-                <div className="h-16 w-16 rounded-full bg-secondary flex items-center justify-center mb-2">
+                <div className="h-16 w-16 avatar-leaf bg-secondary flex items-center justify-center mb-2">
                   <PuffyIcon name="user" size={24} />
                 </div>
               )}

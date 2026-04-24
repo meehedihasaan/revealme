@@ -199,7 +199,7 @@ const ShareSheet = ({ postId, image, caption, username, isOpen, onClose }: Share
                   <div className="flex gap-4 overflow-x-auto pb-2">
                     {[...Array(4)].map((_, i) => (
                       <div key={i} className="flex flex-col items-center gap-2 shrink-0">
-                        <div className="h-14 w-14 rounded-full bg-muted animate-pulse" />
+                        <div className="h-14 w-14 avatar-leaf bg-muted animate-pulse" />
                         <div className="h-3 w-10 rounded bg-muted animate-pulse" />
                       </div>
                     ))}
@@ -222,9 +222,9 @@ const ShareSheet = ({ postId, image, caption, username, isOpen, onClose }: Share
                       >
                         <div className="relative">
                           {f.avatar_url ? (
-                            <img src={f.avatar_url} alt={f.username} className="h-14 w-14 rounded-full object-cover" />
+                            <img src={f.avatar_url} alt={f.username} className="h-14 w-14 avatar-leaf object-cover" />
                           ) : (
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
+                            <div className="flex h-14 w-14 items-center justify-center avatar-leaf bg-secondary">
                               <PuffyIcon name="user" size={22} />
                             </div>
                           )}

@@ -7,7 +7,7 @@ export const FeedShimmer = () => (
     {[...Array(2)].map((_, i) => (
       <div key={i} className="space-y-3">
         <div className="flex items-center gap-3">
-          <ShimmerBlock className="h-9 w-9 rounded-full" />
+          <ShimmerBlock className="h-9 w-9 avatar-leaf" />
           <ShimmerBlock className="h-3 w-28" />
           <div className="flex-1" />
           <ShimmerBlock className="h-3 w-6" />
