@@ -32,7 +32,7 @@ export const ProfileShimmer = () => (
   <div className="space-y-4">
     <ShimmerBlock className="h-48 w-full rounded-none" />
     <div className="px-4 space-y-3">
-      <ShimmerBlock className="h-20 w-20 rounded-xl -mt-10" />
+      <ShimmerBlock className="h-20 w-20 avatar-leaf -mt-10" />
       <ShimmerBlock className="h-5 w-40" />
       <ShimmerBlock className="h-3 w-24" />
       <div className="flex gap-6">
