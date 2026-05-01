@@ -137,7 +137,7 @@ export const EditProfileShimmer = () => (
   <div className="space-y-4 px-4 py-4">
     <ShimmerBlock className="h-48 w-full rounded-none -mx-4" />
     <div className="flex justify-center -mt-14">
-      <ShimmerBlock className="h-24 w-24 rounded-2xl" />
+      <ShimmerBlock className="h-24 w-24 avatar-leaf" />
     </div>
     {[...Array(4)].map((_, i) => (
       <div key={i} className="space-y-2">
