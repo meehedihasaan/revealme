@@ -408,7 +408,7 @@ const Chat = () => {
       <div className="flex min-h-screen flex-col bg-background">
         <div className="flex items-center gap-3 border-b border-border px-4 py-3">
           <button onClick={() => navigate("/messages")}><PuffyIcon name="arrow-left" size={22} /></button>
-          <ShimmerBlock className="h-10 w-10 rounded-full shrink-0" />
+          <ShimmerBlock className="h-10 w-10 avatar-leaf shrink-0" />
           <ShimmerBlock className="h-4 w-24" />
         </div>
         <ChatShimmer />
