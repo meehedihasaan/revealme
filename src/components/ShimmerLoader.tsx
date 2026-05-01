@@ -59,7 +59,7 @@ export const MessagesShimmer = () => (
   <div className="space-y-0">
     {[...Array(6)].map((_, i) => (
       <div key={i} className="flex items-center gap-3 px-4 py-3">
-        <ShimmerBlock className="h-14 w-14 rounded-full shrink-0" />
+        <ShimmerBlock className="h-14 w-14 avatar-leaf shrink-0" />
         <div className="flex-1 space-y-2">
           <ShimmerBlock className="h-3.5 w-28" />
           <ShimmerBlock className="h-3 w-44" />
@@ -107,7 +107,7 @@ export const NotificationsShimmer = () => (
   <div className="divide-y divide-border">
     {[...Array(8)].map((_, i) => (
       <div key={i} className="flex items-center gap-3 px-4 py-3">
-        <ShimmerBlock className="h-12 w-12 rounded-full shrink-0" />
+        <ShimmerBlock className="h-12 w-12 avatar-leaf shrink-0" />
         <div className="flex-1 space-y-2">
           <ShimmerBlock className="h-3.5 w-44" />
           <ShimmerBlock className="h-3 w-12" />
@@ -122,7 +122,7 @@ export const FollowersShimmer = () => (
   <div className="space-y-0">
     {[...Array(8)].map((_, i) => (
       <div key={i} className="flex items-center gap-3 px-4 py-3">
-        <ShimmerBlock className="h-12 w-12 rounded-full shrink-0" />
+        <ShimmerBlock className="h-12 w-12 avatar-leaf shrink-0" />
         <div className="flex-1 space-y-2">
           <ShimmerBlock className="h-3.5 w-28" />
           <ShimmerBlock className="h-3 w-20" />
