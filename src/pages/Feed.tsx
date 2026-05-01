@@ -355,11 +355,11 @@ const Feed = () => {
               onClick={() => userHasStory ? navigate(`/story?user=${user?.id}`) : navigate("/create-story")}
             >
             <div className={`avatar-leaf-ring p-[2.5px] ${userHasStory ? STORY_GRADIENT : ""}`}>
-                <div className="rounded-full border-[2.5px] border-background overflow-hidden">
+                <div className="avatar-leaf border-[2.5px] border-background overflow-hidden">
                   {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt="You" className="h-[64px] w-[64px] avatar-leaf object-cover block" />
                   ) : (
-                    <div className="flex h-[64px] w-[64px] items-center justify-center rounded-full bg-secondary">
+                    <div className="flex h-[64px] w-[64px] items-center justify-center avatar-leaf bg-secondary">
                       <PuffyIcon name="user" size={28} />
                     </div>
                   )}
@@ -382,11 +382,11 @@ const Feed = () => {
               className="flex shrink-0 flex-col items-center gap-1"
             >
               <div className={`avatar-leaf-ring p-[2.5px] ${su.hasSeen ? "bg-muted-foreground/30" : STORY_GRADIENT}`}>
-                <div className="rounded-full border-[2.5px] border-background overflow-hidden">
+                <div className="avatar-leaf border-[2.5px] border-background overflow-hidden">
                   {su.avatar_url ? (
                     <img src={su.avatar_url} alt={su.username} className="h-[64px] w-[64px] avatar-leaf object-cover block" />
                   ) : (
-                    <div className="flex h-[64px] w-[64px] items-center justify-center rounded-full bg-secondary">
+                    <div className="flex h-[64px] w-[64px] items-center justify-center avatar-leaf bg-secondary">
                       <PuffyIcon name="user" size={28} />
                     </div>
                   )}
