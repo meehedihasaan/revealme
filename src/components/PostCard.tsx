@@ -193,11 +193,11 @@ const PostCard = memo(({
           {/* Header overlay at top */}
           <div className="absolute top-0 left-0 right-0 flex items-center gap-3 px-4 py-2.5 z-10">
             <div className={`avatar-leaf-ring p-[2px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
-              <div className={`rounded-full overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
+              <div className={`avatar-leaf overflow-hidden ${hasStoryProp ? "border-[2px] border-background" : ""}`}>
                 {avatar ? (
                   <img src={avatar} alt={username} className="h-9 w-9 avatar-leaf object-cover block" loading="lazy" />
                 ) : (
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
+                  <div className="flex h-9 w-9 items-center justify-center avatar-leaf bg-white/20">
                     <PuffyIcon name="user" size={16} className="!brightness-0 !invert" />
                   </div>
                 )}
