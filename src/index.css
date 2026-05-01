@@ -193,14 +193,26 @@
 }
 
 @layer utilities {
-  /* Leaf shape: two opposite corners heavily rounded, two opposite corners sharp.
-     Used for ALL avatars (and their story rings) across the app. */
+  /* True squircle (iOS-style superellipse) using SVG mask.
+     Applied to ALL avatars and their story rings across the app. */
   .avatar-squircle,
   .avatar-leaf {
-    border-radius: 65% 15% 65% 15%;
+    border-radius: 30% !important;
+    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C30,0 0,30 0,100 C0,170 30,200 100,200 C170,200 200,170 200,100 C200,30 170,0 100,0 Z'/></svg>");
+    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C30,0 0,30 0,100 C0,170 30,200 100,200 C170,200 200,170 200,100 C200,30 170,0 100,0 Z'/></svg>");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
   }
   .avatar-leaf-ring {
-    border-radius: 68% 18% 68% 18%;
+    border-radius: 32% !important;
+    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C30,0 0,30 0,100 C0,170 30,200 100,200 C170,200 200,170 200,100 C200,30 170,0 100,0 Z'/></svg>");
+    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C30,0 0,30 0,100 C0,170 30,200 100,200 C170,200 200,170 200,100 C200,30 170,0 100,0 Z'/></svg>");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
   }
   .scrollbar-hide {
     -ms-overflow-style: none;
