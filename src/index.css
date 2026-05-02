@@ -199,8 +199,8 @@
   .avatar-squircle,
   .avatar-leaf,
   .avatar-leaf-ring {
-    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C158,0 200,42 200,100 C200,158 158,200 100,200 C42,200 0,158 0,100 C0,42 42,0 100,0 Z'/></svg>");
-    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C158,0 200,42 200,100 C200,158 158,200 100,200 C42,200 0,158 0,100 C0,42 42,0 100,0 Z'/></svg>");
+    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' preserveAspectRatio='none'><path fill='black' d='M0,100 C0,30 30,0 100,0 C170,0 200,30 200,100 C200,170 170,200 100,200 C30,200 0,170 0,100 Z'/></svg>");
+    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' preserveAspectRatio='none'><path fill='black' d='M0,100 C0,30 30,0 100,0 C170,0 200,30 200,100 C200,170 170,200 100,200 C30,200 0,170 0,100 Z'/></svg>");
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
