@@ -228,9 +228,9 @@ const Profile = () => {
                   if (avatarLongPressTimer.current) clearTimeout(avatarLongPressTimer.current);
                 }}
                 onContextMenu={(e) => e.preventDefault()}
-                className={`inline-block avatar-leaf-ring p-[2.5px] ${hasStory ? STORY_GRADIENT : ""}`}
+                className={`inline-block avatar-leaf-ring p-[3px] ${hasStory ? STORY_GRADIENT : ""}`}
               >
-                <div className={`avatar-leaf ${hasStory ? "border-[2.5px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
+                <div className={`avatar-leaf ${hasStory ? "border-[3px] border-background" : "border-4 border-background"} bg-background overflow-hidden`}>
                   {avatarUrl ? (
                     <img src={avatarUrl} alt={displayName} className="h-20 w-20 avatar-leaf object-cover block" draggable={false} />
                   ) : (
