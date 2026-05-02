@@ -194,25 +194,19 @@
 
 @layer utilities {
   /* True squircle (iOS-style superellipse) using SVG mask.
+     Path is a true superellipse (n≈5) approximated with cubic beziers.
      Applied to ALL avatars and their story rings across the app. */
   .avatar-squircle,
-  .avatar-leaf {
-    border-radius: 28%;
-    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C30,0 0,30 0,100 C0,170 30,200 100,200 C170,200 200,170 200,100 C200,30 170,0 100,0 Z'/></svg>");
-    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C30,0 0,30 0,100 C0,170 30,200 100,200 C170,200 200,170 200,100 C200,30 170,0 100,0 Z'/></svg>");
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-  }
+  .avatar-leaf,
   .avatar-leaf-ring {
-    border-radius: 32%;
-    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C30,0 0,30 0,100 C0,170 30,200 100,200 C170,200 200,170 200,100 C200,30 170,0 100,0 Z'/></svg>");
-    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C30,0 0,30 0,100 C0,170 30,200 100,200 C170,200 200,170 200,100 C200,30 170,0 100,0 Z'/></svg>");
+    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C158,0 200,42 200,100 C200,158 158,200 100,200 C42,200 0,158 0,100 C0,42 42,0 100,0 Z'/></svg>");
+    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><path d='M100,0 C158,0 200,42 200,100 C200,158 158,200 100,200 C42,200 0,158 0,100 C0,42 42,0 100,0 Z'/></svg>");
     -webkit-mask-size: 100% 100%;
     mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
   }
   .scrollbar-hide {
     -ms-overflow-style: none;
