@@ -37,7 +37,10 @@ interface PostCardProps {
   commentCount?: number;
   hasStory?: boolean;
   postType?: string;
+  viewCount?: number;
+  level?: number;
 }
+
 
 const DoubleTapHeart = () => (
   <motion.div
