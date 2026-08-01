@@ -72,7 +72,7 @@ export const usePosts = (filterUserId?: string) => {
     const postIds = filteredPosts.map((post) => post.id);
 
     // Run all independent queries in parallel
-    const [profilesRes, likesRes, myLikesRes, mySavesRes, followsRes] = await Promise.all([
+    const [profilesRes, likesRes, myLikesRes, mySavesRes, followsRes, viewsRes, authorPostsRes] = await Promise.all([
       supabase
         .from("profiles")
         .select("user_id, username, display_name, avatar_url, is_verified, is_private")
@@ -87,6 +87,8 @@ export const usePosts = (filterUserId?: string) => {
       user?.id
         ? supabase.from("follows").select("following_id").eq("follower_id", user.id)
         : Promise.resolve({ data: [] as { following_id: string }[] }),
+      supabase.from("post_views").select("post_id").in("post_id", postIds),
+      supabase.from("posts").select("user_id").in("user_id", userIds),
     ]);
 
     const profileMap = Object.fromEntries((profilesRes.data || []).map((profile) => [profile.user_id, profile]));
@@ -96,11 +98,22 @@ export const usePosts = (filterUserId?: string) => {
       likesCount[like.post_id] = (likesCount[like.post_id] || 0) + 1;
     });
 
+    const viewsCount: Record<string, number> = {};
+    (viewsRes.data || []).forEach((view: { post_id: string }) => {
+      viewsCount[view.post_id] = (viewsCount[view.post_id] || 0) + 1;
+    });
+
+    // 1 post = 1 credit; every 10 credits = 1 level
+    const creditsByUser: Record<string, number> = {};
+    (authorPostsRes.data || []).forEach((row: { user_id: string }) => {
+      creditsByUser[row.user_id] = (creditsByUser[row.user_id] || 0) + 1;
+    });
+
     const userLikes = new Set((myLikesRes.data || []).map((like) => like.post_id));
     const userSaves = new Set((mySavesRes.data || []).map((saved) => saved.post_id));
     const followingSet = new Set((followsRes.data || []).map((follow) => follow.following_id));
 
-    const allPosts = filteredPosts.map((post) => ({
+    const allPosts: PostWithDetails[] = filteredPosts.map((post) => ({
       id: post.id,
       image_url: post.image_url,
       caption: post.caption || "",
@@ -117,7 +130,11 @@ export const usePosts = (filterUserId?: string) => {
       isSaved: userSaves.has(post.id),
       timeAgo: formatDistanceToNow(new Date(post.created_at), { addSuffix: true }),
       post_type: (post as any).post_type || "post",
+      viewCount: viewsCount[post.id] || 0,
+      authorCredits: creditsByUser[post.user_id] || 0,
+      authorLevel: getLevelFromCredits(creditsByUser[post.user_id] || 0),
     }));
+
 
     const visiblePosts = allPosts.filter((post) => {
       if (post.user_id === user?.id) return true;
