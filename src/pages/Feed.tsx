@@ -429,37 +429,6 @@ const Feed = () => {
               renderPostsWithClips(followingPosts)
             )
           )}
-          {activeTab === "Favourites" && (
-            isDataLoading ? (
-              <FeedShimmer />
-            ) : savedPosts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                <PuffyIcon name="bookmark" size={48} className="opacity-30 mb-3" />
-                <p className="text-sm">Your saved posts will appear here</p>
-              </div>
-            ) : (
-              savedPosts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  postId={post.id}
-                  postUserId={post.user_id}
-                  username={post.username}
-                  displayName={post.display_name}
-                  avatar={post.avatar_url || ""}
-                  verified={post.is_verified}
-                  image={post.image_url}
-                  caption={post.caption}
-                  likesCount={post.likesCount}
-                  timeAgo={post.timeAgo}
-                  location={post.location}
-                  isLiked={post.isLiked}
-                  isSaved={post.isSaved}
-                  onDelete={refetch}
-                  postType={post.post_type}
-                />
-              ))
-            )
-          )}
         </div>
       </PullToRefresh>
 
