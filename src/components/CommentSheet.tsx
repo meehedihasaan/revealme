@@ -26,7 +26,7 @@ interface CommentSheetProps {
 }
 
 const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
