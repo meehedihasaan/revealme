@@ -18,21 +18,19 @@ interface TaggedUser {
   y: number;
 }
 
-type PostTab = "photo" | "text";
-type Step = "upload" | "effects" | "publish";
+type Step = "compose" | "effects";
 
 const CreatePost = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [activeTab, setActiveTab] = useState<PostTab>("photo");
   const [previews, setPreviews] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [caption, setCaption] = useState("");
   const [location, setLocation] = useState("");
   const [posting, setPosting] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [step, setStep] = useState<Step>("upload");
+  const [step, setStep] = useState<Step>("compose");
   const [filterStyles, setFilterStyles] = useState<React.CSSProperties[]>([]);
 
   const [tagMode, setTagMode] = useState(false);
@@ -47,7 +45,6 @@ const CreatePost = () => {
     setFiles(total);
     const newPreviews = total.map(f => URL.createObjectURL(f));
     setPreviews(newPreviews);
-    // Auto-advance to effects step
     setStep("effects");
   };
 
@@ -57,7 +54,7 @@ const CreatePost = () => {
     setFiles(newFiles);
     setPreviews(newPreviews);
     if (currentIndex >= newPreviews.length) setCurrentIndex(Math.max(0, newPreviews.length - 1));
-    if (newFiles.length === 0) { setTaggedUsers([]); setTagMode(false); setStep("upload"); }
+    if (newFiles.length === 0) { setTaggedUsers([]); setTagMode(false); setStep("compose"); }
   };
 
   const handleImageTap = (x: number, y: number) => {
@@ -75,7 +72,7 @@ const CreatePost = () => {
 
   const removeTag = (userId: string) => setTaggedUsers(prev => prev.filter(t => t.user_id !== userId));
 
-  const canPost = activeTab === "photo" ? previews.length > 0 : caption.trim().length > 0;
+  const canPost = previews.length > 0 || caption.trim().length > 0;
 
   const applyFilterToCanvas = async (imgSrc: string, filterStyle: React.CSSProperties): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -173,15 +170,15 @@ const CreatePost = () => {
   };
 
   // Effects step
-  if (step === "effects" && activeTab === "photo" && previews.length > 0) {
+  if (step === "effects" && previews.length > 0) {
     return (
       <ImageEffectsEditor
         images={previews}
         onApply={(styles) => {
           setFilterStyles(styles);
-          setStep("publish");
+          setStep("compose");
         }}
-        onBack={() => setStep("upload")}
+        onBack={() => setStep("compose")}
       />
     );
   }
