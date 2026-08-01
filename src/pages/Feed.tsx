@@ -22,7 +22,7 @@ interface StoryUser {
   hasSeen: boolean;
 }
 
-const tabs = ["For you", "Following", "Favourites"];
+const tabs = ["For you", "Following"];
 
 // Highlight Clips component for feed
 const HighlightClips = () => {
