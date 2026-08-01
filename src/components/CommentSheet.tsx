@@ -273,13 +273,16 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
           className="fixed inset-0 z-[60] flex flex-col bg-background"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <div className="w-8" />
-            <h3 className="text-base font-bold text-foreground">Comments</h3>
-            <button onClick={onClose} className="text-foreground">
+          <div className="relative flex items-center justify-center border-b border-border px-4 py-3">
+            <div className="absolute left-1/2 -top-0.5 h-1 w-10 -translate-x-1/2 rounded-full bg-muted-foreground/30" />
+            <h3 className="text-base font-bold text-foreground">
+              Comments{totalCount > 0 ? ` · ${totalCount}` : ""}
+            </h3>
+            <button onClick={onClose} className="absolute right-4 text-foreground">
               <PuffyIcon name="plus" size={20} className="rotate-45" />
             </button>
           </div>
+
 
           {/* Comment list */}
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-5">
