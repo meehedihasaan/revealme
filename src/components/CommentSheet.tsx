@@ -26,7 +26,7 @@ interface CommentSheetProps {
 }
 
 const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
@@ -273,13 +273,16 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
           className="fixed inset-0 z-[60] flex flex-col bg-background"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <div className="w-8" />
-            <h3 className="text-base font-bold text-foreground">Comments</h3>
-            <button onClick={onClose} className="text-foreground">
+          <div className="relative flex items-center justify-center border-b border-border px-4 py-3">
+            <div className="absolute left-1/2 -top-0.5 h-1 w-10 -translate-x-1/2 rounded-full bg-muted-foreground/30" />
+            <h3 className="text-base font-bold text-foreground">
+              Comments{totalCount > 0 ? ` · ${totalCount}` : ""}
+            </h3>
+            <button onClick={onClose} className="absolute right-4 text-foreground">
               <PuffyIcon name="plus" size={20} className="rotate-45" />
             </button>
           </div>
+
 
           {/* Comment list */}
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-5">
@@ -355,8 +358,28 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
             )}
           </AnimatePresence>
 
+          {/* Quick emoji row */}
+          <div className="flex items-center gap-1 border-t border-border px-3 pt-2 overflow-x-auto scrollbar-hide">
+            {["❤️", "🙌", "🔥", "👏", "😢", "😍", "😮", "😂"].map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => { setInput((prev) => prev + emoji); inputRef.current?.focus(); }}
+                className="text-xl px-1.5 py-1 active:scale-90 transition-transform"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+
           {/* Input */}
-          <div className="border-t border-border px-4 py-3 flex items-center gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}>
+          <div className="px-3 py-2 flex items-center gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)" }}>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="h-8 w-8 shrink-0 avatar-leaf object-cover" />
+            ) : (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center avatar-leaf bg-secondary">
+                <PuffyIcon name="user" size={14} />
+              </div>
+            )}
             <input
               ref={inputRef}
               type="text"
@@ -379,6 +402,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
               <PuffyIcon name="send" size={16} />
             </button>
           </div>
+
         </motion.div>
       )}
     </AnimatePresence>

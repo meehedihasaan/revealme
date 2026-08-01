@@ -392,7 +392,10 @@ const Profile = () => {
                 isSaved={post.isSaved}
                 onDelete={refetch}
                 postType={post.post_type}
+                viewCount={post.viewCount}
+                level={post.authorLevel}
                 hasStory={hasStory && post.user_id === user?.id}
+
               />
             ))}
           </div>

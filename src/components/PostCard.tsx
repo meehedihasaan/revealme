@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
@@ -37,7 +37,10 @@ interface PostCardProps {
   commentCount?: number;
   hasStory?: boolean;
   postType?: string;
+  viewCount?: number;
+  level?: number;
 }
+
 
 const DoubleTapHeart = () => (
   <motion.div
@@ -71,6 +74,8 @@ const PostCard = memo(({
   commentCount: initialCommentCount = 0,
   hasStory: hasStoryProp = false,
   postType = "post",
+  viewCount: initialViewCount = 0,
+  level = 0,
 }: PostCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -85,6 +90,33 @@ const PostCard = memo(({
   const [followLoading, setFollowLoading] = useState(false);
   const [commentCount, setCommentCount] = useState(initialCommentCount);
   const [captionExpanded, setCaptionExpanded] = useState(false);
+  const [viewCount, setViewCount] = useState(initialViewCount);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const viewRecorded = useRef(false);
+
+  useEffect(() => { setViewCount(initialViewCount); }, [initialViewCount]);
+
+  // Record a post view (reach) when the card becomes visible
+  useEffect(() => {
+    if (!user || !cardRef.current || viewRecorded.current) return;
+    const el = cardRef.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting || viewRecorded.current) return;
+        viewRecorded.current = true;
+        observer.disconnect();
+        supabase
+          .from("post_views")
+          .insert({ post_id: postId, viewer_id: user.id })
+          .then(({ error }) => {
+            if (!error) setViewCount((c) => c + 1);
+          });
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [postId, user]);
 
   // Only fetch comment count if not provided
   useEffect(() => {
@@ -95,6 +127,7 @@ const PostCard = memo(({
       .eq("post_id", postId)
       .then(({ count }) => setCommentCount(count || 0));
   }, [postId, initialCommentCount]);
+
 
   const handleDoubleTap = useCallback(() => {
     if (!liked) toggleLike();
@@ -260,7 +293,7 @@ const PostCard = memo(({
   }
 
   return (
-    <div className="border-b border-border">
+    <div ref={cardRef} className="border-b border-border">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-2.5">
         <button onClick={navigateToStoryOrUser} className={`avatar-leaf-ring p-[1.5px] ${hasStoryProp ? STORY_GRADIENT : ""}`}>
@@ -279,9 +312,12 @@ const PostCard = memo(({
             <span className="text-sm font-semibold text-foreground">{displayName || username}</span>
             {verified && <VerifiedBadge size={15} />}
           </div>
-          {!image && <p className="text-[11px] text-muted-foreground">@{username}</p>}
-          {image && location && <p className="text-[11px] text-muted-foreground">{location}</p>}
-          {image && !location && <p className="text-[11px] text-muted-foreground">@{username}</p>}
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-full bg-secondary px-1.5 py-[1px] text-[10px] font-bold text-foreground/80">
+              Lv {level}
+            </span>
+            {location && <span className="text-[11px] text-muted-foreground truncate">{location}</span>}
+          </div>
         </button>
         {showFollowButton && !following && (
           <motion.button
@@ -308,12 +344,29 @@ const PostCard = memo(({
         <PostMenu postId={postId} postUserId={postUserId || ""} caption={caption} location={location} onDelete={onDelete} />
       </div>
 
-      {/* Image/Video or Text-only post */}
+      {/* Title / caption above the photo (no username shown with it) */}
+      {caption && (
+        <div className="px-4 pb-2">
+          <p className="text-[15px] text-foreground leading-snug whitespace-pre-line">
+            {caption.length > 140 && !captionExpanded ? (
+              <>
+                {caption.slice(0, 140)}...{" "}
+                <button onClick={() => setCaptionExpanded(true)} className="text-muted-foreground text-sm">
+                  more
+                </button>
+              </>
+            ) : (
+              caption
+            )}
+          </p>
+        </div>
+      )}
+
+      {/* Image/Video */}
       {image ? (
         <PostImageCarousel postId={postId} mainImage={image} onDoubleTap={handleDoubleTap} showHeart={showHeart} HeartComponent={DoubleTapHeart} />
       ) : (
-        <div className="relative px-4 py-1.5" onDoubleClick={handleDoubleTap}>
-          <p className="text-[15px] text-foreground leading-snug whitespace-pre-line">{caption}</p>
+        <div className="relative px-4 pb-1.5" onDoubleClick={handleDoubleTap}>
           <AnimatePresence>{showHeart && <DoubleTapHeart />}</AnimatePresence>
         </div>
       )}
@@ -336,35 +389,22 @@ const PostCard = memo(({
           <button className="flex items-center gap-1" onClick={openShare}>
             <PuffyIcon name="send" size={22} />
           </button>
+          {/* Post reach */}
+          <div className="flex items-center gap-1" title="Post reach">
+            <PuffyIcon name="eye" size={22} />
+            <span className="text-sm font-semibold text-foreground">{viewCount.toLocaleString()}</span>
+          </div>
         </div>
         <button className="active:scale-90 transition-transform duration-100" onClick={toggleSave}>
           <PuffyIcon name="bookmark" size={24} className={saved ? "opacity-100" : "opacity-70"} />
         </button>
       </div>
 
-      {/* Caption - only show if post has an image */}
-      {image && caption && (
-        <div className="px-4 pt-1">
-          <p className="text-sm text-foreground">
-            <span className="font-semibold">@{username}</span>{" "}
-            {caption.length > 100 && !captionExpanded ? (
-              <>
-                <span className="text-foreground/90">{caption.slice(0, 100)}...</span>{" "}
-                <button onClick={() => setCaptionExpanded(true)} className="text-muted-foreground text-sm">
-                  more
-                </button>
-              </>
-            ) : (
-              <span className="text-foreground/90">{caption}</span>
-            )}
-          </p>
-        </div>
-      )}
-
       {/* Time */}
       <div className="px-4 pt-1 pb-3">
         <p className="text-[10px] uppercase text-muted-foreground">{timeAgo}</p>
       </div>
+
 
       {commentOpen && <CommentSheet postId={postId} isOpen={commentOpen} onClose={closeComment} />}
       {shareOpen && <ShareSheet postId={postId} image={image} caption={caption} username={username} isOpen={shareOpen} onClose={closeShare} />}

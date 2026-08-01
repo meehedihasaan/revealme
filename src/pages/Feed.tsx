@@ -22,88 +22,7 @@ interface StoryUser {
   hasSeen: boolean;
 }
 
-const tabs = ["For you", "Following", "Favourites"];
-
-// Highlight Clips component for feed
-const HighlightClips = () => {
-  const navigate = useNavigate();
-  const [clips, setClips] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchClips = async () => {
-      const { data } = await supabase
-        .from("posts")
-        .select("id, image_url, user_id, caption")
-        .eq("post_type", "reel")
-        .not("image_url", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(10);
-      
-      if (!data || data.length === 0) return;
-      
-      const userIds = [...new Set(data.map(p => p.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, username, avatar_url")
-        .in("user_id", userIds);
-      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
-      
-      setClips(data.map(p => ({
-        ...p,
-        username: profileMap[p.user_id]?.username || "user",
-        avatar_url: profileMap[p.user_id]?.avatar_url || null,
-      })));
-    };
-    fetchClips();
-  }, []);
-
-  if (clips.length === 0) return null;
-
-  return (
-    <div className="py-3 border-b border-border">
-      <div className="flex items-center justify-between px-4 mb-2">
-        <h3 className="text-sm font-bold text-foreground">Clips</h3>
-        <button onClick={() => navigate("/reels")} className="text-xs font-semibold text-primary">
-          See all
-        </button>
-      </div>
-      <div className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide">
-        {clips.map((clip) => {
-          const isVideo = clip.image_url?.match(/\.(mp4|mov|webm|ogg)(\?|$)/i);
-          return (
-            <button
-              key={clip.id}
-              onClick={() => navigate("/reels")}
-              className="relative shrink-0 w-[100px] aspect-[9/16] rounded-xl overflow-hidden bg-secondary"
-            >
-              {isVideo ? (
-                <video src={clip.image_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
-              ) : (
-                <img src={clip.image_url} alt="" className="h-full w-full object-cover" />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-1.5 left-1.5 right-1.5">
-                <div className="flex items-center gap-1">
-                  {clip.avatar_url ? (
-                    <img src={clip.avatar_url} alt="" className="h-4 w-4 avatar-leaf object-cover border border-white/50" />
-                  ) : (
-                    <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
-                      <PuffyIcon name="user" size={8} className="!brightness-0 !invert" />
-                    </div>
-                  )}
-                  <span className="text-white text-[9px] font-semibold truncate">{clip.username}</span>
-                </div>
-              </div>
-              <div className="absolute top-1.5 right-1.5">
-                <PuffyIcon name="reels" size={12} className="!brightness-0 !invert opacity-80" />
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+const tabs = ["For you", "Following"];
 
 const Feed = () => {
   const [activeTab, setActiveTab] = useState("For you");
@@ -233,7 +152,6 @@ const Feed = () => {
   // Derived post lists
   const followingPosts = posts.filter(p => followingIds.has(p.user_id));
   const forYouPosts = posts;
-  const savedPosts = posts.filter(p => p.isSaved);
 
   const handleRefresh = async () => {
     await Promise.all([refetch(), fetchFollowing()]);
@@ -250,46 +168,35 @@ const Feed = () => {
 
   const isDataLoading = loading || followingLoading;
 
-  // Render posts with highlight clips inserted after 5-6 posts
-  const renderPostsWithClips = (postList: typeof posts, showFollow = false) => {
-    const elements: React.ReactNode[] = [];
-    let clipInserted = false;
+  // Clips never appear in the feed — only posts
+  const renderPostsWithClips = (postList: typeof posts, showFollow = false) =>
+    postList.map((post) => (
+      <PostCard
+        key={post.id}
+        postId={post.id}
+        postUserId={post.user_id}
+        username={post.username}
+        displayName={post.display_name}
+        avatar={post.avatar_url || ""}
+        verified={post.is_verified}
+        image={post.image_url}
+        caption={post.caption}
+        likesCount={post.likesCount}
+        timeAgo={post.timeAgo}
+        location={post.location}
+        isLiked={post.isLiked}
+        isSaved={post.isSaved}
+        onDelete={refetch}
+        showFollowButton={showFollow && post.user_id !== user?.id && !followingIds.has(post.user_id)}
+        isFollowing={followingIds.has(post.user_id)}
+        onFollowChange={handleFollowChange}
+        hasStory={storyUsers.some((su) => su.user_id === post.user_id) || (post.user_id === user?.id && userHasStory)}
+        postType={post.post_type}
+        viewCount={post.viewCount}
+        level={post.authorLevel}
+      />
+    ));
 
-    postList.forEach((post, i) => {
-      // Insert highlight clips after 5th post
-      if (i === 5 && !clipInserted) {
-        elements.push(<HighlightClips key="highlight-clips" />);
-        clipInserted = true;
-      }
-
-      elements.push(
-        <PostCard
-          key={post.id}
-          postId={post.id}
-          postUserId={post.user_id}
-          username={post.username}
-          displayName={post.display_name}
-          avatar={post.avatar_url || ""}
-          verified={post.is_verified}
-          image={post.image_url}
-          caption={post.caption}
-          likesCount={post.likesCount}
-          timeAgo={post.timeAgo}
-          location={post.location}
-          isLiked={post.isLiked}
-          isSaved={post.isSaved}
-          onDelete={refetch}
-          showFollowButton={showFollow && post.user_id !== user?.id && !followingIds.has(post.user_id)}
-          isFollowing={followingIds.has(post.user_id)}
-          onFollowChange={handleFollowChange}
-          hasStory={storyUsers.some(su => su.user_id === post.user_id) || (post.user_id === user?.id && userHasStory)}
-          postType={post.post_type}
-        />
-      );
-    });
-
-    return elements;
-  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -312,7 +219,7 @@ const Feed = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 px-4 pb-3 sticky top-0 md:top-16 bg-background z-30 pt-3">
+      <div className="flex gap-2 px-4 pb-3 bg-background pt-3">
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -427,37 +334,6 @@ const Feed = () => {
               </div>
             ) : (
               renderPostsWithClips(followingPosts)
-            )
-          )}
-          {activeTab === "Favourites" && (
-            isDataLoading ? (
-              <FeedShimmer />
-            ) : savedPosts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                <PuffyIcon name="bookmark" size={48} className="opacity-30 mb-3" />
-                <p className="text-sm">Your saved posts will appear here</p>
-              </div>
-            ) : (
-              savedPosts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  postId={post.id}
-                  postUserId={post.user_id}
-                  username={post.username}
-                  displayName={post.display_name}
-                  avatar={post.avatar_url || ""}
-                  verified={post.is_verified}
-                  image={post.image_url}
-                  caption={post.caption}
-                  likesCount={post.likesCount}
-                  timeAgo={post.timeAgo}
-                  location={post.location}
-                  isLiked={post.isLiked}
-                  isSaved={post.isSaved}
-                  onDelete={refetch}
-                  postType={post.post_type}
-                />
-              ))
             )
           )}
         </div>
