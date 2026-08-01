@@ -358,8 +358,28 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
             )}
           </AnimatePresence>
 
+          {/* Quick emoji row */}
+          <div className="flex items-center gap-1 border-t border-border px-3 pt-2 overflow-x-auto scrollbar-hide">
+            {["❤️", "🙌", "🔥", "👏", "😢", "😍", "😮", "😂"].map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => { setInput((prev) => prev + emoji); inputRef.current?.focus(); }}
+                className="text-xl px-1.5 py-1 active:scale-90 transition-transform"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+
           {/* Input */}
-          <div className="border-t border-border px-4 py-3 flex items-center gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}>
+          <div className="px-3 py-2 flex items-center gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)" }}>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="h-8 w-8 shrink-0 avatar-leaf object-cover" />
+            ) : (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center avatar-leaf bg-secondary">
+                <PuffyIcon name="user" size={14} />
+              </div>
+            )}
             <input
               ref={inputRef}
               type="text"
@@ -382,6 +402,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
               <PuffyIcon name="send" size={16} />
             </button>
           </div>
+
         </motion.div>
       )}
     </AnimatePresence>
