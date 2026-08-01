@@ -21,7 +21,14 @@ export interface PostWithDetails {
   isSaved: boolean;
   timeAgo: string;
   post_type: string;
+  viewCount: number;
+  authorCredits: number;
+  authorLevel: number;
 }
+
+export const POSTS_PER_LEVEL = 10;
+export const getLevelFromCredits = (credits: number) => Math.floor(credits / POSTS_PER_LEVEL);
+
 
 export const usePosts = (filterUserId?: string) => {
   const { user } = useAuth();
