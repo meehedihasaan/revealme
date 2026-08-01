@@ -250,46 +250,35 @@ const Feed = () => {
 
   const isDataLoading = loading || followingLoading;
 
-  // Render posts with highlight clips inserted after 5-6 posts
-  const renderPostsWithClips = (postList: typeof posts, showFollow = false) => {
-    const elements: React.ReactNode[] = [];
-    let clipInserted = false;
+  // Clips never appear in the feed — only posts
+  const renderPostsWithClips = (postList: typeof posts, showFollow = false) =>
+    postList.map((post) => (
+      <PostCard
+        key={post.id}
+        postId={post.id}
+        postUserId={post.user_id}
+        username={post.username}
+        displayName={post.display_name}
+        avatar={post.avatar_url || ""}
+        verified={post.is_verified}
+        image={post.image_url}
+        caption={post.caption}
+        likesCount={post.likesCount}
+        timeAgo={post.timeAgo}
+        location={post.location}
+        isLiked={post.isLiked}
+        isSaved={post.isSaved}
+        onDelete={refetch}
+        showFollowButton={showFollow && post.user_id !== user?.id && !followingIds.has(post.user_id)}
+        isFollowing={followingIds.has(post.user_id)}
+        onFollowChange={handleFollowChange}
+        hasStory={storyUsers.some((su) => su.user_id === post.user_id) || (post.user_id === user?.id && userHasStory)}
+        postType={post.post_type}
+        viewCount={post.viewCount}
+        level={post.authorLevel}
+      />
+    ));
 
-    postList.forEach((post, i) => {
-      // Insert highlight clips after 5th post
-      if (i === 5 && !clipInserted) {
-        elements.push(<HighlightClips key="highlight-clips" />);
-        clipInserted = true;
-      }
-
-      elements.push(
-        <PostCard
-          key={post.id}
-          postId={post.id}
-          postUserId={post.user_id}
-          username={post.username}
-          displayName={post.display_name}
-          avatar={post.avatar_url || ""}
-          verified={post.is_verified}
-          image={post.image_url}
-          caption={post.caption}
-          likesCount={post.likesCount}
-          timeAgo={post.timeAgo}
-          location={post.location}
-          isLiked={post.isLiked}
-          isSaved={post.isSaved}
-          onDelete={refetch}
-          showFollowButton={showFollow && post.user_id !== user?.id && !followingIds.has(post.user_id)}
-          isFollowing={followingIds.has(post.user_id)}
-          onFollowChange={handleFollowChange}
-          hasStory={storyUsers.some(su => su.user_id === post.user_id) || (post.user_id === user?.id && userHasStory)}
-          postType={post.post_type}
-        />
-      );
-    });
-
-    return elements;
-  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
