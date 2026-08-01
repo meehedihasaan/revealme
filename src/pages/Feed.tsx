@@ -24,87 +24,6 @@ interface StoryUser {
 
 const tabs = ["For you", "Following"];
 
-// Highlight Clips component for feed
-const HighlightClips = () => {
-  const navigate = useNavigate();
-  const [clips, setClips] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchClips = async () => {
-      const { data } = await supabase
-        .from("posts")
-        .select("id, image_url, user_id, caption")
-        .eq("post_type", "reel")
-        .not("image_url", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(10);
-      
-      if (!data || data.length === 0) return;
-      
-      const userIds = [...new Set(data.map(p => p.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, username, avatar_url")
-        .in("user_id", userIds);
-      const profileMap = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
-      
-      setClips(data.map(p => ({
-        ...p,
-        username: profileMap[p.user_id]?.username || "user",
-        avatar_url: profileMap[p.user_id]?.avatar_url || null,
-      })));
-    };
-    fetchClips();
-  }, []);
-
-  if (clips.length === 0) return null;
-
-  return (
-    <div className="py-3 border-b border-border">
-      <div className="flex items-center justify-between px-4 mb-2">
-        <h3 className="text-sm font-bold text-foreground">Clips</h3>
-        <button onClick={() => navigate("/reels")} className="text-xs font-semibold text-primary">
-          See all
-        </button>
-      </div>
-      <div className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide">
-        {clips.map((clip) => {
-          const isVideo = clip.image_url?.match(/\.(mp4|mov|webm|ogg)(\?|$)/i);
-          return (
-            <button
-              key={clip.id}
-              onClick={() => navigate("/reels")}
-              className="relative shrink-0 w-[100px] aspect-[9/16] rounded-xl overflow-hidden bg-secondary"
-            >
-              {isVideo ? (
-                <video src={clip.image_url} className="h-full w-full object-cover" muted playsInline preload="metadata" />
-              ) : (
-                <img src={clip.image_url} alt="" className="h-full w-full object-cover" />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-              <div className="absolute bottom-1.5 left-1.5 right-1.5">
-                <div className="flex items-center gap-1">
-                  {clip.avatar_url ? (
-                    <img src={clip.avatar_url} alt="" className="h-4 w-4 avatar-leaf object-cover border border-white/50" />
-                  ) : (
-                    <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
-                      <PuffyIcon name="user" size={8} className="!brightness-0 !invert" />
-                    </div>
-                  )}
-                  <span className="text-white text-[9px] font-semibold truncate">{clip.username}</span>
-                </div>
-              </div>
-              <div className="absolute top-1.5 right-1.5">
-                <PuffyIcon name="reels" size={12} className="!brightness-0 !invert opacity-80" />
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
 const Feed = () => {
   const [activeTab, setActiveTab] = useState("For you");
   const navigate = useNavigate();
@@ -233,7 +152,6 @@ const Feed = () => {
   // Derived post lists
   const followingPosts = posts.filter(p => followingIds.has(p.user_id));
   const forYouPosts = posts;
-  const savedPosts = posts.filter(p => p.isSaved);
 
   const handleRefresh = async () => {
     await Promise.all([refetch(), fetchFollowing()]);
