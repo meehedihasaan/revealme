@@ -603,6 +603,9 @@ const UserProfile = () => {
                     location={post.location}
                     isLiked={post.isLiked}
                     isSaved={post.isSaved}
+                    viewCount={post.viewCount}
+                    level={post.authorLevel}
+
                   />
                 ))}
               </div>
