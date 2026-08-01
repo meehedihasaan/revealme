@@ -42,8 +42,14 @@ export const usePosts = (filterUserId?: string) => {
       setLoading(true);
     }
 
-    let query = supabase.from("posts").select("*").order("created_at", { ascending: false });
+    // Clips/reels never appear in the main feed or profile grid — only in the clips tab
+    let query = supabase
+      .from("posts")
+      .select("*")
+      .neq("post_type", "reel")
+      .order("created_at", { ascending: false });
     if (filterUserId) query = query.eq("user_id", filterUserId);
+
 
     const { data: postsData } = await query;
 
