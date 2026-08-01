@@ -312,7 +312,7 @@ const Feed = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 px-4 pb-3 sticky top-0 md:top-16 bg-background z-30 pt-3">
+      <div className="flex gap-2 px-4 pb-3 bg-background pt-3">
         {tabs.map((tab) => (
           <button
             key={tab}
