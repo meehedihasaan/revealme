@@ -74,6 +74,8 @@ const PostCard = memo(({
   commentCount: initialCommentCount = 0,
   hasStory: hasStoryProp = false,
   postType = "post",
+  viewCount: initialViewCount = 0,
+  level = 0,
 }: PostCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -88,6 +90,33 @@ const PostCard = memo(({
   const [followLoading, setFollowLoading] = useState(false);
   const [commentCount, setCommentCount] = useState(initialCommentCount);
   const [captionExpanded, setCaptionExpanded] = useState(false);
+  const [viewCount, setViewCount] = useState(initialViewCount);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const viewRecorded = useRef(false);
+
+  useEffect(() => { setViewCount(initialViewCount); }, [initialViewCount]);
+
+  // Record a post view (reach) when the card becomes visible
+  useEffect(() => {
+    if (!user || !cardRef.current || viewRecorded.current) return;
+    const el = cardRef.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting || viewRecorded.current) return;
+        viewRecorded.current = true;
+        observer.disconnect();
+        supabase
+          .from("post_views")
+          .insert({ post_id: postId, viewer_id: user.id })
+          .then(({ error }) => {
+            if (!error) setViewCount((c) => c + 1);
+          });
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [postId, user]);
 
   // Only fetch comment count if not provided
   useEffect(() => {
@@ -98,6 +127,7 @@ const PostCard = memo(({
       .eq("post_id", postId)
       .then(({ count }) => setCommentCount(count || 0));
   }, [postId, initialCommentCount]);
+
 
   const handleDoubleTap = useCallback(() => {
     if (!liked) toggleLike();
