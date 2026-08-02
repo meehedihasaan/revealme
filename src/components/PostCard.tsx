@@ -391,9 +391,10 @@ const PostCard = memo(({
           </button>
           {/* Post reach */}
           <div className="flex items-center gap-1" title="Post reach">
-            <PuffyIcon name="eye" size={22} />
+            <ReachIcon size={22} />
             <span className="text-sm font-semibold text-foreground">{viewCount.toLocaleString()}</span>
           </div>
+
         </div>
         <button className="active:scale-90 transition-transform duration-100" onClick={toggleSave}>
           <PuffyIcon name="bookmark" size={24} className={saved ? "opacity-100" : "opacity-70"} />
