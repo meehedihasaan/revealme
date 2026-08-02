@@ -28,6 +28,8 @@ const tabs = ["For you", "Following"];
 
 const Feed = () => {
   const [activeTab, setActiveTab] = useState("For you");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   const navigate = useNavigate();
   const { profile, user } = useAuth();
   const { posts, loading, refetch } = usePosts();
