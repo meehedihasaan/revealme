@@ -21,7 +21,7 @@ const VerifiedBadge = ({ size = 14, className = "" }: VerifiedBadgeProps) => (
     role="img"
     aria-label="Verified"
     className={`inline-block shrink-0 text-foreground ${className}`}
-    draggable={false}
+    
   >
     <path
       fill="currentColor"
