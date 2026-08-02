@@ -98,7 +98,7 @@ const PostCard = memo(({
 
   useEffect(() => { setViewCount(initialViewCount); }, [initialViewCount]);
 
-  // Record a post view (reach) when the card becomes visible
+  // Record a post view (reach) when the card becomes visible, then sync the real count
   useEffect(() => {
     if (!user || !cardRef.current || viewRecorded.current) return;
     const el = cardRef.current;
@@ -107,18 +107,25 @@ const PostCard = memo(({
         if (!entries[0]?.isIntersecting || viewRecorded.current) return;
         viewRecorded.current = true;
         observer.disconnect();
-        supabase
-          .from("post_views")
-          .insert({ post_id: postId, viewer_id: user.id })
-          .then(({ error }) => {
-            if (!error) setViewCount((c) => c + 1);
-          });
+        const syncCount = async () => {
+          // Ignore duplicate-view conflicts (unique post_id + viewer_id)
+          await supabase
+            .from("post_views")
+            .upsert({ post_id: postId, viewer_id: user.id }, { onConflict: "post_id,viewer_id", ignoreDuplicates: true });
+          const { count } = await supabase
+            .from("post_views")
+            .select("*", { count: "exact", head: true })
+            .eq("post_id", postId);
+          if (typeof count === "number") setViewCount(count);
+        };
+        syncCount();
       },
       { threshold: 0.5 }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, [postId, user]);
+
 
   // Only fetch comment count if not provided
   useEffect(() => {
