@@ -202,12 +202,23 @@ const Feed = () => {
     <div className="min-h-screen bg-background pb-20">
       {/* Header - mobile only */}
       <div className="flex items-center justify-between px-4 py-3 md:hidden">
-        <button onClick={() => navigate("/create-post")} className="text-foreground">
-          <PuffyIcon name="plus" size={24} />
+        <button onClick={() => setDrawerOpen(true)} aria-label="Open menu" className="shrink-0">
+          <div className="avatar-leaf h-8 w-8 overflow-hidden bg-secondary">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="Your avatar" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <PuffyIcon name="user" size={16} />
+              </div>
+            )}
+          </div>
         </button>
         <h1 className="text-reveal text-2xl text-foreground">Revealme.</h1>
-        <div className="flex items-center gap-3">
-          <button className="relative text-foreground" onClick={() => navigate("/messages")}>
+        <div className="flex items-center gap-4">
+          <button className="text-foreground" onClick={() => navigate("/create-post")} aria-label="Create post">
+            <PuffyIcon name="plus" size={24} />
+          </button>
+          <button className="relative text-foreground" onClick={() => navigate("/messages")} aria-label="Messages">
             <PuffyIcon name="message-circle" size={24} />
             {unreadMsgCount > 0 && (
               <span className="absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
@@ -217,6 +228,9 @@ const Feed = () => {
           </button>
         </div>
       </div>
+
+      <AppDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
+
 
       {/* Tabs */}
       <div className="flex gap-2 px-4 pb-3 bg-background pt-3">
