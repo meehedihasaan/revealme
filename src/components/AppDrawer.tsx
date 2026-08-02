@@ -21,9 +21,10 @@ const items = [
   { icon: "bell", label: "Notifications", path: "/notifications" },
   { icon: "message-circle", label: "Messages", path: "/messages" },
   { icon: "bookmark", label: "Saved", path: "/profile?tab=saved" },
-  { icon: "user-plus", label: "Discover people", path: "/discover-people" },
-  { icon: "map-pin", label: "Nearby", path: "/nearby" },
-  { icon: "star", label: "Get verified", path: "/request-verification" },
+  { icon: "user-plus", label: "Discover people", path: "/explore" },
+  { icon: "map-pin", label: "Nearby", path: "/nearby-users" },
+  { icon: "star", label: "Get verified", path: "/settings/verification" },
+
   { icon: "settings", label: "Settings", path: "/settings" },
 ];
 
