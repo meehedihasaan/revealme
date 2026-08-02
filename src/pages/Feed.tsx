@@ -12,6 +12,8 @@ import { usePosts } from "@/hooks/usePosts";
 import { supabase } from "@/integrations/supabase/client";
 import cameraIcon from "@/assets/icons/camera.png";
 import PeopleYouMayKnow from "@/components/PeopleYouMayKnow";
+import AppDrawer from "@/components/AppDrawer";
+
 
 const STORY_GRADIENT = "gradient-story-ring";
 
