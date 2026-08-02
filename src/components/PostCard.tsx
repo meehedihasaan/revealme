@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
 import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import ReachIcon from "@/components/ReachIcon";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import CommentSheet from "@/components/CommentSheet";
