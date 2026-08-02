@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
 import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import ReachIcon from "@/components/ReachIcon";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import CommentSheet from "@/components/CommentSheet";
@@ -96,7 +98,7 @@ const PostCard = memo(({
 
   useEffect(() => { setViewCount(initialViewCount); }, [initialViewCount]);
 
-  // Record a post view (reach) when the card becomes visible
+  // Record a post view (reach) when the card becomes visible, then sync the real count
   useEffect(() => {
     if (!user || !cardRef.current || viewRecorded.current) return;
     const el = cardRef.current;
@@ -105,18 +107,25 @@ const PostCard = memo(({
         if (!entries[0]?.isIntersecting || viewRecorded.current) return;
         viewRecorded.current = true;
         observer.disconnect();
-        supabase
-          .from("post_views")
-          .insert({ post_id: postId, viewer_id: user.id })
-          .then(({ error }) => {
-            if (!error) setViewCount((c) => c + 1);
-          });
+        const syncCount = async () => {
+          // Ignore duplicate-view conflicts (unique post_id + viewer_id)
+          await supabase
+            .from("post_views")
+            .upsert({ post_id: postId, viewer_id: user.id }, { onConflict: "post_id,viewer_id", ignoreDuplicates: true });
+          const { count } = await supabase
+            .from("post_views")
+            .select("*", { count: "exact", head: true })
+            .eq("post_id", postId);
+          if (typeof count === "number") setViewCount(count);
+        };
+        syncCount();
       },
       { threshold: 0.5 }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, [postId, user]);
+
 
   // Only fetch comment count if not provided
   useEffect(() => {
@@ -391,9 +400,10 @@ const PostCard = memo(({
           </button>
           {/* Post reach */}
           <div className="flex items-center gap-1" title="Post reach">
-            <PuffyIcon name="eye" size={22} />
+            <ReachIcon size={22} />
             <span className="text-sm font-semibold text-foreground">{viewCount.toLocaleString()}</span>
           </div>
+
         </div>
         <button className="active:scale-90 transition-transform duration-100" onClick={toggleSave}>
           <PuffyIcon name="bookmark" size={24} className={saved ? "opacity-100" : "opacity-70"} />

@@ -208,6 +208,15 @@
     -webkit-mask-position: center;
     mask-position: center;
   }
+  /* The ring wrapper is slightly larger than the avatar (padding), so its
+     corner curvature is scaled down to keep the same absolute silhouette
+     as the avatar it wraps — the ring reads as a perfect concentric squircle. */
+  .avatar-leaf-ring {
+    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' preserveAspectRatio='none'><path fill='black' d='M0,100 C0,27.8 27.8,0 100,0 C172.2,0 200,27.8 200,100 C200,172.2 172.2,200 100,200 C27.8,200 0,172.2 0,100 Z'/></svg>");
+    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' preserveAspectRatio='none'><path fill='black' d='M0,100 C0,27.8 27.8,0 100,0 C172.2,0 200,27.8 200,100 C200,172.2 172.2,200 100,200 C27.8,200 0,172.2 0,100 Z'/></svg>");
+    display: inline-block;
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
