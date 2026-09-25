@@ -196,8 +196,6 @@ const Feed = () => {
         onFollowChange={handleFollowChange}
         hasStory={storyUsers.some((su) => su.user_id === post.user_id) || (post.user_id === user?.id && userHasStory)}
         postType={post.post_type}
-        viewCount={post.viewCount}
-        level={post.authorLevel}
       />
     ));
 

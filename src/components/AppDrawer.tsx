@@ -52,7 +52,6 @@ const AppDrawer = ({ open, onOpenChange }: AppDrawerProps) => {
     load();
   }, [open, user]);
 
-  const level = Math.floor(counts.posts / 10);
 
   const go = (path: string) => {
     onOpenChange(false);
@@ -90,7 +89,6 @@ const AppDrawer = ({ open, onOpenChange }: AppDrawerProps) => {
             <button onClick={() => go("/profile")} className="hover:text-foreground">
               <span className="font-semibold text-foreground">{counts.followers}</span> Followers
             </button>
-            <span className="rounded-full bg-secondary px-2 py-0.5 font-semibold text-foreground">Lv {level}</span>
           </div>
         </div>
 
