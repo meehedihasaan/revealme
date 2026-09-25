@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import PostCard from "@/components/PostCard";
 import { usePosts } from "@/hooks/usePosts";
-import { ShimmerPostCard } from "@/components/ShimmerLoader";
+import { FeedShimmer } from "@/components/ShimmerLoader";
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -35,10 +35,7 @@ const Welcome = () => {
 
       <main className={`mx-auto max-w-lg transition-[filter] duration-500 ${showGate ? "pointer-events-none blur-[3px]" : ""}`} aria-hidden={showGate}>
         {loading ? (
-          <>
-            <ShimmerPostCard />
-            <ShimmerPostCard />
-          </>
+          <FeedShimmer />
         ) : posts.length === 0 ? (
           <p className="py-20 text-center text-sm text-muted-foreground">No posts yet.</p>
         ) : (
