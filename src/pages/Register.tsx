@@ -4,24 +4,15 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const GENDER_OPTIONS = ["Male", "Female", "Non-binary", "Prefer not to say"];
-
 const Register = () => {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
 
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
@@ -40,7 +31,6 @@ const Register = () => {
         .from("profiles")
         .update({
           display_name: fullName.trim() || null,
-          gender: gender || null,
         })
         .eq("user_id", data.user.id);
     }
@@ -99,45 +89,9 @@ const Register = () => {
             />
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Confirm Password</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter password"
-              required
-              minLength={6}
-              className="w-full rounded-xl bg-secondary px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            {confirmPassword && password !== confirmPassword && (
-              <p className="mt-1.5 text-xs text-destructive">Passwords do not match</p>
-            )}
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Gender</label>
-            <div className="flex flex-wrap gap-2">
-              {GENDER_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setGender(option)}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                    gender === option
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-foreground hover:bg-secondary/80"
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <button
             type="submit"
-            disabled={loading || !gender || !fullName.trim()}
+            disabled={loading || !fullName.trim()}
             className="mt-2 w-full rounded-xl bg-primary py-4 text-lg font-semibold text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
           >
             {loading ? "Creating account..." : "Create Account"}

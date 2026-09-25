@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,23 +17,31 @@ const SetUsername = () => {
 
   const hasBannedWord = username.length > 0 && containsBannedWord(username, bannedWords);
 
-  const checkAvailability = async (value: string) => {
-    if (value.length < 3) {
-      setAvailable(null);
-      return;
-    }
-    const { data } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("username", value.toLowerCase())
-      .maybeSingle();
-    setAvailable(!data);
-  };
+  const [checking, setChecking] = useState(false);
+  const reqId = useRef(0);
+
+  useEffect(() => {
+    const id = ++reqId.current;
+    setAvailable(null);
+    if (username.length < 3 || hasBannedWord) { setChecking(false); return; }
+    setChecking(true);
+    const t = setTimeout(async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("username", username)
+        .maybeSingle();
+      if (id !== reqId.current) return;
+      setChecking(false);
+      if (error) return;
+      setAvailable(!data || data.user_id === user?.id);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [username, hasBannedWord, user?.id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/[^a-zA-Z0-9._]/g, "").toLowerCase().slice(0, 10);
     setUsername(val);
-    checkAvailability(val);
   };
 
   const handleSubmit = async () => {
@@ -136,13 +144,16 @@ const SetUsername = () => {
               className="flex-1 bg-transparent text-lg font-medium text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
             />
             <span className="text-xs text-muted-foreground mr-2">{username.length}/10</span>
-            {username.length >= 3 && available !== null && !hasBannedWord && (
+            {checking && (
+              <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary" aria-label="Checking" />
+            )}
+            {!checking && username.length >= 3 && available !== null && !hasBannedWord && (
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
                   available
-                    ? "bg-green-500/15 text-green-500"
+                    ? "bg-success/15 text-success"
                     : "bg-destructive/15 text-destructive"
                 }`}
               >
@@ -159,12 +170,13 @@ const SetUsername = () => {
               This username contains a restricted word
             </motion.p>
           )}
-          {!hasBannedWord && username.length >= 3 && available !== null && (
+          {checking && <p className="mt-2 text-xs text-muted-foreground">Checking availability…</p>}
+          {!checking && !hasBannedWord && username.length >= 3 && available !== null && (
             <motion.p
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               className={`mt-2 text-xs font-medium ${
-                available ? "text-green-500" : "text-destructive"
+                available ? "text-success" : "text-destructive"
               }`}
             >
               {available ? "This username is yours for the taking!" : "Already claimed — try another one"}
@@ -206,7 +218,7 @@ const SetUsername = () => {
         >
           <button
             onClick={handleSubmit}
-            disabled={loading || !available || username.length < 3 || hasBannedWord}
+            disabled={loading || checking || !available || username.length < 3 || hasBannedWord}
             className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/25 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none"
           >
             {loading ? (
