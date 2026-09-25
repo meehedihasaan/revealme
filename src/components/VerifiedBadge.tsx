@@ -6,8 +6,7 @@ interface VerifiedBadgeProps {
 }
 
 /**
- * Monochrome (black & white) verified badge.
- * Uses currentColor so it renders black on light theme and white on dark theme.
+ * Twitter-blue verified badge with a white check (same in light & dark).
  * Shape matches the classic scalloped verified seal with an inner check.
  */
 const VerifiedBadge = ({ size = 14, className = "" }: VerifiedBadgeProps) => (
@@ -20,7 +19,7 @@ const VerifiedBadge = ({ size = 14, className = "" }: VerifiedBadgeProps) => (
     viewBox="0 0 24 24"
     role="img"
     aria-label="Verified"
-    className={`inline-block shrink-0 text-foreground ${className}`}
+    className={`inline-block shrink-0 text-verified ${className}`}
     
   >
     <path
@@ -30,7 +29,7 @@ const VerifiedBadge = ({ size = 14, className = "" }: VerifiedBadgeProps) => (
     <path
       d="M8 12.2l2.6 2.6L16.2 9.2"
       fill="none"
-      stroke="hsl(var(--background))"
+      stroke="hsl(var(--verified-foreground))"
       strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"

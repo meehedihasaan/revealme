@@ -7,13 +7,13 @@ interface ThemeContextType {
   setTheme: (t: Theme) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({ theme: "dark", setTheme: () => {} });
+const ThemeContext = createContext<ThemeContextType>({ theme: "light", setTheme: () => {} });
 
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    return (localStorage.getItem("app-theme") as Theme) || "dark";
+    return (localStorage.getItem("app-theme") as Theme) || "light";
   });
 
   useEffect(() => {

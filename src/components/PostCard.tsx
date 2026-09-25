@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
 import PuffyIcon from "@/components/PuffyIcon";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import ReachIcon from "@/components/ReachIcon";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,7 +39,6 @@ interface PostCardProps {
   hasStory?: boolean;
   postType?: string;
   viewCount?: number;
-  level?: number;
 }
 
 
@@ -76,8 +74,6 @@ const PostCard = memo(({
   commentCount: initialCommentCount = 0,
   hasStory: hasStoryProp = false,
   postType = "post",
-  viewCount: initialViewCount = 0,
-  level = 0,
 }: PostCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -92,40 +88,7 @@ const PostCard = memo(({
   const [followLoading, setFollowLoading] = useState(false);
   const [commentCount, setCommentCount] = useState(initialCommentCount);
   const [captionExpanded, setCaptionExpanded] = useState(false);
-  const [viewCount, setViewCount] = useState(initialViewCount);
   const cardRef = useRef<HTMLDivElement>(null);
-  const viewRecorded = useRef(false);
-
-  useEffect(() => { setViewCount(initialViewCount); }, [initialViewCount]);
-
-  // Record a post view (reach) when the card becomes visible, then sync the real count
-  useEffect(() => {
-    if (!user || !cardRef.current || viewRecorded.current) return;
-    const el = cardRef.current;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries[0]?.isIntersecting || viewRecorded.current) return;
-        viewRecorded.current = true;
-        observer.disconnect();
-        const syncCount = async () => {
-          // Ignore duplicate-view conflicts (unique post_id + viewer_id)
-          await supabase
-            .from("post_views")
-            .upsert({ post_id: postId, viewer_id: user.id }, { onConflict: "post_id,viewer_id", ignoreDuplicates: true });
-          const { count } = await supabase
-            .from("post_views")
-            .select("*", { count: "exact", head: true })
-            .eq("post_id", postId);
-          if (typeof count === "number") setViewCount(count);
-        };
-        syncCount();
-      },
-      { threshold: 0.5 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [postId, user]);
-
 
   // Only fetch comment count if not provided
   useEffect(() => {
@@ -247,8 +210,9 @@ const PostCard = memo(({
             </div>
             <div className="flex-1 min-w-0 text-left">
               <div className="flex items-center gap-1">
-                <span className="text-sm font-semibold text-white">{displayName || username}</span>
+                <span className="text-sm font-semibold text-white truncate">{displayName || username}</span>
                 {verified && <VerifiedBadge size={15} />}
+                <span className="text-[13px] text-white/70 truncate">@{username}</span>
               </div>
               <p className="text-[11px] text-white/60">{timeAgo}</p>
             </div>
@@ -318,15 +282,11 @@ const PostCard = memo(({
         </button>
         <button onClick={navigateToUser} className="flex-1 min-w-0 text-left">
           <div className="flex items-center gap-1">
-            <span className="text-sm font-semibold text-foreground">{displayName || username}</span>
+            <span className="text-sm font-semibold text-foreground truncate">{displayName || username}</span>
             {verified && <VerifiedBadge size={15} />}
+            <span className="text-[13px] text-muted-foreground truncate">@{username}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="rounded-full bg-secondary px-1.5 py-[1px] text-[10px] font-bold text-foreground/80">
-              Lv {level}
-            </span>
-            {location && <span className="text-[11px] text-muted-foreground truncate">{location}</span>}
-          </div>
+          {location && <p className="text-[11px] text-muted-foreground truncate">{location}</p>}
         </button>
         {showFollowButton && !following && (
           <motion.button
@@ -398,12 +358,6 @@ const PostCard = memo(({
           <button className="flex items-center gap-1" onClick={openShare}>
             <PuffyIcon name="send" size={22} />
           </button>
-          {/* Post reach */}
-          <div className="flex items-center gap-1" title="Post reach">
-            <ReachIcon size={22} />
-            <span className="text-sm font-semibold text-foreground">{viewCount.toLocaleString()}</span>
-          </div>
-
         </div>
         <button className="active:scale-90 transition-transform duration-100" onClick={toggleSave}>
           <PuffyIcon name="bookmark" size={24} className={saved ? "opacity-100" : "opacity-70"} />

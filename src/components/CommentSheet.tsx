@@ -12,6 +12,7 @@ interface Comment {
   created_at: string;
   parent_id: string | null;
   username: string;
+  display_name: string;
   avatar_url: string | null;
   is_verified: boolean;
   likes_count: number;
@@ -56,7 +57,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
     const commentIds = commentsData.map((c: any) => c.id);
 
     const [{ data: profiles }, { data: allLikes }, { data: myLikes }] = await Promise.all([
-      supabase.from("profiles").select("user_id, username, avatar_url, is_verified").in("user_id", userIds),
+      supabase.from("profiles").select("user_id, username, display_name, avatar_url, is_verified").in("user_id", userIds),
       supabase.from("comment_likes").select("comment_id").in("comment_id", commentIds),
       user
         ? supabase.from("comment_likes").select("comment_id").in("comment_id", commentIds).eq("user_id", user.id)
@@ -73,6 +74,7 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
     const enriched = commentsData.map((c: any) => ({
       ...c,
       username: profileMap[c.user_id]?.username || "user",
+      display_name: profileMap[c.user_id]?.display_name || profileMap[c.user_id]?.username || "User",
       avatar_url: profileMap[c.user_id]?.avatar_url || null,
       is_verified: profileMap[c.user_id]?.is_verified || false,
       likes_count: likesCountMap[c.id] || 0,
@@ -121,13 +123,14 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
     if (data) {
       const { data: prof } = await supabase
         .from("profiles")
-        .select("username, avatar_url, is_verified")
+        .select("username, display_name, avatar_url, is_verified")
         .eq("user_id", user.id)
         .single();
 
       const newComment: Comment = {
         ...data,
         username: prof?.username || "you",
+        display_name: prof?.display_name || prof?.username || "You",
         avatar_url: prof?.avatar_url || null,
         is_verified: prof?.is_verified || false,
         likes_count: 0,
@@ -218,10 +221,14 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-foreground leading-snug flex items-center gap-1">{comment.username}{comment.is_verified && <VerifiedBadge size={12} />}</p>
-        <p className="text-[13px] text-foreground leading-snug mt-0.5">{comment.text}</p>
-        <div className="flex items-center gap-4 mt-1">
-          <span className="text-[11px] text-muted-foreground">{timeAgo(comment.created_at)}</span>
+        <p className="flex items-center gap-1 text-[14px] leading-snug min-w-0">
+          <span className="font-bold text-foreground truncate">{comment.display_name}</span>
+          {comment.is_verified && <VerifiedBadge size={13} />}
+          <span className="text-muted-foreground truncate">@{comment.username}</span>
+          <span className="text-muted-foreground">· {timeAgo(comment.created_at)}</span>
+        </p>
+        <p className="text-[15px] text-foreground leading-snug mt-0.5 break-words">{comment.text}</p>
+        <div className="flex items-center gap-4 mt-1.5">
           {comment.likes_count > 0 && (
             <span className="text-[11px] font-semibold text-muted-foreground">
               {comment.likes_count} {comment.likes_count === 1 ? "like" : "likes"}
@@ -266,15 +273,26 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          key="comment-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[59] bg-foreground/30"
+        />
+      )}
+      {isOpen && (
+        <motion.div
+          key="comment-sheet"
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
-          transition={{ type: "spring", damping: 28, stiffness: 300 }}
-          className="fixed inset-0 z-[60] flex flex-col bg-background"
+          transition={{ type: "tween", duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+          className="fixed inset-x-0 bottom-0 top-[12vh] z-[60] mx-auto flex max-w-lg flex-col rounded-t-3xl border-t border-border bg-background shadow-2xl"
         >
           {/* Header */}
-          <div className="relative flex items-center justify-center border-b border-border px-4 py-3">
-            <div className="absolute left-1/2 -top-0.5 h-1 w-10 -translate-x-1/2 rounded-full bg-muted-foreground/30" />
+          <div className="relative flex items-center justify-center border-b border-border px-4 pb-3 pt-5">
+            <div className="absolute left-1/2 top-2 h-1 w-10 -translate-x-1/2 rounded-full bg-muted-foreground/30" />
             <h3 className="text-base font-bold text-foreground">
               Comments{totalCount > 0 ? ` · ${totalCount}` : ""}
             </h3>
@@ -358,21 +376,8 @@ const CommentSheet = ({ postId, isOpen, onClose }: CommentSheetProps) => {
             )}
           </AnimatePresence>
 
-          {/* Quick emoji row */}
-          <div className="flex items-center gap-1 border-t border-border px-3 pt-2 overflow-x-auto scrollbar-hide">
-            {["❤️", "🙌", "🔥", "👏", "😢", "😍", "😮", "😂"].map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => { setInput((prev) => prev + emoji); inputRef.current?.focus(); }}
-                className="text-xl px-1.5 py-1 active:scale-90 transition-transform"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-
           {/* Input */}
-          <div className="px-3 py-2 flex items-center gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)" }}>
+          <div className="border-t border-border px-3 py-2 flex items-center gap-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)" }}>
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="" className="h-8 w-8 shrink-0 avatar-leaf object-cover" />
             ) : (

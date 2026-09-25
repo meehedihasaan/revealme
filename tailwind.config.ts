@@ -19,6 +19,10 @@ export default {
         bangla: ['Hind Siliguri', 'sans-serif'],
       },
       colors: {
+        verified: {
+          DEFAULT: "hsl(var(--verified))",
+          foreground: "hsl(var(--verified-foreground))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
